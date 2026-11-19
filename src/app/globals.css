@@ -128,3 +128,37 @@
     @apply font-sans;
   }
 }
+
+/*
+ * Storefront theme tokens. A store's root element sets the --store-* variables
+ * from its theme config (src/features/theme/tokens.ts and fonts.ts); these map
+ * them to Tailwind utilities such as bg-store-primary and font-store-heading.
+ */
+@theme inline {
+  --color-store-primary: var(--store-primary);
+  --color-store-on-primary: var(--store-on-primary);
+  --color-store-accent: var(--store-accent);
+  --color-store-on-accent: var(--store-on-accent);
+  --color-store-bg: var(--store-bg);
+  --color-store-text: var(--store-text);
+  --color-store-muted: color-mix(
+    in oklab,
+    var(--store-text) 72%,
+    var(--store-bg)
+  );
+  --color-store-subtle: color-mix(
+    in oklab,
+    var(--store-text) 5%,
+    var(--store-bg)
+  );
+  --color-store-border: color-mix(
+    in oklab,
+    var(--store-text) 14%,
+    var(--store-bg)
+  );
+  --font-store-heading:
+    var(--store-font-heading), ui-serif, Georgia, 'Times New Roman', serif;
+  --font-store-body:
+    var(--store-font-body), ui-sans-serif, system-ui, sans-serif;
+  --radius-store: var(--store-radius);
+}
