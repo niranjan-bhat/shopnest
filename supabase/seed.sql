@@ -1,0 +1,2 @@
+-- Seed data for local development. Runs after migrations on `supabase db reset`.
+-- Phase 2 adds the two demo tenants (saree-demo, boutique-demo) here.
