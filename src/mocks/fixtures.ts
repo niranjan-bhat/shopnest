@@ -25,19 +25,17 @@ export type FixtureProduct = {
   status?: 'draft' | 'active' | 'archived';
   /** How many days ago it was added; drives "newest" sorting. */
   ageDays: number;
-  /** Placeholder image colour. */
-  swatch: string;
+  /** Number of photos in photos/<n>/ for the n-th product. */
   images: number;
   /** Defaults to one variant with 6 in stock. */
   variants?: FixtureVariant[];
 };
 
-export type FixtureCategory = { slug: string; name: string; swatch: string };
+export type FixtureCategory = { slug: string; name: string };
 
 export type FixtureBanner = {
   heading: string;
   link: string;
-  swatch: string;
   /** Hero banners are wide; promo banners are closer to square. */
   shape: 'hero' | 'promo';
 };
@@ -201,30 +199,27 @@ const sareeStore: FixtureStore = {
     ],
   },
   categories: [
-    { slug: 'kanjivaram', name: 'Kanjivaram', swatch: '#9B1B30' },
-    { slug: 'banarasi', name: 'Banarasi', swatch: '#1F2A5A' },
-    { slug: 'soft-silk', name: 'Soft Silk', swatch: '#9D8CC4' },
-    { slug: 'cotton', name: 'Cotton', swatch: '#B5543C' },
-    { slug: 'linen', name: 'Linen', swatch: '#CBBBA0' },
-    { slug: 'organza', name: 'Organza', swatch: '#E8B4B8' },
+    { slug: 'kanjivaram', name: 'Kanjivaram' },
+    { slug: 'banarasi', name: 'Banarasi' },
+    { slug: 'soft-silk', name: 'Soft Silk' },
+    { slug: 'cotton', name: 'Cotton' },
+    { slug: 'linen', name: 'Linen' },
+    { slug: 'organza', name: 'Organza' },
   ],
   banners: [
     {
       heading: 'Woven for the wedding season',
       link: '/c/kanjivaram',
-      swatch: '#7A1F2B',
       shape: 'hero',
     },
     {
       heading: 'The Banarasi edit',
       link: '/c/banarasi',
-      swatch: '#1F2A5A',
       shape: 'hero',
     },
     {
       heading: 'Everyday handloom',
       link: '/c/cotton',
-      swatch: '#B5543C',
       shape: 'promo',
     },
   ],
@@ -247,8 +242,7 @@ const sareeStore: FixtureStore = {
       },
       featured: true,
       ageDays: 40,
-      swatch: '#9B1B30',
-      images: 3,
+      images: 5,
       variants: [{ options: {}, stock: 4 }],
     },
     {
@@ -269,7 +263,6 @@ const sareeStore: FixtureStore = {
       },
       featured: true,
       ageDays: 5,
-      swatch: '#0E5E4E',
       images: 3,
       variants: [{ options: {}, stock: 1 }],
     },
@@ -291,8 +284,7 @@ const sareeStore: FixtureStore = {
         care: SAREE_CARE,
       },
       ageDays: 60,
-      swatch: '#C8961E',
-      images: 2,
+      images: 3,
     },
     {
       slug: 'midnight-brocade-banarasi',
@@ -312,8 +304,7 @@ const sareeStore: FixtureStore = {
       },
       featured: true,
       ageDays: 12,
-      swatch: '#1F2A5A',
-      images: 3,
+      images: 4,
     },
     {
       slug: 'rose-kadhwa-banarasi',
@@ -332,8 +323,7 @@ const sareeStore: FixtureStore = {
         care: SAREE_CARE,
       },
       ageDays: 25,
-      swatch: '#C76B7E',
-      images: 2,
+      images: 4,
     },
     {
       slug: 'ivory-tissue-banarasi',
@@ -353,8 +343,7 @@ const sareeStore: FixtureStore = {
       },
       featured: true,
       ageDays: 3,
-      swatch: '#E9DFC8',
-      images: 2,
+      images: 4,
       variants: [{ options: {}, stock: 2 }],
     },
     {
@@ -375,8 +364,7 @@ const sareeStore: FixtureStore = {
       },
       featured: true,
       ageDays: 8,
-      swatch: '#9D8CC4',
-      images: 2,
+      images: 4,
     },
     {
       slug: 'teal-zari-butta-soft-silk',
@@ -396,8 +384,7 @@ const sareeStore: FixtureStore = {
         care: SAREE_CARE,
       },
       ageDays: 30,
-      swatch: '#1E6F73',
-      images: 2,
+      images: 4,
     },
     {
       slug: 'coral-soft-silk',
@@ -416,8 +403,7 @@ const sareeStore: FixtureStore = {
         care: SAREE_CARE,
       },
       ageDays: 50,
-      swatch: '#E07A5F',
-      images: 2,
+      images: 4,
       variants: [{ options: {}, stock: 0 }],
     },
     {
@@ -437,8 +423,7 @@ const sareeStore: FixtureStore = {
       },
       featured: true,
       ageDays: 2,
-      swatch: '#2E3F7F',
-      images: 2,
+      images: 3,
       variants: [{ options: {}, stock: 12 }],
     },
     {
@@ -457,8 +442,7 @@ const sareeStore: FixtureStore = {
         care: 'Hand wash cold, separately',
       },
       ageDays: 18,
-      swatch: '#B5543C',
-      images: 2,
+      images: 4,
       variants: [{ options: {}, stock: 9 }],
     },
     {
@@ -477,8 +461,7 @@ const sareeStore: FixtureStore = {
         care: 'Hand wash cold, separately',
       },
       ageDays: 35,
-      swatch: '#8FA382',
-      images: 2,
+      images: 4,
     },
     {
       slug: 'natural-handloom-linen',
@@ -496,8 +479,7 @@ const sareeStore: FixtureStore = {
         care: 'Dry clean recommended',
       },
       ageDays: 6,
-      swatch: '#CBBBA0',
-      images: 2,
+      images: 4,
     },
     {
       slug: 'charcoal-linen-silver-border',
@@ -515,8 +497,7 @@ const sareeStore: FixtureStore = {
         care: 'Dry clean recommended',
       },
       ageDays: 22,
-      swatch: '#3D3D3F',
-      images: 2,
+      images: 4,
       variants: [{ options: {}, stock: 2 }],
     },
     {
@@ -536,8 +517,7 @@ const sareeStore: FixtureStore = {
       },
       featured: true,
       ageDays: 1,
-      swatch: '#E8B4B8',
-      images: 3,
+      images: 4,
     },
     {
       slug: 'sky-embroidered-organza',
@@ -556,8 +536,7 @@ const sareeStore: FixtureStore = {
         care: SAREE_CARE,
       },
       ageDays: 15,
-      swatch: '#8EB8D9',
-      images: 2,
+      images: 4,
     },
     {
       slug: 'unreleased-paithani',
@@ -568,8 +547,7 @@ const sareeStore: FixtureStore = {
       attributes: { fabric: 'Silk', colour: 'Green' },
       status: 'draft',
       ageDays: 0,
-      swatch: '#2F6B3A',
-      images: 1,
+      images: 4,
     },
   ],
 };
@@ -653,29 +631,26 @@ const boutiqueStore: FixtureStore = {
     ],
   },
   categories: [
-    { slug: 'kurta-sets', name: 'Kurta Sets', swatch: '#9CAF88' },
-    { slug: 'anarkalis', name: 'Anarkalis', swatch: '#1E2340' },
-    { slug: 'lehengas', name: 'Lehengas', swatch: '#C2185B' },
-    { slug: 'co-ords', name: 'Co-ords', swatch: '#2D3E73' },
-    { slug: 'dupattas', name: 'Dupattas', swatch: '#E6B422' },
+    { slug: 'kurta-sets', name: 'Kurta Sets' },
+    { slug: 'anarkalis', name: 'Anarkalis' },
+    { slug: 'lehengas', name: 'Lehengas' },
+    { slug: 'co-ords', name: 'Co-ords' },
+    { slug: 'dupattas', name: 'Dupattas' },
   ],
   banners: [
     {
       heading: 'The Noor festive edit',
       link: '/c/kurta-sets',
-      swatch: '#2F4A3A',
       shape: 'hero',
     },
     {
       heading: 'Lehengas, made to twirl',
       link: '/c/lehengas',
-      swatch: '#C2185B',
       shape: 'hero',
     },
     {
       heading: 'Co-ords for every day',
       link: '/c/co-ords',
-      swatch: '#D98E73',
       shape: 'promo',
     },
   ],
@@ -697,8 +672,7 @@ const boutiqueStore: FixtureStore = {
       },
       featured: true,
       ageDays: 4,
-      swatch: '#9CAF88',
-      images: 3,
+      images: 5,
       variants: sized([3, 5, 0, 4, 2]),
     },
     {
@@ -719,7 +693,6 @@ const boutiqueStore: FixtureStore = {
       },
       featured: true,
       ageDays: 20,
-      swatch: '#EFE6D2',
       images: 3,
       variants: sized([2, 4, 6, 3, 1]),
     },
@@ -739,8 +712,7 @@ const boutiqueStore: FixtureStore = {
         care: KURTA_CARE,
       },
       ageDays: 33,
-      swatch: '#C4683F',
-      images: 2,
+      images: 3,
       variants: sized([4, 6, 6, 5, 3]),
     },
     {
@@ -760,8 +732,7 @@ const boutiqueStore: FixtureStore = {
       },
       featured: true,
       ageDays: 10,
-      swatch: '#1E2340',
-      images: 3,
+      images: 4,
       variants: sized([1, 2, 3, 2, 1]),
     },
     {
@@ -780,8 +751,7 @@ const boutiqueStore: FixtureStore = {
         care: 'Dry clean only',
       },
       ageDays: 28,
-      swatch: '#E9B9B0',
-      images: 2,
+      images: 4,
       variants: sized([2, 3, 4, 2, 0]),
     },
     {
@@ -801,8 +771,7 @@ const boutiqueStore: FixtureStore = {
         care: 'Dry clean only',
       },
       ageDays: 45,
-      swatch: '#1F6B52',
-      images: 2,
+      images: 4,
       variants: sized([2, 2, 3, 3, 1]),
     },
     {
@@ -821,8 +790,7 @@ const boutiqueStore: FixtureStore = {
       },
       featured: true,
       ageDays: 6,
-      swatch: '#D9C3A0',
-      images: 3,
+      images: 4,
       variants: sized([1, 1, 1, 1, 1]),
     },
     {
@@ -840,8 +808,7 @@ const boutiqueStore: FixtureStore = {
         care: 'Dry clean only',
       },
       ageDays: 14,
-      swatch: '#C2185B',
-      images: 2,
+      images: 4,
       variants: sized([1, 2, 2, 1, 1]),
     },
     {
@@ -859,8 +826,7 @@ const boutiqueStore: FixtureStore = {
         care: 'Dry clean only',
       },
       ageDays: 38,
-      swatch: '#A8D5BA',
-      images: 2,
+      images: 4,
       variants: sized([1, 2, 2, 2, 0]),
     },
     {
@@ -879,7 +845,6 @@ const boutiqueStore: FixtureStore = {
       },
       featured: true,
       ageDays: 3,
-      swatch: '#2D3E73',
       images: 3,
       variants: [
         ...sized([2, 4, 5, 3, 1], { colour: 'Indigo' }),
@@ -901,8 +866,7 @@ const boutiqueStore: FixtureStore = {
         care: 'Machine wash gentle',
       },
       ageDays: 12,
-      swatch: '#D8CBB5',
-      images: 2,
+      images: 4,
       variants: sized([3, 5, 5, 4, 2]),
     },
     {
@@ -920,8 +884,7 @@ const boutiqueStore: FixtureStore = {
         care: 'Machine wash gentle',
       },
       ageDays: 52,
-      swatch: '#6B7046',
-      images: 2,
+      images: 4,
       variants: sized([2, 3, 3, 3, 2]),
     },
     {
@@ -939,8 +902,7 @@ const boutiqueStore: FixtureStore = {
         care: KURTA_CARE,
       },
       ageDays: 24,
-      swatch: '#E4A672',
-      images: 2,
+      images: 4,
       variants: sized([4, 6, 6, 4, 3]),
     },
     {
@@ -957,8 +919,7 @@ const boutiqueStore: FixtureStore = {
         care: 'Dry clean only',
       },
       ageDays: 9,
-      swatch: '#E6B422',
-      images: 2,
+      images: 4,
       variants: [{ options: {}, stock: 10 }],
     },
     {
@@ -976,8 +937,7 @@ const boutiqueStore: FixtureStore = {
       },
       featured: true,
       ageDays: 17,
-      swatch: '#B0243B',
-      images: 2,
+      images: 4,
       variants: [{ options: {}, stock: 6 }],
     },
     {
@@ -994,8 +954,7 @@ const boutiqueStore: FixtureStore = {
         care: 'Dry clean only',
       },
       ageDays: 41,
-      swatch: '#F2C6CF',
-      images: 2,
+      images: 4,
       variants: [{ options: {}, stock: 8 }],
     },
   ],
