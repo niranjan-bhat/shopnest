@@ -8,8 +8,20 @@ import { z } from 'zod';
 export const publicEnvSchema = z.object({
   NEXT_PUBLIC_SUPABASE_URL: z.url(),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),
-  /** Base URL that R2 object keys are appended to, e.g. https://media.shopnest.in */
-  NEXT_PUBLIC_MEDIA_BASE_URL: z.url(),
+  /**
+   * Where R2 object keys are served from: the bucket's domain
+   * (https://media.shopnest.in) or, locally, a path under /public
+   * (/mock-media).
+   */
+  NEXT_PUBLIC_MEDIA_BASE_URL: z
+    .string()
+    .refine(
+      (value) =>
+        /^https?:\/\//.test(value)
+          ? URL.canParse(value)
+          : /^\/[A-Za-z0-9._/-]+$/.test(value),
+      'must be an http(s) URL or a path such as /mock-media',
+    ),
   /** Platform domain for storefront subdomains, e.g. shopnest.in or localhost:3000 */
   NEXT_PUBLIC_ROOT_DOMAIN: z
     .string()

@@ -90,6 +90,40 @@ describe('mappers', () => {
       value: 'Handwoven cotton ikat',
     });
   });
+
+  it('orders options and attributes for display, whatever the jsonb key order', () => {
+    // Postgres returns jsonb keys shortest-first, e.g. {size, colour}.
+    const rows = rowsFor(saree.id, 'ruby-temple-border-kanjivaram');
+    const scrambled: ProductRows = {
+      ...rows,
+      product: {
+        ...rows.product,
+        attributes: {
+          care: 'Dry clean',
+          zari: 'Gold',
+          fabric: 'Silk',
+          mood: 'Calm',
+        },
+      },
+      variants: rows.variants.map((v) => ({
+        ...v,
+        options: { size: 'M', colour: 'Rust', border: 'Gold' },
+      })),
+    };
+    const detail = toProductDetail(scrambled);
+    expect(detail.attributes.map((a) => a.label)).toEqual([
+      'Fabric',
+      'Zari',
+      'Care',
+      'Mood',
+    ]);
+    expect(detail.optionNames).toEqual(['colour', 'size', 'border']);
+    expect(Object.values(detail.variants[0].options)).toEqual([
+      'Rust',
+      'M',
+      'Gold',
+    ]);
+  });
 });
 
 describe('parseCatalogFilters', () => {

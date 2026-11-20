@@ -28,6 +28,9 @@ jobs:
   e2e:
     name: Playwright
     runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_MEDIA_BASE_URL: /mock-media
+      NEXT_PUBLIC_ROOT_DOMAIN: localhost:3000
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -35,6 +38,19 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      # Stores read Supabase and sign-in needs Auth and Mailpit (for codes):
+      # start the local stack (migrations + seed.sql) without the extras.
+      - run: npx supabase start -x studio,imgproxy,edge-runtime,logflare,vector,supavisor,realtime,storage-api,postgres-meta
+      - name: Export local Supabase settings
+        run: |
+          npx supabase status -o env > "$RUNNER_TEMP/supabase.env"
+          . "$RUNNER_TEMP/supabase.env"
+          {
+            echo "NEXT_PUBLIC_SUPABASE_URL=$API_URL"
+            echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$ANON_KEY"
+            echo "SUPABASE_SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY"
+            echo "MAILPIT_URL=$MAILPIT_URL"
+          } >> "$GITHUB_ENV"
       - run: npx playwright install --with-deps chromium
       - run: npm run build
       - run: npm run test:e2e

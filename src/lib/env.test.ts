@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { serverEnvSchema } from './env';
+import { r2EnvSchema } from './env';
 import { parseEnv, publicEnvSchema } from './env.public';
 
 const validPublic = {
@@ -29,11 +29,7 @@ describe('parseEnv', () => {
   it('never echoes secret values in errors', () => {
     const secret = 'super-secret-value';
     try {
-      parseEnv(
-        serverEnvSchema,
-        { SUPABASE_SERVICE_ROLE_KEY: secret },
-        'server',
-      );
+      parseEnv(r2EnvSchema, { R2_SECRET_ACCESS_KEY: secret }, 'R2');
       expect.unreachable();
     } catch (error) {
       const message = (error as Error).message;
@@ -41,4 +37,22 @@ describe('parseEnv', () => {
       expect(message).not.toContain(secret);
     }
   });
+
+  it.each(['/mock-media', 'https://media.shopnest.in'])(
+    'accepts %s as the media base',
+    (base) => {
+      const env = { ...validPublic, NEXT_PUBLIC_MEDIA_BASE_URL: base };
+      expect(() => parseEnv(publicEnvSchema, env, 'public')).not.toThrow();
+    },
+  );
+
+  it.each(['mock-media', 'javascript:alert(1)', '/a b'])(
+    'rejects %s as the media base',
+    (base) => {
+      const env = { ...validPublic, NEXT_PUBLIC_MEDIA_BASE_URL: base };
+      expect(() => parseEnv(publicEnvSchema, env, 'public')).toThrow(
+        /NEXT_PUBLIC_MEDIA_BASE_URL/,
+      );
+    },
+  );
 });

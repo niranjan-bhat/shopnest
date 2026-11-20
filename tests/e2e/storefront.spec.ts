@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { store } from './urls';
 
 /** Stops WhatsApp navigation and returns the pre-filled message text. */
 async function captureWhatsApp(page: Page): Promise<() => Promise<string>> {
@@ -26,7 +27,7 @@ test.describe('storefront', () => {
     page,
   }) => {
     const whatsappText = await captureWhatsApp(page);
-    await page.goto('/sites/saree-demo/p/ruby-temple-border-kanjivaram');
+    await page.goto(store('saree-demo', '/p/ruby-temple-border-kanjivaram'));
     await expect(
       page.getByRole('heading', {
         level: 1,
@@ -42,7 +43,7 @@ test.describe('storefront', () => {
     await expect(page.getByTestId('cart-count')).toHaveText('2');
     await drawer.getByRole('link', { name: 'Checkout' }).click();
 
-    await expect(page).toHaveURL(/\/sites\/saree-demo\/checkout$/);
+    await expect(page).toHaveURL(store('saree-demo', '/checkout'));
     await page.getByRole('button', { name: 'Place order on WhatsApp' }).click();
     await expect(page.getByText('Enter your name')).toBeVisible();
 
@@ -64,7 +65,7 @@ test.describe('storefront', () => {
     page,
   }) => {
     const whatsappText = await captureWhatsApp(page);
-    await page.goto('/sites/boutique-demo/p/ikat-co-ord');
+    await page.goto(store('boutique-demo', '/p/ikat-co-ord'));
 
     await page.getByRole('button', { name: 'Add to bag' }).click();
     await expect(page.getByText('Please choose a size.')).toBeVisible();
@@ -78,17 +79,17 @@ test.describe('storefront', () => {
     await expect(page.getByTestId('cart-count')).toHaveText('1');
 
     // The cart survives a reload (localStorage) and is per store.
-    await page.goto('/sites/boutique-demo/cart');
+    await page.goto(store('boutique-demo', '/cart'));
     await expect(page.locator('main').getByTestId('cart-line')).toHaveCount(1);
     await expect(page.locator('main').getByTestId('cart-line')).toContainText(
       'Rust · M',
     );
-    await page.goto('/sites/saree-demo/cart');
+    await page.goto(store('saree-demo', '/cart'));
     await expect(
       page.locator('main').getByText('Your bag is empty.'),
     ).toBeVisible();
 
-    await page.goto('/sites/boutique-demo/checkout');
+    await page.goto(store('boutique-demo', '/checkout'));
     await fillCheckout(page);
     await page.getByRole('button', { name: 'Place order on WhatsApp' }).click();
     const text = await whatsappText();
@@ -99,10 +100,10 @@ test.describe('storefront', () => {
   test('price-on-request items make the total provisional', async ({
     page,
   }) => {
-    await page.goto('/sites/saree-demo/p/bridal-peacock-kanjivaram');
+    await page.goto(store('saree-demo', '/p/bridal-peacock-kanjivaram'));
     await expect(page.getByText('Price on request').first()).toBeVisible();
     await page.getByRole('button', { name: 'Add to bag' }).click();
-    await page.goto('/sites/saree-demo/cart');
+    await page.goto(store('saree-demo', '/cart'));
     await expect(
       page.getByText(/Includes items priced on request/),
     ).toBeVisible();
@@ -111,22 +112,24 @@ test.describe('storefront', () => {
   test('category filters and sorting update the URL and results', async ({
     page,
   }) => {
-    await page.goto('/sites/saree-demo/c/soft-silk');
+    await page.goto(store('saree-demo', '/c/soft-silk'));
     const cards = page.locator('main article');
     await expect(cards).toHaveCount(3);
 
-    await page.goto('/sites/saree-demo/c/soft-silk?inStock=1&sort=price-asc');
+    await page.goto(
+      store('saree-demo', '/c/soft-silk?inStock=1&sort=price-asc'),
+    );
     await expect(cards).toHaveCount(2);
     await expect(cards.first()).toContainText('Teal Zari-Butta Soft Silk');
 
-    await page.goto('/sites/saree-demo/c/soft-silk?price=10k-25k');
+    await page.goto(store('saree-demo', '/c/soft-silk?price=10k-25k'));
     await expect(
       page.getByText('Nothing matches these filters.'),
     ).toBeVisible();
   });
 
   test('filter controls submit on change', async ({ page, isMobile }) => {
-    await page.goto('/sites/saree-demo/c/soft-silk');
+    await page.goto(store('saree-demo', '/c/soft-silk'));
     if (isMobile) await page.getByRole('button', { name: /^Filters/ }).click();
     await page.getByLabel('In stock only').check();
     await expect(page).toHaveURL(/inStock=1/);
@@ -154,8 +157,8 @@ test.describe('storefront', () => {
         };
       });
     };
-    const saree = await themeOf('/sites/saree-demo');
-    const boutique = await themeOf('/sites/boutique-demo');
+    const saree = await themeOf(store('saree-demo'));
+    const boutique = await themeOf(store('boutique-demo'));
     expect(saree.template).toBe('silk');
     expect(boutique.template).toBe('silk');
     expect(saree.primary).not.toBe(boutique.primary);
@@ -163,11 +166,11 @@ test.describe('storefront', () => {
   });
 
   test('draft products and unknown pages are not shown', async ({ page }) => {
-    await page.goto('/sites/saree-demo/p/unreleased-paithani');
+    await page.goto(store('saree-demo', '/p/unreleased-paithani'));
     await expect(
       page.getByRole('heading', { name: "We couldn't find that page" }),
     ).toBeVisible();
-    await page.goto('/sites/no-such-store');
+    await page.goto(store('no-such-store'));
     await expect(
       page.getByRole('heading', { name: 'Page not found' }),
     ).toBeVisible();

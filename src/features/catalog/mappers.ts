@@ -41,6 +41,51 @@ const ATTRIBUTE_LABELS: Record<string, string> = {
   care: 'Care',
 };
 
+// jsonb does not keep object key order (Postgres stores shorter keys first),
+// so display order is decided here. Unknown keys follow, alphabetically.
+
+/** Order of product details on the product page. */
+const ATTRIBUTE_ORDER = [
+  'fabric',
+  'zari',
+  'colour',
+  'fit',
+  'length',
+  'blouse',
+  'includes',
+  'occasion',
+  'care',
+] as const;
+
+/** Order of variant options in pickers and cart labels ("Rust · M"). */
+const OPTION_ORDER = ['colour', 'size'] as const;
+
+/** Unique keys, preferred ones first in the given order, then A–Z. */
+export function orderKeys(
+  keys: Iterable<string>,
+  preferred: readonly string[],
+): string[] {
+  const rank = (key: string) => {
+    const i = preferred.indexOf(key);
+    return i === -1 ? preferred.length : i;
+  };
+  return [...new Set(keys)].sort(
+    (a, b) => rank(a) - rank(b) || a.localeCompare(b),
+  );
+}
+
+/** Variant options re-keyed in display order. */
+export function orderOptions(
+  options: Record<string, string>,
+): Record<string, string> {
+  return Object.fromEntries(
+    orderKeys(Object.keys(options), OPTION_ORDER).map((key) => [
+      key,
+      options[key],
+    ]),
+  );
+}
+
 function attributeLabel(key: string): string {
   return (
     ATTRIBUTE_LABELS[key] ??
@@ -93,7 +138,7 @@ export function toVariant(
   return {
     id: row.id,
     sku: row.sku,
-    options: toStringRecord(row.options),
+    options: orderOptions(toStringRecord(row.options)),
     pricePaise,
     stock: row.stock_qty,
     trackInventory: row.track_inventory,
@@ -167,12 +212,15 @@ export function toCatalogItem({
 export function toProductDetail(rows: ProductRows): ProductDetail {
   const item = toCatalogItem(rows);
   const variants = rows.variants.map((v) => toVariant(v, rows.product));
-  const optionNames = [
-    ...new Set(variants.flatMap((v) => Object.keys(v.options))),
-  ];
-  const attributes = Object.entries(
-    toStringRecord(rows.product.attributes),
-  ).map(([key, value]) => ({ label: attributeLabel(key), value }));
+  const optionNames = orderKeys(
+    variants.flatMap((v) => Object.keys(v.options)),
+    OPTION_ORDER,
+  );
+  const attributeValues = toStringRecord(rows.product.attributes);
+  const attributes = orderKeys(
+    Object.keys(attributeValues),
+    ATTRIBUTE_ORDER,
+  ).map((key) => ({ label: attributeLabel(key), value: attributeValues[key] }));
 
   return {
     id: item.id,
