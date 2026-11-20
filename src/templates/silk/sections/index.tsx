@@ -34,7 +34,9 @@ function Hero({ section, store, isFirst }: SectionProps<'hero'>) {
               fill
               sizes="100vw"
               priority={isFirst && i === 0}
-              className="-z-10"
+              // Hero art leaves the left side free for the heading, so the
+              // subject is on the right: keep it in frame on tall screens.
+              className="-z-10 object-[75%_center] md:object-center"
             />
             <div className="absolute inset-0 -z-10 bg-gradient-to-t from-black/65 via-black/25 to-transparent md:bg-gradient-to-r md:from-black/55 md:via-black/20" />
             <div className="mx-auto w-full max-w-7xl px-5 pb-20 text-white md:px-10 md:pb-0">

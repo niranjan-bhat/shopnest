@@ -44,3 +44,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# original product photos (processed into public/mock-media by npm run mock:media)
+/photos/
