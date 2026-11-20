@@ -1,5 +1,7 @@
+import 'server-only';
 import { cacheLife, cacheTag } from 'next/cache';
-import { mockDb } from '@/mocks';
+import { check } from '@/lib/supabase/result';
+import { storefrontDb } from '@/lib/supabase/storefront';
 import type { Tables } from '@/types/database';
 import {
   toBanner,
@@ -15,9 +17,10 @@ import type {
   ProductDetail,
 } from './types';
 
-// Phase 1 reads the in-memory mock tables; Phase 2 swaps these bodies for
-// Supabase queries with the same signatures. Every query takes tenantId and
-// filters on it explicitly.
+// Public storefront reads. They use the anonymous client, so RLS already
+// limits them to live data; every query still filters by tenant_id
+// explicitly. Results are cached per tenant and invalidated with
+// revalidateTag(catalogTag(tenantId)) when the merchant saves (Phase 3).
 
 export const catalogTag = (tenantId: string) => `tenant:${tenantId}:catalog`;
 
@@ -26,39 +29,102 @@ function cacheCatalog(tenantId: string) {
   cacheTag(catalogTag(tenantId));
 }
 
-function activeCategoryRows(tenantId: string): Tables<'categories'>[] {
-  return mockDb.categories
-    .filter((c) => c.tenant_id === tenantId && c.is_active)
-    .sort((a, b) => a.position - b.position);
-}
-
-function productRows(
+async function activeCategoryRows(
   tenantId: string,
-  product: Tables<'products'>,
-): ProductRows {
-  const categoryIds = new Set(
-    mockDb.product_categories
-      .filter((pc) => pc.tenant_id === tenantId && pc.product_id === product.id)
-      .map((pc) => pc.category_id),
+): Promise<Tables<'categories'>[]> {
+  return check(
+    await storefrontDb()
+      .from('categories')
+      .select('*')
+      .eq('tenant_id', tenantId)
+      .eq('is_active', true)
+      .order('position')
+      .order('name'),
+    'categories',
   );
-  return {
-    product,
-    variants: mockDb.product_variants.filter(
-      (v) => v.tenant_id === tenantId && v.product_id === product.id,
-    ),
-    images: mockDb.product_images.filter(
-      (i) => i.tenant_id === tenantId && i.product_id === product.id,
-    ),
-    categories: activeCategoryRows(tenantId).filter((c) =>
-      categoryIds.has(c.id),
-    ),
-  };
 }
 
-function activeProductRows(tenantId: string): Tables<'products'>[] {
-  return mockDb.products.filter(
-    (p) => p.tenant_id === tenantId && p.status === 'active',
-  );
+/**
+ * Active products with their variants, images and categories. With a slug,
+ * just that product; otherwise the whole catalog.
+ */
+async function productRows(
+  tenantId: string,
+  slug?: string,
+): Promise<ProductRows[]> {
+  const db = storefrontDb();
+  let productQuery = db
+    .from('products')
+    .select('*')
+    .eq('tenant_id', tenantId)
+    .eq('status', 'active');
+  if (slug !== undefined) productQuery = productQuery.eq('slug', slug);
+  const products = check(await productQuery, 'products');
+  if (products.length === 0) return [];
+
+  let variantQuery = db
+    .from('product_variants')
+    .select('*')
+    .eq('tenant_id', tenantId);
+  let imageQuery = db
+    .from('product_images')
+    .select('*')
+    .eq('tenant_id', tenantId);
+  let linkQuery = db
+    .from('product_categories')
+    .select('*')
+    .eq('tenant_id', tenantId);
+  // For one product, fetch only its children. For the whole catalog the
+  // tenant filter is enough, and keeps the request URL short.
+  if (slug !== undefined) {
+    const ids = products.map((p) => p.id);
+    variantQuery = variantQuery.in('product_id', ids);
+    imageQuery = imageQuery.in('product_id', ids);
+    linkQuery = linkQuery.in('product_id', ids);
+  }
+
+  const [variantResult, imageResult, linkResult, categories] =
+    await Promise.all([
+      // Variants keep the order they were created in (sizes are re-sorted
+      // for display anyway).
+      variantQuery.order('created_at').order('id'),
+      imageQuery.order('position'),
+      linkQuery,
+      activeCategoryRows(tenantId),
+    ]);
+  const variants = check(variantResult, 'product_variants');
+  const images = check(imageResult, 'product_images');
+  const links = check(linkResult, 'product_categories');
+
+  const byProduct = <T extends { product_id: string }>(rows: T[]) => {
+    const map = new Map<string, T[]>();
+    for (const row of rows) {
+      const list = map.get(row.product_id);
+      if (list) list.push(row);
+      else map.set(row.product_id, [row]);
+    }
+    return map;
+  };
+  const variantsBy = byProduct(variants);
+  const imagesBy = byProduct(images);
+  const categoryById = new Map(categories.map((c) => [c.id, c]));
+  const categoriesBy = new Map<string, Tables<'categories'>[]>();
+  for (const link of links) {
+    const category = categoryById.get(link.category_id);
+    if (!category) continue;
+    const list = categoriesBy.get(link.product_id) ?? [];
+    list.push(category);
+    categoriesBy.set(link.product_id, list);
+  }
+
+  return products.map((product) => ({
+    product,
+    variants: variantsBy.get(product.id) ?? [],
+    images: imagesBy.get(product.id) ?? [],
+    categories: (categoriesBy.get(product.id) ?? []).sort(
+      (a, b) => a.position - b.position,
+    ),
+  }));
 }
 
 export async function listCategories(
@@ -66,7 +132,7 @@ export async function listCategories(
 ): Promise<CategorySummary[]> {
   'use cache';
   cacheCatalog(tenantId);
-  return activeCategoryRows(tenantId).map(toCategory);
+  return (await activeCategoryRows(tenantId)).map(toCategory);
 }
 
 export async function getCategoryBySlug(
@@ -75,17 +141,31 @@ export async function getCategoryBySlug(
 ): Promise<CategorySummary | null> {
   'use cache';
   cacheCatalog(tenantId);
-  const row = activeCategoryRows(tenantId).find((c) => c.slug === slug);
+  const row = check(
+    await storefrontDb()
+      .from('categories')
+      .select('*')
+      .eq('tenant_id', tenantId)
+      .eq('is_active', true)
+      .eq('slug', slug)
+      .maybeSingle(),
+    'category',
+  );
   return row ? toCategory(row) : null;
 }
 
 export async function listBanners(tenantId: string): Promise<Banner[]> {
   'use cache';
   cacheCatalog(tenantId);
-  return mockDb.banners
-    .filter((b) => b.tenant_id === tenantId)
-    .sort((a, b) => a.position - b.position)
-    .map(toBanner);
+  const rows = check(
+    await storefrontDb()
+      .from('banners')
+      .select('*')
+      .eq('tenant_id', tenantId)
+      .order('position'),
+    'banners',
+  );
+  return rows.map(toBanner);
 }
 
 /** Every active product as a card with filter fields, unsorted. */
@@ -94,9 +174,7 @@ export async function listCatalogItems(
 ): Promise<CatalogItem[]> {
   'use cache';
   cacheCatalog(tenantId);
-  return activeProductRows(tenantId).map((product) =>
-    toCatalogItem(productRows(tenantId, product)),
-  );
+  return (await productRows(tenantId)).map(toCatalogItem);
 }
 
 export async function getProductBySlug(
@@ -105,6 +183,6 @@ export async function getProductBySlug(
 ): Promise<ProductDetail | null> {
   'use cache';
   cacheCatalog(tenantId);
-  const product = activeProductRows(tenantId).find((p) => p.slug === slug);
-  return product ? toProductDetail(productRows(tenantId, product)) : null;
+  const [rows] = await productRows(tenantId, slug);
+  return rows ? toProductDetail(rows) : null;
 }

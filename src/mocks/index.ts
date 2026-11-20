@@ -5,12 +5,15 @@ import {
   MEDIA_SIZE,
   mediaKey,
   type FixtureStore,
-} from './fixtures';
+} from './fixtures.ts';
 
 /**
- * Phase 1 stand-in for the database: every table the storefront reads, as
- * typed rows built from fixtures.ts. Only src/features/* may import this; in
- * Phase 2 those query functions switch to Supabase and this folder goes.
+ * The two demo stores as typed table rows, built from fixtures.ts.
+ *
+ * Since Phase 2 the app reads Supabase, not this. It is the single source for
+ * supabase/seed.sql (scripts/generate-seed.mjs, run directly by Node, hence
+ * the .ts import above) and for unit tests of the pure catalog code. App code
+ * must not import it.
  */
 export type MockDb = {
   tenants: Tables<'tenants'>[];
@@ -31,9 +34,11 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const isoDaysAgo = (days: number) =>
   new Date(MOCK_NOW - days * DAY_MS).toISOString();
 
-/** Round-trips through JSON so the value is a plain `Json` like a jsonb column. */
-function asJson(value: unknown): Json {
-  return JSON.parse(JSON.stringify(value)) as Json;
+type JsonObject = { [key: string]: Json | undefined };
+
+/** Round-trips through JSON so the value is a plain object like a jsonb column. */
+function asJsonObject(value: object): JsonObject {
+  return JSON.parse(JSON.stringify(value)) as JsonObject;
 }
 
 function addStore(db: MockDb, store: FixtureStore): void {
@@ -48,6 +53,7 @@ function addStore(db: MockDb, store: FixtureStore): void {
     whatsapp_number: store.whatsapp,
     currency: 'INR',
     created_at: isoDaysAgo(90),
+    updated_at: isoDaysAgo(90),
   });
 
   db.tenant_domains.push({
@@ -57,15 +63,17 @@ function addStore(db: MockDb, store: FixtureStore): void {
     kind: 'subdomain',
     is_primary: true,
     verified_at: isoDaysAgo(90),
+    created_at: isoDaysAgo(90),
   });
 
-  const theme = asJson(store.theme);
+  const theme = asJsonObject(store.theme);
   db.tenant_themes.push({
     tenant_id: tenantId,
     template_key: 'silk',
     draft: theme,
     published: theme,
     published_at: isoDaysAgo(30),
+    updated_at: isoDaysAgo(30),
   });
 
   const categoryIds = new Map<string, string>();
@@ -81,6 +89,8 @@ function addStore(db: MockDb, store: FixtureStore): void {
       position: i,
       image_key: mediaKey.category(tenantId, id),
       is_active: true,
+      created_at: isoDaysAgo(90),
+      updated_at: isoDaysAgo(90),
     });
   });
 
@@ -95,6 +105,8 @@ function addStore(db: MockDb, store: FixtureStore): void {
       position: i,
       starts_at: null,
       ends_at: null,
+      created_at: isoDaysAgo(30),
+      updated_at: isoDaysAgo(30),
     });
   });
 
@@ -145,6 +157,8 @@ function addStore(db: MockDb, store: FixtureStore): void {
         price_paise: variant.price ?? null,
         stock_qty: variant.stock,
         track_inventory: true,
+        created_at: createdAt,
+        updated_at: createdAt,
       });
     });
 
@@ -159,6 +173,7 @@ function addStore(db: MockDb, store: FixtureStore): void {
         position: n - 1,
         width: MEDIA_SIZE.product.width,
         height: MEDIA_SIZE.product.height,
+        created_at: createdAt,
       });
     }
   });

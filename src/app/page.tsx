@@ -1,29 +1,28 @@
-import Link from 'next/link';
-import { listDemoStores, storeBasePath } from '@/features/storefront/context';
+import { listStoreLinks } from '@/features/storefront/context';
 
 /**
- * Phase 1 index: links to the demo stores. In Phase 2 storefronts move to
- * their own hostnames and this becomes the marketing site.
+ * Platform index: links to the live stores, each on its own host name. Later
+ * this becomes the marketing site.
  */
 export default async function Home() {
-  const stores = await listDemoStores();
+  const stores = await listStoreLinks();
   return (
     <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-20">
       <p className="text-sm tracking-widest text-muted-foreground uppercase">
-        ShopNest · Phase 1
+        ShopNest
       </p>
       <h1 className="mt-2 text-4xl font-semibold tracking-tight">
         Demo stores
       </h1>
       <p className="mt-3 text-muted-foreground">
         Two stores rendered by the same template, styled only by their theme
-        config. Data is mocked until Phase 2.
+        config, each on its own host name.
       </p>
       <ul className="mt-10 grid gap-4 sm:grid-cols-2">
         {stores.map((store) => (
           <li key={store.slug}>
-            <Link
-              href={storeBasePath(store.slug)}
+            <a
+              href={store.url}
               className="block rounded-xl border p-6 transition-colors hover:bg-muted"
             >
               <span className="block text-xl font-medium">{store.name}</span>
@@ -33,9 +32,9 @@ export default async function Home() {
                 </span>
               )}
               <span className="mt-4 block font-mono text-xs text-muted-foreground">
-                {storeBasePath(store.slug)}
+                {store.url.replace(/^https?:\/\//, '')}
               </span>
-            </Link>
+            </a>
           </li>
         ))}
       </ul>

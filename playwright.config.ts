@@ -1,4 +1,9 @@
+import { existsSync } from 'node:fs';
 import { defineConfig, devices } from '@playwright/test';
+
+// Tests that set up data (e.g. store memberships) need the local Supabase
+// keys. CI sets them as environment variables instead.
+if (existsSync('.env.local')) process.loadEnvFile('.env.local');
 
 const PORT = Number(process.env.PORT ?? 3000);
 const isCI = Boolean(process.env.CI);

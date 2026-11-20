@@ -1,36 +1,52 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ShopNest
 
-## Getting Started
+Multi-tenant online stores for Indian clothing brands. The plan, architecture
+and database design are in [docs/PLAN.md](docs/PLAN.md).
 
-First, run the development server:
+## Local setup
+
+Needs Node (see `.nvmrc`) and Docker Desktop running.
 
 ```bash
+npm install
+npx supabase start          # local Postgres, Auth, Mailpit; applies migrations + seed
+npx supabase status         # copy API_URL, ANON_KEY and SERVICE_ROLE_KEY
+cp .env.example .env.local  # and paste those values in
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Every store has its own host name, and the dashboard has its own (any
+`*.localhost` name points at your machine, no hosts-file changes needed):
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| URL                                 | What                                  |
+| ----------------------------------- | ------------------------------------- |
+| http://localhost:3000               | Platform page listing the demo stores |
+| http://saree-demo.localhost:3000    | Demo store: Tara Weaves (sarees)      |
+| http://boutique-demo.localhost:3000 | Demo store: Noor Atelier (boutique)   |
+| http://app.localhost:3000/login     | Merchant sign-in (6-digit email code) |
+| http://127.0.0.1:54324              | Mailpit: the sign-in emails land here |
+| http://127.0.0.1:54323              | Supabase Studio                       |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Signing in and access
 
-## Learn More
+Anyone can sign in at `/login`, but a new account sees no stores. Give access
+from the command line (until the super-admin screens arrive):
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run grant -- --email you@example.com --store saree-demo   # owner of a store
+npm run grant -- --email you@example.com --super-admin        # all stores, /admin
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Commands
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Command                      | Does                                                   |
+| ---------------------------- | ------------------------------------------------------ |
+| `npm run dev`                | Dev server                                             |
+| `npm run lint` / `typecheck` | ESLint / TypeScript                                    |
+| `npm test`                   | Unit tests (Vitest)                                    |
+| `npm run test:e2e`           | Browser tests (Playwright; needs Supabase running)     |
+| `npm run db:test`            | Database and tenant-isolation tests (pgTAP)            |
+| `npm run db:reset`           | Rebuild the local database from migrations + seed      |
+| `npm run db:types`           | Regenerate `src/types/database.ts` after a migration   |
+| `npm run db:seed`            | Regenerate `supabase/seed.sql` from the demo fixtures  |
+| `npm run mock:media`         | Rebuild demo images in `public/mock-media` from photos |

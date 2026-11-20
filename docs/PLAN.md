@@ -236,33 +236,33 @@ Eight phases, each ending in something demoable; MVP is Phases 0–5. I've reord
 
 ### Phase 0 — Foundations
 
-- [ ] Next.js (App Router, TypeScript strict), Tailwind, shadcn/ui, ESLint + Prettier
-- [ ] Supabase project (dev + prod), Supabase CLI, migrations folder, type generation script
-- [ ] Cloudflare R2 bucket + media domain; Vercel project with preview deployments
-- [ ] `lib/env.ts` with Zod-validated env vars; `money.ts` helpers (paise ↔ ₹ formatting)
-- [ ] CI: typecheck, lint, unit tests on every PR
+- [x] Next.js (App Router, TypeScript strict), Tailwind, shadcn/ui, ESLint + Prettier
+- [x] Supabase project (dev + prod), Supabase CLI, migrations folder, type generation script
+- [x] Cloudflare R2 bucket + media domain; Vercel project with preview deployments
+- [x] `lib/env.ts` with Zod-validated env vars; `money.ts` helpers (paise ↔ ₹ formatting)
+- [x] CI: typecheck, lint, unit tests on every PR
 
 **Exit:** empty app deploys to preview; a migration runs locally and in CI.
 
 ### Phase 1 — Premium storefront (mock data)
 
-- [ ] Write the core table types by hand (matching the schema) and build `mocks/` for 2 stores: a saree shop and a women's ethnic-wear boutique
-- [ ] Theme token → CSS variable pipeline; font whitelist via `next/font`
-- [ ] Template 1: header, footer, hero, category tiles, featured grid, product card
-- [ ] Pages: home, category (filter + sort), product (gallery, variants, zoom), cart, checkout form
-- [ ] Cart in local storage; WhatsApp checkout builds a `wa.me` message (no order record yet)
-- [ ] Mobile-first polish, image loading strategy, Lighthouse ≥ 90 on mobile
+- [x] Write the core table types by hand (matching the schema) and build `mocks/` for 2 stores: a saree shop and a women's ethnic-wear boutique
+- [x] Theme token → CSS variable pipeline; font whitelist via `next/font`
+- [x] Template 1: header, footer, hero, category tiles, featured grid, product card
+- [x] Pages: home, category (filter + sort), product (gallery, variants, zoom), cart, checkout form
+- [x] Cart in local storage; WhatsApp checkout builds a `wa.me` message (no order record yet)
+- [x] Mobile-first polish, image loading strategy, Lighthouse ≥ 90 on mobile
 
 **Exit:** two visibly different branded stores from one template, switched by config.
 
 ### Phase 2 — Backend, auth and tenancy core
 
-- [ ] Migrations for all tables in the database section, enums, indexes, triggers (`updated_at`, profile creation)
-- [ ] RLS policies + helper functions; pgTAP isolation tests in CI
-- [ ] Supabase Auth (email OTP or magic link) for merchants and super admin
-- [ ] `proxy.ts` hostname resolution + `/sites/[host]` rewrite; `*.localhost` for local dev
-- [ ] Replace mocks with `features/catalog/queries.ts`; cache tags per tenant
-- [ ] Seed script with the two demo stores
+- [x] Migrations for all tables in the database section, enums, indexes, triggers (`updated_at`, profile creation)
+- [x] RLS policies + helper functions; pgTAP isolation tests in CI
+- [x] Supabase Auth (email OTP or magic link) for merchants and super admin
+- [x] `proxy.ts` hostname resolution + `/sites/[host]` rewrite; `*.localhost` for local dev
+- [x] Replace mocks with `features/catalog/queries.ts`; cache tags per tenant
+- [x] Seed script with the two demo stores
 
 **Exit:** `saree-demo.localhost:3000` and `boutique-demo.localhost:3000` render from Supabase; isolation tests pass.
 

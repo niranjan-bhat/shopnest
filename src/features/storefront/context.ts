@@ -1,18 +1,19 @@
 import { cacheLife } from 'next/cache';
 import { listCategories } from '@/features/catalog/queries';
-import { getStoreByHost } from '@/features/tenants/queries';
+import {
+  getStoreByHost,
+  listPrimaryStoreHosts,
+} from '@/features/tenants/queries';
 import type { ThemeConfig } from '@/features/theme/schema';
-import { mockDb } from '@/mocks';
+import { getPublicEnv } from '@/lib/env.public';
+import { originFor } from '@/lib/tenant';
 import type { StoreContext } from '@/templates/contract';
 
 /**
- * Where store links point. Phase 1 serves stores under /sites/<slug>; in
- * Phase 2 proxy.ts rewrites each store's own hostname to that route, and
- * this returns "" so links are plain "/c/…" paths.
+ * Prefix for store links. Each store is served on its own host name
+ * (proxy.ts rewrites it to /sites/<host>), so links are plain "/c/…" paths.
  */
-export function storeBasePath(host: string): string {
-  return `/sites/${encodeURIComponent(host)}`;
-}
+const STORE_BASE_PATH = '';
 
 export type Storefront = { store: StoreContext; theme: ThemeConfig };
 
@@ -34,28 +35,37 @@ export async function loadStorefront(host: string): Promise<Storefront | null> {
       whatsappNumber: store.whatsappNumber,
       branding: store.theme.branding,
       announcement: store.theme.announcement ?? null,
-      basePath: storeBasePath(host),
+      basePath: STORE_BASE_PATH,
       categories,
     },
   };
 }
 
-/** Demo store list for the Phase 1 index page at "/". */
-export async function listDemoStores(): Promise<
-  { slug: string; name: string; tagline: string | null }[]
-> {
+export type StoreLink = {
+  slug: string;
+  name: string;
+  tagline: string | null;
+  url: string;
+};
+
+/** Live stores for the platform index page at "/". */
+export async function listStoreLinks(): Promise<StoreLink[]> {
   'use cache';
   cacheLife('hours');
+  const rootDomain = getPublicEnv().NEXT_PUBLIC_ROOT_DOMAIN;
+  const hosts = await listPrimaryStoreHosts();
   const stores = await Promise.all(
-    mockDb.tenants
-      .filter((t) => t.status === 'active')
-      .map((t) => getStoreByHost(t.slug)),
+    hosts.map(async (hostname) => {
+      const store = await getStoreByHost(hostname);
+      return store
+        ? {
+            slug: store.slug,
+            name: store.name,
+            tagline: store.theme.branding.tagline ?? null,
+            url: originFor(hostname, rootDomain),
+          }
+        : null;
+    }),
   );
-  return stores
-    .filter((s) => s !== null)
-    .map((s) => ({
-      slug: s.slug,
-      name: s.name,
-      tagline: s.theme.branding.tagline ?? null,
-    }));
+  return stores.filter((s) => s !== null);
 }
