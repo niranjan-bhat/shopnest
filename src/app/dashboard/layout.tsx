@@ -1,8 +1,11 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
-import type { ReactNode } from 'react';
-import { Button } from '@/components/ui/button';
-import { signOut } from '@/features/auth/actions';
+import { Suspense } from 'react';
+import { Brand } from '@/components/dashboard/brand';
+import { DashboardHeader } from '@/components/dashboard/dashboard-header';
+import { MobileNav } from '@/components/dashboard/mobile-nav';
+import { NavLinks } from '@/components/dashboard/nav-links';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Toaster } from '@/components/ui/sonner';
 
 export const metadata: Metadata = {
   title: { default: 'Dashboard', template: '%s · Zarify' },
@@ -10,28 +13,36 @@ export const metadata: Metadata = {
 };
 
 /**
- * Dashboard shell. The shell is static; each page checks the session itself
- * (layouts and pages render in parallel, so a check here would not protect
- * page data).
+ * Dashboard shell: sidebar navigation (a slide-in menu on phones) and a
+ * header with the store switcher and account menu. The shell does not
+ * protect anything: layouts and pages render in parallel, so every page and
+ * action checks access itself (features/tenants/access.ts).
  */
-export default function DashboardLayout({ children }: { children: ReactNode }) {
+export default function DashboardLayout({
+  children,
+}: LayoutProps<'/dashboard'>) {
   return (
-    <div className="flex min-h-full flex-1 flex-col">
-      <header className="border-b">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-          <Link href="/dashboard" className="font-semibold tracking-tight">
-            Zarify
-          </Link>
-          <form action={signOut}>
-            <Button type="submit" variant="ghost" size="sm">
-              Sign out
-            </Button>
-          </form>
+    <div className="flex min-h-full flex-1">
+      <aside className="sticky top-0 hidden h-svh w-60 shrink-0 flex-col border-r bg-sidebar md:flex">
+        <div className="flex h-14 shrink-0 items-center border-b px-5">
+          <Brand />
         </div>
-      </header>
-      <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-10">
-        {children}
-      </main>
+        <div className="flex-1 overflow-y-auto p-3">
+          <NavLinks />
+        </div>
+      </aside>
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-2 border-b bg-background/95 px-3 backdrop-blur md:px-6">
+          <MobileNav />
+          <Suspense fallback={<Skeleton className="h-6 w-40" />}>
+            <DashboardHeader />
+          </Suspense>
+        </header>
+        <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 md:px-8">
+          {children}
+        </main>
+      </div>
+      <Toaster position="top-center" />
     </div>
   );
 }

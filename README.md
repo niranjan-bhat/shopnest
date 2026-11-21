@@ -37,6 +37,12 @@ npm run grant -- --email you@example.com --store saree-demo   # owner of a store
 npm run grant -- --email you@example.com --super-admin        # all stores, /admin
 ```
 
+`npm run grant` uses `.env.local` (the local database). For the hosted
+project, keep its URL and service-role key in `.env.hosted` and run
+`node --env-file=.env.hosted scripts/grant-access.mjs ...`. Don't name that
+file `.env.production.local`: `next build` loads it automatically and would
+mix the hosted URL with your local keys.
+
 ## Commands
 
 | Command                      | Does                                                   |
