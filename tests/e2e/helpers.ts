@@ -71,6 +71,36 @@ export async function createCategory(
   if (error) throw error;
 }
 
+/**
+ * Adds draft products "Product 01".."Product NN" (one variant each), with
+ * "Product 01" the most recently changed, so it lists first.
+ */
+export async function createProducts(store: TestStore, count: number) {
+  const db = adminDb();
+  const now = Date.now();
+  const rows = Array.from({ length: count }, (_, i) => {
+    const n = String(i + 1).padStart(2, '0');
+    return {
+      tenant_id: store.id,
+      name: `Product ${n}`,
+      slug: `product-${n}`,
+      price_mode: 'fixed' as const,
+      price_paise: 100000,
+      updated_at: new Date(now - i * 60_000).toISOString(),
+    };
+  });
+  const { data, error } = await db.from('products').insert(rows).select('id');
+  if (error) throw error;
+  const { error: variantError } = await db.from('product_variants').insert(
+    data.map((p) => ({
+      tenant_id: store.id,
+      product_id: p.id,
+      stock_qty: 1,
+    })),
+  );
+  if (variantError) throw variantError;
+}
+
 /** Variant ids of a store's product, by option label (e.g. "Rust · S"). */
 export async function variantIds(
   store: TestStore,
