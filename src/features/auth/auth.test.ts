@@ -26,10 +26,13 @@ describe('sign-in schemas', () => {
 });
 
 describe('safeNextPath', () => {
-  it.each(['/dashboard', '/dashboard/products', '/admin', '/admin/tenants'])(
-    'keeps %s',
-    (path) => expect(safeNextPath(path)).toBe(path),
-  );
+  it.each([
+    '/dashboard',
+    '/dashboard/products',
+    '/admin',
+    '/admin/tenants',
+    '/preview',
+  ])('keeps %s', (path) => expect(safeNextPath(path)).toBe(path));
 
   it.each([
     'https://evil.example',

@@ -17,13 +17,13 @@ export const verifyCodeSchema = z.object({
 });
 
 /**
- * Where to go after signing in. Only same-site dashboard or admin paths are
- * allowed, so a crafted ?next= cannot send people to another site.
+ * Where to go after signing in. Only same-site dashboard, admin or preview
+ * paths are allowed, so a crafted ?next= cannot send people to another site.
  */
 export function safeNextPath(next: unknown): string {
   if (
     typeof next === 'string' &&
-    /^\/(dashboard|admin)(\/[A-Za-z0-9\-._~/]*)?$/.test(next) &&
+    /^\/(dashboard|admin|preview)(\/[A-Za-z0-9\-._~/]*)?$/.test(next) &&
     !next.includes('//')
   ) {
     return next;

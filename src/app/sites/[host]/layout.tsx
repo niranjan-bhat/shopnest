@@ -5,6 +5,7 @@ import { StoreShellFallback } from '@/components/storefront/fallbacks';
 import { StoreRoot } from '@/components/storefront/store-root';
 import { loadStorefront } from '@/features/storefront/context';
 import { listStoreHosts } from '@/features/tenants/queries';
+import { mediaUrl } from '@/lib/media';
 import { atLeastOne } from '@/lib/static-params';
 import { getTemplate } from '@/templates/registry';
 
@@ -23,6 +24,9 @@ export async function generateMetadata({
   return {
     title: { default: store.name, template: `%s · ${store.name}` },
     description: store.branding.tagline,
+    ...(store.branding.faviconKey
+      ? { icons: { icon: mediaUrl(store.branding.faviconKey) } }
+      : {}),
   };
 }
 

@@ -1,14 +1,69 @@
 import { z } from 'zod';
 
-// Product photo rules shared by the browser (before uploading) and the
-// server actions (the real check).
+const UUID = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
 
-/** Formats the browser produces after resizing (WebP where supported). */
+// Image upload rules shared by the browser (before uploading) and the
+// server actions (the real check): product photos, logos, favicons and
+// banners.
+
+/** Every format the browser may produce after resizing. */
+export const UPLOAD_TYPES = {
+  'image/webp': 'webp',
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+} as const;
+export type UploadType = keyof typeof UPLOAD_TYPES;
+
+/** Product photos: WebP, or JPEG where the browser cannot make WebP. */
 export const IMAGE_TYPES = {
   'image/webp': 'webp',
   'image/jpeg': 'jpg',
 } as const;
 export type ImageType = keyof typeof IMAGE_TYPES;
+
+/** Store images other than product photos. */
+export const BRANDING_KINDS = ['logo', 'favicon', 'banner'] as const;
+export type BrandingKind = (typeof BRANDING_KINDS)[number];
+
+/**
+ * Longest side after resizing, and the format to use where WebP is missing:
+ * PNG for logos and favicons (keeps transparency), JPEG for banner photos.
+ */
+export const BRANDING_SIZES: Record<
+  BrandingKind,
+  { maxSide: number; fallback: 'image/png' | 'image/jpeg' }
+> = {
+  logo: { maxSide: 800, fallback: 'image/png' },
+  favicon: { maxSide: 256, fallback: 'image/png' },
+  banner: { maxSide: 2400, fallback: 'image/jpeg' },
+};
+
+/**
+ * R2 key for a new store image: tenants/{t}/branding/{kind}-{id}.{ext}, or
+ * tenants/{t}/banners/{id}.{ext} for banners.
+ */
+export function brandingKey(
+  tenantId: string,
+  kind: BrandingKind,
+  imageId: string,
+  type: UploadType,
+): string {
+  const ext = UPLOAD_TYPES[type];
+  return kind === 'banner'
+    ? `tenants/${tenantId}/banners/${imageId}.${ext}`
+    : `tenants/${tenantId}/branding/${kind}-${imageId}.${ext}`;
+}
+
+/** Whether `key` is a key made by brandingKey for this store and kind. */
+export function isBrandingKey(
+  key: string,
+  tenantId: string,
+  kind: BrandingKind,
+): boolean {
+  const path =
+    kind === 'banner' ? `banners/${UUID}` : `branding/${kind}-${UUID}`;
+  return new RegExp(`^tenants/${tenantId}/${path}\\.(webp|jpg|png)$`).test(key);
+}
 
 /** After resizing a photo is usually 150–400 KB; this leaves headroom. */
 export const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
@@ -38,8 +93,6 @@ export function productImageKey(
 ): string {
   return `tenants/${tenantId}/products/${productId}/${imageId}.${IMAGE_TYPES[type]}`;
 }
-
-const UUID = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
 
 /** Whether `key` is a photo key made by productImageKey for this product. */
 export function isProductImageKey(
@@ -93,4 +146,10 @@ export const imageOrderSchema = z.object({
     .min(1)
     .max(MAX_IMAGES_PER_PRODUCT * 2)
     .refine((ids) => new Set(ids).size === ids.length, 'Duplicate photo'),
+});
+
+export const brandingUploadSchema = z.object({
+  kind: z.enum(BRANDING_KINDS),
+  type: z.enum(Object.keys(UPLOAD_TYPES) as [UploadType, ...UploadType[]]),
+  size: z.number().int().min(1).max(MAX_IMAGE_BYTES),
 });
