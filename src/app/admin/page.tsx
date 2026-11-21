@@ -5,7 +5,7 @@ import { requireSuperAdmin } from '@/features/auth/session';
 import { listAllStores } from '@/features/tenants/dashboard';
 
 export const metadata: Metadata = {
-  title: 'Super admin · ShopNest',
+  title: 'Super admin · Zarify',
   robots: { index: false },
 };
 

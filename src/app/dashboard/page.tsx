@@ -30,8 +30,8 @@ async function Overview() {
       <h2 className="mt-10 text-lg font-medium">Your stores</h2>
       {stores.length === 0 ? (
         <p className="mt-2 text-muted-foreground" data-testid="no-stores">
-          You don&apos;t have access to a store yet. Ask the ShopNest team to
-          add you.
+          You don&apos;t have access to a store yet. Ask the Zarify team to add
+          you.
         </p>
       ) : (
         <ul className="mt-4 grid gap-3 sm:grid-cols-2">

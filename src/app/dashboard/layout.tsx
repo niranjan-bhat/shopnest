@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { signOut } from '@/features/auth/actions';
 
 export const metadata: Metadata = {
-  title: { default: 'Dashboard', template: '%s · ShopNest' },
+  title: { default: 'Dashboard', template: '%s · Zarify' },
   robots: { index: false },
 };
 
@@ -20,7 +20,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       <header className="border-b">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
           <Link href="/dashboard" className="font-semibold tracking-tight">
-            ShopNest
+            Zarify
           </Link>
           <form action={signOut}>
             <Button type="submit" variant="ghost" size="sm">

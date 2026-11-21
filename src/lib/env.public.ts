@@ -9,8 +9,8 @@ export const publicEnvSchema = z.object({
   NEXT_PUBLIC_SUPABASE_URL: z.url(),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),
   /**
-   * Where R2 object keys are served from: the bucket's domain
-   * (https://media.shopnest.in) or, locally, a path under /public
+   * Where R2 object keys are served from: the bucket's public domain
+   * (https://pub-<id>.r2.dev in development) or, locally, a path under /public
    * (/mock-media).
    */
   NEXT_PUBLIC_MEDIA_BASE_URL: z
@@ -22,7 +22,7 @@ export const publicEnvSchema = z.object({
           : /^\/[A-Za-z0-9._/-]+$/.test(value),
       'must be an http(s) URL or a path such as /mock-media',
     ),
-  /** Platform domain for storefront subdomains, e.g. shopnest.in or localhost:3000 */
+  /** Platform domain for storefront subdomains, e.g. zarify.in or localhost:3000 */
   NEXT_PUBLIC_ROOT_DOMAIN: z
     .string()
     .regex(

@@ -9,7 +9,7 @@ export default async function Home() {
   return (
     <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-20">
       <p className="text-sm tracking-widest text-muted-foreground uppercase">
-        ShopNest
+        Zarify
       </p>
       <h1 className="mt-2 text-4xl font-semibold tracking-tight">
         Demo stores

@@ -1,9 +1,9 @@
 /**
  * Hostname routing, shared by proxy.ts and by code that builds links.
  *
- * With NEXT_PUBLIC_ROOT_DOMAIN = shopnest.in (localhost:3000 locally):
- *   shopnest.in, www.shopnest.in  → platform (marketing site)
- *   app.shopnest.in               → app (merchant dashboard, super admin, login)
+ * With NEXT_PUBLIC_ROOT_DOMAIN = zarify.in (localhost:3000 locally):
+ *   zarify.in, www.zarify.in  → platform (marketing site)
+ *   app.zarify.in               → app (merchant dashboard, super admin, login)
  *   anything else                 → a storefront, looked up in tenant_domains
  */
 

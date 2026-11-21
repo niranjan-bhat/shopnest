@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'ShopNest',
+  title: 'Zarify',
   description: 'Online stores for Indian clothing brands.',
 };
 

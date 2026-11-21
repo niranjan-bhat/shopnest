@@ -118,7 +118,7 @@ function Footer({ store }: { store: StoreContext }) {
       </div>
       <div className="border-t border-store-on-primary/15">
         <p className="mx-auto max-w-7xl px-4 py-5 text-xs opacity-70 md:px-8">
-          © {store.name} · Powered by ShopNest
+          © {store.name} · Powered by Zarify
         </p>
       </div>
     </footer>

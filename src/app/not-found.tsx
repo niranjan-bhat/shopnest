@@ -14,7 +14,7 @@ export default function NotFound() {
         There is no store or page at this address.
       </p>
       <a href={home} className="mt-6 underline underline-offset-4">
-        Go to ShopNest
+        Go to Zarify
       </a>
     </main>
   );

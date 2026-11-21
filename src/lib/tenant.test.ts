@@ -26,17 +26,17 @@ describe('normalizeHostname', () => {
 
 describe('routeHost', () => {
   const local = 'localhost:3000';
-  const prod = 'shopnest.in';
+  const prod = 'zarify.in';
 
   it('sends the root domain and www to the platform site', () => {
     expect(routeHost('localhost:3000', local)).toEqual({ kind: 'platform' });
-    expect(routeHost('shopnest.in', prod)).toEqual({ kind: 'platform' });
-    expect(routeHost('www.shopnest.in', prod)).toEqual({ kind: 'platform' });
+    expect(routeHost('zarify.in', prod)).toEqual({ kind: 'platform' });
+    expect(routeHost('www.zarify.in', prod)).toEqual({ kind: 'platform' });
   });
 
   it('sends app.<root> to the app', () => {
     expect(routeHost('app.localhost:3000', local)).toEqual({ kind: 'app' });
-    expect(routeHost('APP.shopnest.in', prod)).toEqual({ kind: 'app' });
+    expect(routeHost('APP.zarify.in', prod)).toEqual({ kind: 'app' });
   });
 
   it('treats every other host as a storefront, without the port', () => {
@@ -79,9 +79,9 @@ describe('origins', () => {
   });
 
   it('uses https in production', () => {
-    expect(originFor('saree-demo.shopnest.in', 'shopnest.in')).toBe(
-      'https://saree-demo.shopnest.in',
+    expect(originFor('saree-demo.zarify.in', 'zarify.in')).toBe(
+      'https://saree-demo.zarify.in',
     );
-    expect(appOrigin('shopnest.in')).toBe('https://app.shopnest.in');
+    expect(appOrigin('zarify.in')).toBe('https://app.zarify.in');
   });
 });

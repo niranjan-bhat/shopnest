@@ -1,4 +1,4 @@
-# ShopNest
+# Zarify
 
 Multi-tenant online stores for Indian clothing brands. The plan, architecture
 and database design are in [docs/PLAN.md](docs/PLAN.md).

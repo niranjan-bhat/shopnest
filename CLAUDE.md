@@ -1,7 +1,8 @@
-# ShopNest
+# Zarify
 
 Multi-tenant ecommerce SaaS for Indian clothing brands (saree shops, ethnic wear, boutiques). Jewellery comes after the MVP.
 The full plan is in `docs/PLAN.md`. Read it before starting any phase, and follow its architecture, folder structure and database design.
+The product was renamed from ShopNest to Zarify (production: `zarify.in`). Internal names stay `shopnest` on purpose: the repo folder, the `package.json` name, Supabase `project_id` (renaming orphans the local Docker database), the `shopnest-cart` storage key (renaming empties shoppers' carts) and comments in already-applied migrations.
 
 ## Stack
 
