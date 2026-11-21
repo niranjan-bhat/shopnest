@@ -22,6 +22,7 @@ The product was renamed from ShopNest to Zarify (production: `zarify.in`). Inter
 - Validate every Server Action input with Zod.
 - Schema changes go in `supabase/migrations`; regenerate `src/types/database.ts` afterwards. No `any` in the data layer.
 - Never commit `.env.local` or expose the service-role key to the browser.
+- Production steps that live outside the code (migrations to push, env vars, buckets, DNS, plans) go in `docs/LAUNCH-CHECKLIST.md` when a change needs them, not only in chat.
 
 ## Commands
 
