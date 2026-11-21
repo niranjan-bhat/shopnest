@@ -231,12 +231,22 @@ export async function countDashboardProducts(
   };
 }
 
+export type DashboardImage = {
+  id: string;
+  key: string;
+  alt: string;
+  width: number;
+  height: number;
+};
+
 export type ProductForEdit = {
   id: string;
   slug: string;
   status: ProductStatus;
   /** Changes on every save; the form restarts from fresh data then. */
   updatedAt: string;
+  /** In display order; the first is the cover. */
+  images: DashboardImage[];
   values: ProductFormValues;
 };
 
@@ -249,10 +259,14 @@ export async function getProductForEdit(
   const row = check(
     await supabase
       .from('products')
-      .select('*, product_variants(*), product_categories(category_id)')
+      .select(
+        `*, product_variants(*), product_categories(category_id),
+         product_images(id, r2_key, alt, width, height, position)`,
+      )
       .eq('tenant_id', tenantId)
       .eq('id', productId)
       .order('created_at', { referencedTable: 'product_variants' })
+      .order('position', { referencedTable: 'product_images' })
       .maybeSingle(),
     'product',
   );
@@ -294,6 +308,13 @@ export async function getProductForEdit(
     slug: row.slug,
     status: row.status,
     updatedAt: row.updated_at,
+    images: row.product_images.map((image) => ({
+      id: image.id,
+      key: image.r2_key,
+      alt: image.alt ?? '',
+      width: image.width ?? 900,
+      height: image.height ?? 1200,
+    })),
     values: {
       name: row.name,
       slug: row.slug,

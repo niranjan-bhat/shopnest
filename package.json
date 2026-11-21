@@ -20,7 +20,8 @@
     "grant": "node --env-file=.env.local scripts/grant-access.mjs",
     "db:seed": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/generate-seed.mjs",
     "db:types": "supabase gen types typescript --local --schema public > src/types/database.ts",
-    "mock:media": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/generate-mock-media.mjs"
+    "mock:media": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/generate-mock-media.mjs",
+    "media:upload-demo": "node --env-file=.env.local scripts/upload-demo-media.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1172.0",

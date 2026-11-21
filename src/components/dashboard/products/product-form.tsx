@@ -85,12 +85,15 @@ export function ProductForm({
   initial,
   categories,
   liveUrl,
+  photos,
 }: {
   productId: string | null;
   initial: ProductFormValues;
   categories: CategoryChoice[];
   /** The product's storefront page, when it is live. */
   liveUrl: string | null;
+  /** The photos panel; photos save on their own, not with this form. */
+  photos: ReactNode;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -212,6 +215,13 @@ export function ProductForm({
 
         <div className="grid items-start gap-6 lg:grid-cols-[1fr_18rem]">
           <div className="grid gap-6">
+            <Section
+              title="Photos"
+              description="The first photo is the cover. Drag to reorder."
+            >
+              {photos}
+            </Section>
+
             <Section title="Basics">
               <FieldGroup>
                 <Field data-invalid={Boolean(errors.name)}>
