@@ -25,16 +25,16 @@ ignores the new database functions and keeps serving `/mock-media`.
        `npx supabase db push --remote --dry-run`, then `npx supabase db push --remote`.
        Expect four: `reorder_categories`, `category_menu_flag`, `save_product`, `reorder_product_images`.
        Never add `--include-seed` on production.
-2. [ ] **CORS on `zarify-prod`**: allow origin `https://app.zarify.in`, method `PUT`, header `content-type`.
-3. [ ] **R2 API token for production**: Object Read & Write on `zarify-prod` only (separate from the dev token).
-4. [ ] **`.env.hosted`**: add `R2_ACCOUNT_ID`, the new `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY`, `R2_BUCKET=zarify-prod`.
-5. [ ] **Copy the demo photos to the bucket** (skips files already there):
+2. [x] **CORS on `zarify-prod`**: allow origin `https://app.zarify.in`, method `PUT`, header `content-type`.
+3. [x] **R2 API token for production**: Object Read & Write on `zarify-prod` only (separate from the dev token).
+4. [x] **`.env.hosted`**: add `R2_ACCOUNT_ID`, the new `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY`, `R2_BUCKET=zarify-prod`.
+5. [x] **Copy the demo photos to the bucket** (skips files already there):
        `node --env-file=.env.hosted scripts/upload-demo-media.mjs`
-6. [ ] **Vercel → Settings → Environment Variables (Production):**
+6. [x] **Vercel → Settings → Environment Variables (Production):**
        `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` (as Secret), `R2_BUCKET=zarify-prod`,
        `NEXT_PUBLIC_MEDIA_BASE_URL=https://pub-efb6c498a91f450b828dc042bcb50ee9.r2.dev`.
        Only after step 5, or the demo stores show broken images.
-7. [ ] **Push `phase-3-dashboard`**, check the Vercel preview build is green, open a PR, merge to `main`.
+7. [x] **Push `phase-3-dashboard`**, check the Vercel preview build is green, open a PR, merge to `main`.
 8. [ ] **Check the live site** at `https://app.zarify.in`:
        categories (reorder, menu flag), products (add, edit, sizes), photos (upload, reorder, delete),
        and that the store pages still show their photos.
