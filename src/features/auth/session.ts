@@ -1,17 +1,23 @@
 import 'server-only';
 import { notFound, redirect } from 'next/navigation';
+import { cache } from 'react';
 import { check } from '@/lib/supabase/result';
 import { createServerSupabase } from '@/lib/supabase/server';
 
 export type SessionUser = { id: string; email: string };
 
-/** The signed-in user, verified with Supabase Auth, or null. */
-export async function getSessionUser(): Promise<SessionUser | null> {
+/**
+ * The signed-in user, or null. Asks the Supabase Auth server rather than only
+ * checking the token's signature (getClaims), so a deleted account or a
+ * revoked session loses access on its next request instead of when its
+ * token expires (up to an hour later). Runs once per request.
+ */
+export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
   const supabase = await createServerSupabase();
-  const { data, error } = await supabase.auth.getClaims();
-  if (error || !data?.claims.sub) return null;
-  return { id: data.claims.sub, email: String(data.claims.email ?? '') };
-}
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data.user) return null;
+  return { id: data.user.id, email: data.user.email ?? '' };
+});
 
 /** The signed-in user; anyone else is sent to /login and back afterwards. */
 export async function requireUser(returnTo: string): Promise<SessionUser> {

@@ -93,6 +93,42 @@ export async function grantAccess(
 }
 
 /** A fresh address per test and project, so runs never collide. */
+async function userIdFor(email: string): Promise<string> {
+  const { data, error } = await adminDb().auth.admin.listUsers({
+    perPage: 1000,
+  });
+  if (error) throw error;
+  const user = data.users.find((u) => u.email === email);
+  if (!user) throw new Error(`No user ${email}`);
+  return user.id;
+}
+
+/** Takes a user out of a store (what removing a team member will do). */
+export async function revokeStore(email: string, storeSlug: string) {
+  const db = adminDb();
+  const userId = await userIdFor(email);
+  const { data: tenant, error } = await db
+    .from('tenants')
+    .select('id')
+    .eq('slug', storeSlug)
+    .single();
+  if (error) throw error;
+  const { error: e } = await db
+    .from('tenant_members')
+    .delete()
+    .eq('tenant_id', tenant.id)
+    .eq('user_id', userId);
+  if (e) throw e;
+}
+
+/** Deletes the account entirely, as from the Supabase dashboard. */
+export async function deleteUser(email: string) {
+  const { error } = await adminDb().auth.admin.deleteUser(
+    await userIdFor(email),
+  );
+  if (error) throw error;
+}
+
 export function freshEmail(testInfo: TestInfo): string {
   const id = `${testInfo.project.name}-${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
   return `e2e-${id}@example.com`;
