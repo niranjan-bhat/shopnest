@@ -1,10 +1,10 @@
-# ShopNest – Project Plan
+# Zarify – Project Plan
 
 Nov 19, 2026 · @niranjan
 
 ## Overview and key recommendations
 
-ShopNest should be one Next.js app, one Supabase database, and a small set of code-based templates driven by per-tenant theme config. The direction in the brief is right; the changes below keep the MVP small without painting us into a corner.
+Zarify should be one Next.js app, one Supabase database, and a small set of code-based templates driven by per-tenant theme config. The direction in the brief is right; the changes below keep the MVP small without painting us into a corner.
 
 **MVP goal:** a merchant can be onboarded by the super admin, manage their catalog and branding, and receive WhatsApp orders on their own subdomain or custom domain.
 
@@ -26,19 +26,19 @@ ShopNest should be one Next.js app, one Supabase database, and a small set of co
 
 Every request hits one Next.js deployment; `proxy.ts` reads the hostname, looks up the tenant, and routes to the storefront, the merchant dashboard or the super admin.
 
-&#91;embedded content: ShopNest architecture · one app, three surfaces, four services\]
+&#91;embedded content: Zarify architecture · one app, three surfaces, four services\]
 
 All three audiences enter through the same proxy; only the route and the auth check differ. Images load straight from the R2 CDN, not through the app.
 
 **Hosts**
 
-| Host                        | Serves                         | Auth                            |
-| --------------------------- | ------------------------------ | ------------------------------- |
-| `shopnest.in`               | Marketing site (later)         | None                            |
-| `app.shopnest.in/dashboard` | Merchant dashboard             | Supabase Auth, tenant member    |
-| `app.shopnest.in/admin`     | Super admin                    | Supabase Auth, `is_super_admin` |
-| `{slug}.shopnest.in`        | Storefront on a free subdomain | Public                          |
-| `www.merchant.com`          | Storefront on a custom domain  | Public                          |
+| Host                      | Serves                         | Auth                            |
+| ------------------------- | ------------------------------ | ------------------------------- |
+| `zarify.in`               | Marketing site (later)         | None                            |
+| `app.zarify.in/dashboard` | Merchant dashboard             | Supabase Auth, tenant member    |
+| `app.zarify.in/admin`     | Super admin                    | Supabase Auth, `is_super_admin` |
+| `{slug}.zarify.in`        | Storefront on a free subdomain | Public                          |
+| `www.merchant.com`        | Storefront on a custom domain  | Public                          |
 
 **Request flow for a storefront**
 
@@ -58,7 +58,7 @@ All three audiences enter through the same proxy; only the route and the auth ch
 
 - Bucket layout: `tenants/{tenant_id}/products/{product_id}/{uuid}.webp`, `tenants/{tenant_id}/branding/...`.
 - Upload: dashboard asks a server action for a presigned PUT URL, browser uploads straight to R2, then the action saves the key.
-- Delivery: a custom domain on the bucket (e.g. `media.shopnest.in`) behind Cloudflare's CDN, with a custom `next/image` loader for resizing.
+- Delivery: a custom domain on the bucket behind Cloudflare's CDN, with a custom `next/image` loader for resizing. It is a separate domain on Cloudflare DNS (not a `zarify.in` subdomain), because `zarify.in` uses Vercel's nameservers for the store wildcard. Development uses the bucket's `r2.dev` address.
 
 **Security baseline**
 

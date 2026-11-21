@@ -6,7 +6,7 @@ import { safeNextPath } from '@/features/auth/schemas';
 import { getSessionUser } from '@/features/auth/session';
 
 export const metadata: Metadata = {
-  title: 'Sign in · ShopNest',
+  title: 'Sign in · Zarify',
   robots: { index: false },
 };
 
@@ -38,7 +38,7 @@ export default function LoginPage(props: PageProps<'/login'>) {
   return (
     <main className="mx-auto w-full max-w-sm flex-1 px-6 py-20">
       <p className="text-sm tracking-widest text-muted-foreground uppercase">
-        ShopNest
+        Zarify
       </p>
       <h1 className="mt-2 text-3xl font-semibold tracking-tight">Sign in</h1>
       <p className="mt-2 text-muted-foreground">

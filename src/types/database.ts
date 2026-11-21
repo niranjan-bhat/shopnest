@@ -47,14 +47,14 @@ isOneToOne: false
                   ]
                 },"categories": {
                   Row: {
-                    "created_at": string,"id": string,"image_key": string | null,"is_active": boolean,"name": string,"parent_id": string | null,"position": number,"slug": string,"tenant_id": string,"updated_at": string
+                    "created_at": string,"id": string,"image_key": string | null,"is_active": boolean,"name": string,"parent_id": string | null,"position": number,"show_in_menu": boolean,"slug": string,"tenant_id": string,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"id"?: string,"image_key"?: string | null,"is_active"?: boolean,"name": string,"parent_id"?: string | null,"position"?: number,"slug": string,"tenant_id": string,"updated_at"?: string
+                    "created_at"?: string,"id"?: string,"image_key"?: string | null,"is_active"?: boolean,"name": string,"parent_id"?: string | null,"position"?: number,"show_in_menu"?: boolean,"slug": string,"tenant_id": string,"updated_at"?: string
                   }
                   Update: {
-                    "created_at"?: string,"id"?: string,"image_key"?: string | null,"is_active"?: boolean,"name"?: string,"parent_id"?: string | null,"position"?: number,"slug"?: string,"tenant_id"?: string,"updated_at"?: string
+                    "created_at"?: string,"id"?: string,"image_key"?: string | null,"is_active"?: boolean,"name"?: string,"parent_id"?: string | null,"position"?: number,"show_in_menu"?: boolean,"slug"?: string,"tenant_id"?: string,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -407,6 +407,12 @@ isOneToOne: true
                            },
 "is_tenant_member":
 { Args: { "tid": string }; Returns: boolean
+                           },
+"reorder_categories":
+{ Args: { "ordered_ids": (string)[],"tid": string }; Returns: undefined
+                           },
+"save_product":
+{ Args: { "pid"?: string,"product": Json,"tid": string }; Returns: string
                            }
           }
           Enums: {

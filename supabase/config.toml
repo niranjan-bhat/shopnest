@@ -161,7 +161,7 @@ max_indexes = 5
 enabled = true
 # The base URL of your website. Used as an allow-list for redirects and for constructing URLs used
 # in emails.
-# ShopNest: the app host (dashboard, admin, login). Storefronts never sign in.
+# Zarify: the app host (dashboard, admin, login). Storefronts never sign in.
 site_url = "http://app.localhost:3000"
 # The public URL that Auth serves on. Defaults to the API external URL with `/auth/v1` appended.
 # external_url = ""
@@ -241,17 +241,17 @@ max_frequency = "1s"
 # Number of characters used in the email OTP.
 otp_length = 6
 # Number of seconds before the email OTP expires (defaults to 1 hour).
-# ShopNest: sign-in codes are valid for 10 minutes.
+# Zarify: sign-in codes are valid for 10 minutes.
 otp_expiry = 600
 
-# ShopNest sign-in emails carry a 6-digit code (and a fallback link). New
+# Zarify sign-in emails carry a 6-digit code (and a fallback link). New
 # users get the confirmation email, returning users the magic-link one.
 [auth.email.template.magic_link]
-subject = "Your ShopNest sign-in code"
+subject = "Your Zarify sign-in code"
 content_path = "./supabase/templates/sign-in-code.html"
 
 [auth.email.template.confirmation]
-subject = "Your ShopNest sign-in code"
+subject = "Your Zarify sign-in code"
 content_path = "./supabase/templates/sign-in-code.html"
 
 # Use a production-ready SMTP server

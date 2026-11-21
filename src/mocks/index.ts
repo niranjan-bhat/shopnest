@@ -89,6 +89,7 @@ function addStore(db: MockDb, store: FixtureStore): void {
       position: i,
       image_key: mediaKey.category(tenantId, id),
       is_active: true,
+      show_in_menu: true,
       created_at: isoDaysAgo(90),
       updated_at: isoDaysAgo(90),
     });

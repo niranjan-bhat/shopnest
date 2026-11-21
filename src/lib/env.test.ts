@@ -38,7 +38,7 @@ describe('parseEnv', () => {
     }
   });
 
-  it.each(['/mock-media', 'https://media.shopnest.in'])(
+  it.each(['/mock-media', 'https://pub-0123abcd.r2.dev'])(
     'accepts %s as the media base',
     (base) => {
       const env = { ...validPublic, NEXT_PUBLIC_MEDIA_BASE_URL: base };

@@ -1,6 +1,7 @@
 import 'server-only';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
+import { connection } from 'next/server';
 import type { Database } from '@/types/database';
 import { getPublicEnv } from '@/lib/env.public';
 
@@ -8,8 +9,14 @@ import { getPublicEnv } from '@/lib/env.public';
  * Client acting as the signed-in user (session from cookies), so RLS applies.
  * For Server Components, Server Actions and Route Handlers. Create one per
  * request; never use it inside `'use cache'`.
+ *
+ * `connection()` makes everything that uses the session render at request
+ * time. Without it, partial prefetching may prerender with the visitor's
+ * cookies, and Supabase checks token expiry with Date.now(), which Cache
+ * Components refuses during a prerender. Sessions must never be prerendered.
  */
 export async function createServerSupabase() {
+  await connection();
   const cookieStore = await cookies();
   const env = getPublicEnv();
   return createServerClient<Database>(
