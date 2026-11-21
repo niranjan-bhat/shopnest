@@ -13,6 +13,16 @@ async function captureWhatsApp(page: Page): Promise<() => Promise<string>> {
   };
 }
 
+/**
+ * Opens a store page and waits until it has hydrated (CartHydrator marks
+ * <html data-hydrated>): a click before that does nothing, which made these
+ * tests flaky when the machine was busy.
+ */
+async function openStore(page: Page, url: string) {
+  await page.goto(url);
+  await page.locator('html[data-hydrated]').waitFor({ state: 'attached' });
+}
+
 async function fillCheckout(page: Page) {
   await page.getByLabel('Full name').fill('Asha Rao');
   await page.getByLabel('Mobile number').fill('98765 43210');
@@ -27,7 +37,10 @@ test.describe('storefront', () => {
     page,
   }) => {
     const whatsappText = await captureWhatsApp(page);
-    await page.goto(store('saree-demo', '/p/ruby-temple-border-kanjivaram'));
+    await openStore(
+      page,
+      store('saree-demo', '/p/ruby-temple-border-kanjivaram'),
+    );
     await expect(
       page.getByRole('heading', {
         level: 1,
@@ -65,7 +78,7 @@ test.describe('storefront', () => {
     page,
   }) => {
     const whatsappText = await captureWhatsApp(page);
-    await page.goto(store('boutique-demo', '/p/ikat-co-ord'));
+    await openStore(page, store('boutique-demo', '/p/ikat-co-ord'));
 
     await page.getByRole('button', { name: 'Add to bag' }).click();
     await expect(page.getByText('Please choose a size.')).toBeVisible();
@@ -79,17 +92,17 @@ test.describe('storefront', () => {
     await expect(page.getByTestId('cart-count')).toHaveText('1');
 
     // The cart survives a reload (localStorage) and is per store.
-    await page.goto(store('boutique-demo', '/cart'));
+    await openStore(page, store('boutique-demo', '/cart'));
     await expect(page.locator('main').getByTestId('cart-line')).toHaveCount(1);
     await expect(page.locator('main').getByTestId('cart-line')).toContainText(
       'Rust · M',
     );
-    await page.goto(store('saree-demo', '/cart'));
+    await openStore(page, store('saree-demo', '/cart'));
     await expect(
       page.locator('main').getByText('Your bag is empty.'),
     ).toBeVisible();
 
-    await page.goto(store('boutique-demo', '/checkout'));
+    await openStore(page, store('boutique-demo', '/checkout'));
     await fillCheckout(page);
     await page.getByRole('button', { name: 'Place order on WhatsApp' }).click();
     const text = await whatsappText();
@@ -100,10 +113,10 @@ test.describe('storefront', () => {
   test('price-on-request items make the total provisional', async ({
     page,
   }) => {
-    await page.goto(store('saree-demo', '/p/bridal-peacock-kanjivaram'));
+    await openStore(page, store('saree-demo', '/p/bridal-peacock-kanjivaram'));
     await expect(page.getByText('Price on request').first()).toBeVisible();
     await page.getByRole('button', { name: 'Add to bag' }).click();
-    await page.goto(store('saree-demo', '/cart'));
+    await openStore(page, store('saree-demo', '/cart'));
     await expect(
       page.getByText(/Includes items priced on request/),
     ).toBeVisible();
@@ -112,7 +125,7 @@ test.describe('storefront', () => {
   test('category filters and sorting update the URL and results', async ({
     page,
   }) => {
-    await page.goto(store('saree-demo', '/c/soft-silk'));
+    await openStore(page, store('saree-demo', '/c/soft-silk'));
     const cards = page.locator('main article');
     await expect(cards).toHaveCount(3);
 
@@ -122,14 +135,14 @@ test.describe('storefront', () => {
     await expect(cards).toHaveCount(2);
     await expect(cards.first()).toContainText('Teal Zari-Butta Soft Silk');
 
-    await page.goto(store('saree-demo', '/c/soft-silk?price=10k-25k'));
+    await openStore(page, store('saree-demo', '/c/soft-silk?price=10k-25k'));
     await expect(
       page.getByText('Nothing matches these filters.'),
     ).toBeVisible();
   });
 
   test('filter controls submit on change', async ({ page, isMobile }) => {
-    await page.goto(store('saree-demo', '/c/soft-silk'));
+    await openStore(page, store('saree-demo', '/c/soft-silk'));
     if (isMobile) await page.getByRole('button', { name: /^Filters/ }).click();
     await page.getByLabel('In stock only').check();
     await expect(page).toHaveURL(/inStock=1/);
@@ -166,7 +179,7 @@ test.describe('storefront', () => {
   });
 
   test('draft products and unknown pages are not shown', async ({ page }) => {
-    await page.goto(store('saree-demo', '/p/unreleased-paithani'));
+    await openStore(page, store('saree-demo', '/p/unreleased-paithani'));
     await expect(
       page.getByRole('heading', { name: "We couldn't find that page" }),
     ).toBeVisible();

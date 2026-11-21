@@ -13,7 +13,10 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: isCI,
   retries: isCI ? 2 : 0,
-  workers: isCI ? 1 : undefined,
+  // Locally the tests share one dev server that compiles pages on demand.
+  // More than three browsers at once overloads it on Windows (slow pages,
+  // dropped connections, flaky failures); three ran reliably.
+  workers: isCI ? 1 : 3,
   reporter: isCI ? [['github'], ['html', { open: 'never' }]] : 'list',
   use: {
     baseURL: `http://localhost:${PORT}`,
