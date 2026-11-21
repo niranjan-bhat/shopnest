@@ -21,6 +21,8 @@ export const categoryFormSchema = z.object({
       'Use lower-case letters, numbers and single hyphens',
     ),
   isActive: z.boolean(),
+  /** Also listed in the storefront's top menu. */
+  showInMenu: z.boolean(),
 });
 
 export type CategoryFormInput = z.input<typeof categoryFormSchema>;

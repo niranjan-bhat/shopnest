@@ -12,8 +12,14 @@ describe('categoryFormSchema', () => {
         name: '  Kurta Sets ',
         slug: ' Kurta-Sets ',
         isActive: true,
+        showInMenu: true,
       }),
-    ).toEqual({ name: 'Kurta Sets', slug: 'kurta-sets', isActive: true });
+    ).toEqual({
+      name: 'Kurta Sets',
+      slug: 'kurta-sets',
+      isActive: true,
+      showInMenu: true,
+    });
   });
 
   it('requires a name', () => {
@@ -21,6 +27,7 @@ describe('categoryFormSchema', () => {
       name: '   ',
       slug: '',
       isActive: true,
+      showInMenu: false,
     });
     expect(result.success).toBe(false);
   });
@@ -32,24 +39,52 @@ describe('categoryFormSchema', () => {
         name: 'Kurta',
         slug,
         isActive: true,
+        showInMenu: false,
       });
       expect(result.success).toBe(false);
     },
   );
 });
 
+describe('categoryFormSchema menu flag', () => {
+  it('requires an explicit choice for the top menu', () => {
+    const base = { name: 'Kurta', slug: '', isActive: true };
+    expect(categoryFormSchema.safeParse(base).success).toBe(false);
+    expect(
+      categoryFormSchema.safeParse({ ...base, showInMenu: false }).success,
+    ).toBe(true);
+  });
+});
+
 describe('categorySlug', () => {
   it('uses the typed slug, or makes one from the name', () => {
     expect(
-      categorySlug({ name: 'Kurta Sets', slug: 'kurtas', isActive: true }),
+      categorySlug({
+        name: 'Kurta Sets',
+        slug: 'kurtas',
+        isActive: true,
+        showInMenu: false,
+      }),
     ).toBe('kurtas');
-    expect(categorySlug({ name: 'Kurta Sets', slug: '', isActive: true })).toBe(
-      'kurta-sets',
-    );
+    expect(
+      categorySlug({
+        name: 'Kurta Sets',
+        slug: '',
+        isActive: true,
+        showInMenu: false,
+      }),
+    ).toBe('kurta-sets');
   });
 
   it('is empty for a name in another script with no slug typed', () => {
-    expect(categorySlug({ name: 'साड़ी', slug: '', isActive: true })).toBe('');
+    expect(
+      categorySlug({
+        name: 'साड़ी',
+        slug: '',
+        isActive: true,
+        showInMenu: false,
+      }),
+    ).toBe('');
   });
 });
 

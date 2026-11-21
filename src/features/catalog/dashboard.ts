@@ -11,6 +11,7 @@ export type DashboardCategory = {
   name: string;
   slug: string;
   isActive: boolean;
+  showInMenu: boolean;
   /** Products linked to the category, whatever their status. */
   productCount: number;
 };
@@ -22,7 +23,9 @@ export async function listDashboardCategories(
   const rows = check(
     await supabase
       .from('categories')
-      .select('id, name, slug, is_active, product_categories(count)')
+      .select(
+        'id, name, slug, is_active, show_in_menu, product_categories(count)',
+      )
       .eq('tenant_id', tenantId)
       .order('position')
       .order('name'),
@@ -33,6 +36,7 @@ export async function listDashboardCategories(
     name: row.name,
     slug: row.slug,
     isActive: row.is_active,
+    showInMenu: row.show_in_menu,
     productCount: row.product_categories[0]?.count ?? 0,
   }));
 }

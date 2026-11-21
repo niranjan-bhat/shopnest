@@ -14,6 +14,8 @@ export type CategorySummary = {
   id: string;
   slug: string;
   name: string;
+  /** Listed in the store's top menu (header and phone menu). */
+  inMenu: boolean;
   image: MediaImage | null;
 };
 

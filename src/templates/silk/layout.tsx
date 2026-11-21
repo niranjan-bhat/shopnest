@@ -6,11 +6,14 @@ import { StoreImage } from '@/components/storefront/store-image';
 import type { StoreContext, StoreLayoutProps } from '../contract';
 import { MobileNav } from './mobile-nav';
 
+/** The top menu: only categories the merchant put in it, in their order. */
 function navItems(store: StoreContext) {
-  return store.categories.map((c) => ({
-    href: storeHref(store.basePath, storePaths.category(c.slug)),
-    label: c.name,
-  }));
+  return store.categories
+    .filter((c) => c.inMenu)
+    .map((c) => ({
+      href: storeHref(store.basePath, storePaths.category(c.slug)),
+      label: c.name,
+    }));
 }
 
 function Wordmark({ store }: { store: StoreContext }) {

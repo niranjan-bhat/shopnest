@@ -107,6 +107,7 @@ export function toCategory(row: Tables<'categories'>): CategorySummary {
     id: row.id,
     slug: row.slug,
     name: row.name,
+    inMenu: row.show_in_menu,
     image: row.image_key
       ? { key: row.image_key, alt: row.name, width: 800, height: 800 }
       : null,

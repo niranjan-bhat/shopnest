@@ -59,6 +59,7 @@ export async function saveCategory(
     name: parsed.data.name,
     slug,
     is_active: parsed.data.isActive,
+    show_in_menu: parsed.data.showInMenu,
   };
 
   const supabase = await createServerSupabase();

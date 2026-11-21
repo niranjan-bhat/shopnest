@@ -66,10 +66,17 @@ test('a merchant builds, reorders, hides and deletes categories', async ({
   await page.keyboard.press('Space');
   // "Picked up Linen…" is replaced at once by its starting position.
   await expect(announcer).toContainText('Linen is at position 3 of 3.');
-  await page.keyboard.press('ArrowUp');
-  await expect(announcer).toContainText('Linen is at position 2 of 3.');
-  await page.keyboard.press('ArrowUp');
-  await expect(announcer).toContainText('Linen is at position 1 of 3.');
+  // dnd-kit ignores a key pressed in the first moments of a drag, before it
+  // has measured the rows (faster than any person types). Press again only
+  // if the position has not changed.
+  const moveUpTo = (position: string) =>
+    expect(async () => {
+      const text = (await announcer.textContent()) ?? '';
+      if (!text.includes(position)) await page.keyboard.press('ArrowUp');
+      await expect(announcer).toContainText(position, { timeout: 1_000 });
+    }).toPass({ timeout: 10_000 });
+  await moveUpTo('Linen is at position 2 of 3.');
+  await moveUpTo('Linen is at position 1 of 3.');
   await page.keyboard.press('Space');
   await expect(announcer).toContainText('Linen dropped at position 1 of 3.');
   await expect(rows(page)).toHaveText([/^Linen/, /^Silk Sarees/, /^Cotton/]);
@@ -83,6 +90,10 @@ test('a merchant builds, reorders, hides and deletes categories', async ({
   const edit = page.getByRole('dialog', { name: 'Edit category' });
   await edit.getByLabel('Name').fill('Silk');
   await edit.getByLabel('URL').fill('silk');
+  // New categories start out of the top menu; put Silk in it.
+  const menu = edit.getByRole('switch', { name: 'Show in top menu' });
+  await expect(menu).not.toBeChecked();
+  await menu.click();
   await edit.getByRole('button', { name: 'Save' }).click();
   await expect(edit).toBeHidden();
 
@@ -90,6 +101,8 @@ test('a merchant builds, reorders, hides and deletes categories', async ({
   await page.reload();
   await expect(rows(page)).toHaveText([/^Linen/, /^Silk/, /^Cotton.*Hidden/]);
   await expect(rows(page).nth(1)).toContainText('/c/silk');
+  await expect(rows(page).nth(1)).toContainText('In menu');
+  await expect(rows(page).nth(0)).not.toContainText('In menu');
 
   // The storefront follows: Silk is live, hidden Cotton is not.
   const storefront = await page.context().newPage();
@@ -97,6 +110,11 @@ test('a merchant builds, reorders, hides and deletes categories', async ({
   await expect(
     storefront.getByRole('heading', { level: 1, name: 'Silk' }),
   ).toBeVisible();
+  // Only Silk is in the top menu (present on every screen size, hidden on
+  // small ones, so count the links rather than check visibility).
+  await expect(
+    storefront.locator('header > nav[aria-label="Categories"] a'),
+  ).toHaveText(['Silk']);
   // Streamed pages cannot change their status code, so check the page text
   // (as storefront.spec.ts does).
   await storefront.goto(storeUrl(shop.slug, '/c/cotton'));

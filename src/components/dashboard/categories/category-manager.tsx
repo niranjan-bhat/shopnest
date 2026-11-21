@@ -262,7 +262,11 @@ function CategoryRow({
       <div className="min-w-0 flex-1">
         <p className="flex items-center gap-2 font-medium">
           <span className="truncate">{category.name}</span>
-          {!category.isActive && <Badge variant="outline">Hidden</Badge>}
+          {category.isActive ? (
+            category.showInMenu && <Badge variant="secondary">In menu</Badge>
+          ) : (
+            <Badge variant="outline">Hidden</Badge>
+          )}
         </p>
         <p className="truncate text-sm text-muted-foreground">
           <span className="font-mono">/c/{category.slug}</span> · {count}{' '}

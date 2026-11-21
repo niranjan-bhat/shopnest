@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dialog';
 import {
   Field,
+  FieldContent,
   FieldDescription,
   FieldError,
   FieldGroup,
@@ -81,6 +82,8 @@ function CategoryForm({
       name: category?.name ?? '',
       slug: category?.slug ?? '',
       isActive: category?.isActive ?? true,
+      // New categories stay out of the top menu until the merchant adds them.
+      showInMenu: category?.showInMenu ?? false,
     },
   });
   const name = useWatch({ control, name: 'name' });
@@ -150,6 +153,28 @@ function CategoryForm({
             )}
           />
           <FieldLabel htmlFor="category-active">Show in store</FieldLabel>
+        </Field>
+        <Field orientation="horizontal">
+          <Controller
+            control={control}
+            name="showInMenu"
+            render={({ field }) => (
+              <Switch
+                id="category-menu"
+                aria-label="Show in top menu"
+                aria-describedby="category-menu-help"
+                checked={field.value}
+                onCheckedChange={field.onChange}
+              />
+            )}
+          />
+          <FieldContent>
+            <FieldLabel htmlFor="category-menu">Show in top menu</FieldLabel>
+            <FieldDescription id="category-menu-help">
+              Lists it in your store&apos;s header menu. Keep the menu to your
+              main collections.
+            </FieldDescription>
+          </FieldContent>
         </Field>
       </FieldGroup>
       <DialogFooter className="mt-6">
