@@ -6,16 +6,67 @@ import { app, MAILPIT_URL } from './urls';
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
+/** Service-role client for test setup (bypasses RLS). */
+function adminDb() {
+  if (!SUPABASE_URL || !SERVICE_ROLE_KEY)
+    throw new Error('Supabase env missing');
+  return createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+}
+
+export type TestStore = { id: string; slug: string; name: string };
+
+/**
+ * A live store of its own for a test that changes catalog data, so it never
+ * disturbs the seeded demo stores other tests read. It copies the saree
+ * demo's published theme and lives on <slug>.localhost. Delete it with
+ * deleteStore when the test ends.
+ */
+export async function createStore(testInfo: TestInfo): Promise<TestStore> {
+  const db = adminDb();
+  const slug = `e2e-${testInfo.project.name}-${Date.now()}-${Math.floor(Math.random() * 1e4)}`;
+  const name = `Test store ${slug.slice(-8)}`;
+  const { data: tenant, error } = await db
+    .from('tenants')
+    .insert({ slug, name, status: 'active', whatsapp_number: '+919800000000' })
+    .select('id')
+    .single();
+  if (error) throw error;
+  const { error: domainError } = await db.from('tenant_domains').insert({
+    tenant_id: tenant.id,
+    hostname: `${slug}.localhost`,
+    kind: 'subdomain',
+    is_primary: true,
+  });
+  if (domainError) throw domainError;
+  const { data: demo, error: demoError } = await db
+    .from('tenant_themes')
+    .select('template_key, published, tenants!inner(slug)')
+    .eq('tenants.slug', 'saree-demo')
+    .single();
+  if (demoError) throw demoError;
+  const { error: themeError } = await db.from('tenant_themes').insert({
+    tenant_id: tenant.id,
+    template_key: demo.template_key,
+    draft: demo.published,
+    published: demo.published,
+  });
+  if (themeError) throw themeError;
+  return { id: tenant.id, slug, name };
+}
+
+export async function deleteStore(store: TestStore) {
+  const { error } = await adminDb().from('tenants').delete().eq('id', store.id);
+  if (error) throw error;
+}
+
 /** Test setup only: what a super admin will do through the UI in Phase 5. */
 export async function grantAccess(
   email: string,
   access: { store?: string; superAdmin?: boolean },
 ) {
-  if (!SUPABASE_URL || !SERVICE_ROLE_KEY)
-    throw new Error('Supabase env missing');
-  const db = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
+  const db = adminDb();
   const { data, error } = await db.auth.admin.listUsers({ perPage: 1000 });
   if (error) throw error;
   const user = data.users.find((u) => u.email === email);
