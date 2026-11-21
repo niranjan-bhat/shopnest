@@ -9,6 +9,7 @@ import {
 import { toStringRecord } from './mappers';
 import {
   emptyProductForm,
+  PRODUCT_PAGE_SIZE,
   type ProductFormValues,
   type ProductStatus,
 } from './product-schema';
@@ -66,6 +67,14 @@ export type ProductListFilter = {
   status: ProductStatus | 'all';
   /** Matches anywhere in the name, ignoring case. */
   search: string;
+  /** 1-based. */
+  page: number;
+};
+
+export type ProductPage = {
+  products: DashboardProduct[];
+  /** Products matching the filter, across all pages. */
+  total: number;
 };
 
 export type DashboardProduct = {
@@ -90,13 +99,20 @@ export function likePattern(search: string): string {
   return `%${search.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
 }
 
-const PRODUCT_LIST_LIMIT = 500;
+/** PostgREST's answer to a page past the end ("range not satisfiable"). */
+const PAST_LAST_PAGE = 'PGRST103';
 
+/**
+ * One page of the store's products (most recently changed first) and how
+ * many match in total. A page past the end comes back empty, with the total,
+ * so the list can link back to the last page.
+ */
 export async function listDashboardProducts(
   tenantId: string,
   filter: ProductListFilter,
-): Promise<DashboardProduct[]> {
+): Promise<ProductPage> {
   const supabase = await createServerSupabase();
+  const from = (filter.page - 1) * PRODUCT_PAGE_SIZE;
   let query = supabase
     .from('products')
     .select(
@@ -104,17 +120,35 @@ export async function listDashboardProducts(
        product_variants(stock_qty, track_inventory, price_paise),
        product_images(r2_key, alt, width, height, position),
        product_categories(categories(name))`,
+      { count: 'exact' },
     )
     .eq('tenant_id', tenantId)
     .order('updated_at', { ascending: false })
+    // A tiebreaker, so pages never repeat or skip rows saved together.
+    .order('id')
     .order('position', { referencedTable: 'product_images' })
     .limit(1, { referencedTable: 'product_images' })
-    .limit(PRODUCT_LIST_LIMIT);
+    .range(from, from + PRODUCT_PAGE_SIZE - 1);
   if (filter.status !== 'all') query = query.eq('status', filter.status);
   if (filter.search) query = query.ilike('name', likePattern(filter.search));
-  const rows = check(await query, 'products');
+  const result = await query;
 
-  return rows.map((row) => {
+  if (result.error?.code === PAST_LAST_PAGE) {
+    let countQuery = supabase
+      .from('products')
+      .select('id', { count: 'exact', head: true })
+      .eq('tenant_id', tenantId);
+    if (filter.status !== 'all') {
+      countQuery = countQuery.eq('status', filter.status);
+    }
+    if (filter.search) {
+      countQuery = countQuery.ilike('name', likePattern(filter.search));
+    }
+    return { products: [], total: countOf(await countQuery, 'products') };
+  }
+  const rows = check(result, 'products');
+
+  const products = rows.map((row) => {
     const variants = row.product_variants;
     const prices =
       row.price_mode === 'on_request'
@@ -152,25 +186,49 @@ export async function listDashboardProducts(
         .filter((name): name is string => Boolean(name)),
     };
   });
+  return { products, total: result.count ?? products.length };
 }
 
-/** How many products each status tab holds. */
+type CountResult = {
+  count: number | null;
+  error: { message: string } | null;
+};
+
+function countOf(result: CountResult, what: string): number {
+  if (result.error) {
+    throw new Error(
+      `Supabase query failed (${what}): ${result.error.message}`,
+      { cause: result.error },
+    );
+  }
+  return result.count ?? 0;
+}
+
+/** How many products each status tab holds (counted by the database). */
 export async function countDashboardProducts(
   tenantId: string,
 ): Promise<ProductCounts> {
   const supabase = await createServerSupabase();
-  const rows = check(
-    await supabase.from('products').select('status').eq('tenant_id', tenantId),
-    'products',
-  );
-  const counts: ProductCounts = {
-    all: rows.length,
-    draft: 0,
-    active: 0,
-    archived: 0,
+  const count = (status?: ProductStatus) => {
+    let query = supabase
+      .from('products')
+      .select('id', { count: 'exact', head: true })
+      .eq('tenant_id', tenantId);
+    if (status) query = query.eq('status', status);
+    return query;
   };
-  for (const row of rows) counts[row.status] += 1;
-  return counts;
+  const [all, draft, active, archived] = await Promise.all([
+    count(),
+    count('draft'),
+    count('active'),
+    count('archived'),
+  ]);
+  return {
+    all: countOf(all, 'products'),
+    draft: countOf(draft, 'products'),
+    active: countOf(active, 'products'),
+    archived: countOf(archived, 'products'),
+  };
 }
 
 export type ProductForEdit = {

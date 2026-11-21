@@ -17,20 +17,25 @@ import { optionKey, type VariantDraft } from './variant-builder';
 export const PRODUCT_STATUSES = ['draft', 'active', 'archived'] as const;
 export type ProductStatus = (typeof PRODUCT_STATUSES)[number];
 
+/** Products per page in the dashboard list. */
+export const PRODUCT_PAGE_SIZE = 25;
+
 const listFilterSchema = z.object({
   status: z.enum(['all', ...PRODUCT_STATUSES]).catch('all'),
   search: z.string().trim().max(100).catch(''),
+  page: z.coerce.number().int().min(1).max(10_000).catch(1),
 });
 
-/** The product list's ?status= and ?q=, with anything invalid ignored. */
+/** The product list's ?status=, ?q= and ?page=, ignoring anything invalid. */
 export function parseProductListFilter(
   params: Record<string, string | string[] | undefined>,
-): { status: ProductStatus | 'all'; search: string } {
+): { status: ProductStatus | 'all'; search: string; page: number } {
   const first = (value: string | string[] | undefined) =>
     Array.isArray(value) ? value[0] : value;
   return listFilterSchema.parse({
     status: first(params.status) ?? 'all',
     search: first(params.q) ?? '',
+    page: first(params.page) ?? 1,
   });
 }
 

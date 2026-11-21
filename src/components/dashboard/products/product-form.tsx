@@ -43,7 +43,7 @@ import {
   type ProductFormValues,
 } from '@/features/catalog/product-schema';
 import { slugify } from '@/lib/slug';
-import { STATUS_BADGE } from './product-list';
+import { STATUS_BADGE } from './status-badge';
 import { ProductDetailsFields } from './product-details-fields';
 import { ProductOptions } from './product-options';
 

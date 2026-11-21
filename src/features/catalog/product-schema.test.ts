@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   emptyProductForm,
+  parseProductListFilter,
   productFormSchema,
   toProductPayload,
   type ProductFormValues,
@@ -131,5 +132,25 @@ describe('toProductPayload', () => {
     expect(payload.price_paise).toBeNull();
     expect(payload.compare_at_paise).toBeNull();
     expect(payload.variants[0].price_paise).toBeNull();
+  });
+});
+
+describe('parseProductListFilter', () => {
+  it('reads status, search and page', () => {
+    expect(
+      parseProductListFilter({ status: 'draft', q: ' silk ', page: '3' }),
+    ).toEqual({ status: 'draft', search: 'silk', page: 3 });
+  });
+
+  it('falls back to the first page of everything', () => {
+    expect(parseProductListFilter({})).toEqual({
+      status: 'all',
+      search: '',
+      page: 1,
+    });
+    for (const page of ['0', '-2', '1.5', 'two', '99999']) {
+      expect(parseProductListFilter({ page }).page).toBe(1);
+    }
+    expect(parseProductListFilter({ status: 'deleted' }).status).toBe('all');
   });
 });

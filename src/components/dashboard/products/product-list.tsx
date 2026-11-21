@@ -1,5 +1,13 @@
 import { cn } from 'cn';
-import { ImageIcon, Package, Plus, Search, Star } from 'lucide-react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  ImageIcon,
+  Package,
+  Plus,
+  Search,
+  Star,
+} from 'lucide-react';
 import Link from 'next/link';
 import { EmptyState } from '@/components/dashboard/empty-state';
 import { PageHeader } from '@/components/dashboard/page-header';
@@ -11,8 +19,10 @@ import type {
   DashboardProduct,
   ProductCounts,
   ProductListFilter,
+  ProductPage,
 } from '@/features/catalog/dashboard';
-import type { ProductStatus } from '@/features/catalog/product-schema';
+import { PRODUCT_PAGE_SIZE } from '@/features/catalog/product-schema';
+import { STATUS_BADGE } from './status-badge';
 import { formatINR } from '@/lib/money';
 
 const TABS: { status: ProductListFilter['status']; label: string }[] = [
@@ -22,19 +32,14 @@ const TABS: { status: ProductListFilter['status']; label: string }[] = [
   { status: 'archived', label: 'Archived' },
 ];
 
-export const STATUS_BADGE: Record<
-  ProductStatus,
-  { label: string; variant: 'default' | 'secondary' | 'outline' }
-> = {
-  active: { label: 'Active', variant: 'default' },
-  draft: { label: 'Draft', variant: 'secondary' },
-  archived: { label: 'Archived', variant: 'outline' },
-};
-
-function listHref(filter: ProductListFilter): string {
+/** The list's URL; a new tab or search starts again at page 1. */
+function listHref(
+  filter: Omit<ProductListFilter, 'page'> & { page?: number },
+): string {
   const params = new URLSearchParams();
   if (filter.status !== 'all') params.set('status', filter.status);
   if (filter.search) params.set('q', filter.search);
+  if (filter.page && filter.page > 1) params.set('page', String(filter.page));
   const query = params.toString();
   return `/dashboard/products${query ? `?${query}` : ''}`;
 }
@@ -74,13 +79,13 @@ const addButton = (
   </Link>
 );
 
-/** Products page: status tabs, search and the product rows. */
+/** Products page: status tabs, search, the product rows and page links. */
 export function ProductList({
-  products,
+  page: { products, total },
   counts,
   filter,
 }: {
-  products: DashboardProduct[];
+  page: ProductPage;
   counts: ProductCounts;
   filter: ProductListFilter;
 }) {
@@ -120,7 +125,7 @@ export function ProductList({
             return (
               <Link
                 key={tab.status}
-                href={listHref({ ...filter, status: tab.status })}
+                href={listHref({ search: filter.search, status: tab.status })}
                 aria-current={active ? 'page' : undefined}
                 className={cn(
                   'rounded-lg px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors',
@@ -156,7 +161,20 @@ export function ProductList({
         </form>
       </div>
 
-      {products.length === 0 ? (
+      {products.length === 0 && total > 0 ? (
+        <p className="rounded-xl border border-dashed px-6 py-10 text-center text-muted-foreground">
+          This page is empty.{' '}
+          <Link
+            href={listHref({
+              ...filter,
+              page: Math.ceil(total / PRODUCT_PAGE_SIZE),
+            })}
+            className="underline underline-offset-4"
+          >
+            Go to the last page
+          </Link>
+        </p>
+      ) : products.length === 0 ? (
         <p className="rounded-xl border border-dashed px-6 py-10 text-center text-muted-foreground">
           No products match.{' '}
           <Link
@@ -206,6 +224,60 @@ export function ProductList({
           })}
         </ul>
       )}
+
+      <Pagination filter={filter} total={total} shown={products.length} />
     </div>
+  );
+}
+
+function Pagination({
+  filter,
+  total,
+  shown,
+}: {
+  filter: ProductListFilter;
+  total: number;
+  shown: number;
+}) {
+  const pages = Math.ceil(total / PRODUCT_PAGE_SIZE);
+  if (pages <= 1 || shown === 0) return null;
+  const first = (filter.page - 1) * PRODUCT_PAGE_SIZE + 1;
+  const last = first + shown - 1;
+  const link = (page: number, label: string, icon: 'prev' | 'next') => {
+    const disabled = page < 1 || page > pages;
+    const content = (
+      <>
+        {icon === 'prev' && <ChevronLeft aria-hidden />}
+        {label}
+        {icon === 'next' && <ChevronRight aria-hidden />}
+      </>
+    );
+    const className = buttonVariants({ variant: 'outline', size: 'sm' });
+    return disabled ? (
+      <span aria-disabled="true" className={cn(className, 'opacity-50')}>
+        {content}
+      </span>
+    ) : (
+      <Link href={listHref({ ...filter, page })} className={className}>
+        {content}
+      </Link>
+    );
+  };
+  return (
+    <nav
+      aria-label="Pages"
+      className="flex flex-wrap items-center justify-between gap-3"
+    >
+      <p className="text-sm text-muted-foreground" data-testid="page-summary">
+        Showing {first}–{last} of {total}
+      </p>
+      <div className="flex items-center gap-2">
+        {link(filter.page - 1, 'Previous', 'prev')}
+        <span className="text-sm text-muted-foreground">
+          Page {filter.page} of {pages}
+        </span>
+        {link(filter.page + 1, 'Next', 'next')}
+      </div>
+    </nav>
   );
 }

@@ -16,11 +16,11 @@ type Props = PageProps<'/dashboard/products'>;
 async function Products({ searchParams }: Pick<Props, 'searchParams'>) {
   const { store } = await requireStore('/dashboard/products');
   const filter = parseProductListFilter(await searchParams);
-  const [products, counts] = await Promise.all([
+  const [page, counts] = await Promise.all([
     listDashboardProducts(store.id, filter),
     countDashboardProducts(store.id),
   ]);
-  return <ProductList products={products} counts={counts} filter={filter} />;
+  return <ProductList page={page} counts={counts} filter={filter} />;
 }
 
 function ProductsSkeleton() {
