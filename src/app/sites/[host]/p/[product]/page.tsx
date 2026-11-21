@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { atLeastOne } from '@/lib/static-params';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { StorePageFallback } from '@/components/storefront/fallbacks';
@@ -16,9 +17,9 @@ export async function generateStaticParams({
   params: { host: string };
 }) {
   const store = await getStoreByHost(params.host);
-  if (!store) return [];
+  if (!store) return atLeastOne('product', []);
   const { products } = await listStorePaths(store.id);
-  return products.map((product) => ({ product }));
+  return atLeastOne('product', products);
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

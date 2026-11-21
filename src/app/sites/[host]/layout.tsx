@@ -5,11 +5,12 @@ import { StoreShellFallback } from '@/components/storefront/fallbacks';
 import { StoreRoot } from '@/components/storefront/store-root';
 import { loadStorefront } from '@/features/storefront/context';
 import { listStoreHosts } from '@/features/tenants/queries';
+import { atLeastOne } from '@/lib/static-params';
 import { getTemplate } from '@/templates/registry';
 
 export async function generateStaticParams() {
   const hosts = await listStoreHosts();
-  return hosts.map((host) => ({ host }));
+  return atLeastOne('host', hosts);
 }
 
 export async function generateMetadata({
