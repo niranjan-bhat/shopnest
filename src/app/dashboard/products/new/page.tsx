@@ -17,6 +17,11 @@ async function NewProduct() {
       initial={emptyProductForm()}
       categories={categories}
       liveUrl={null}
+      photos={
+        <p className="text-sm text-muted-foreground">
+          Save the product first, then add its photos here.
+        </p>
+      }
     />
   );
 }

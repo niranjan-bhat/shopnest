@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { ProductForm } from '@/components/dashboard/products/product-form';
+import { ProductPhotos } from '@/components/dashboard/products/product-photos';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   getProductForEdit,
@@ -9,6 +10,7 @@ import {
 } from '@/features/catalog/dashboard';
 import { idSchema } from '@/features/catalog/schemas';
 import { requireStore } from '@/features/tenants/access';
+import { isR2Configured } from '@/lib/r2';
 
 export const metadata: Metadata = { title: 'Edit product' };
 
@@ -37,6 +39,14 @@ async function EditProduct({ params }: Pick<Props, 'params'>) {
         product.status === 'active' && store.url
           ? `${store.url}/p/${product.slug}`
           : null
+      }
+      photos={
+        <ProductPhotos
+          productId={product.id}
+          productName={product.values.name}
+          images={product.images}
+          uploadsEnabled={isR2Configured()}
+        />
       }
     />
   );

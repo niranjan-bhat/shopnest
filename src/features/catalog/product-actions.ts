@@ -2,6 +2,7 @@
 
 import { requireStoreForAction } from '@/features/tenants/access';
 import type { ActionResult } from '@/lib/action-result';
+import { deleteObjects, isR2Configured } from '@/lib/r2';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { catalogChanged } from './cache';
 import {
@@ -82,6 +83,14 @@ export async function deleteProduct(id: string): Promise<ActionResult> {
   const productId = idSchema.safeParse(id);
   if (!productId.success) return { ok: false, error: GONE };
   const supabase = await createServerSupabase();
+  // The photo rows go with the product (cascade); note their files first.
+  const images = await supabase
+    .from('product_images')
+    .select('r2_key')
+    .eq('tenant_id', store.id)
+    .eq('product_id', productId.data);
+  if (images.error) throw new Error(images.error.message);
+
   const { data, error } = await supabase
     .from('products')
     .delete()
@@ -91,5 +100,12 @@ export async function deleteProduct(id: string): Promise<ActionResult> {
   if (error) throw new Error(`Deleting product failed: ${error.message}`);
   if ((data ?? []).length === 0) return { ok: false, error: GONE };
   catalogChanged(store.id);
+
+  const keys = images.data.map((row) => row.r2_key);
+  if (keys.length > 0 && isR2Configured()) {
+    await deleteObjects(keys).catch((e: unknown) =>
+      console.error('Product photos not deleted from R2', e),
+    );
+  }
   return { ok: true };
 }

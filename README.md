@@ -56,3 +56,4 @@ mix the hosted URL with your local keys.
 | `npm run db:types`           | Regenerate `src/types/database.ts` after a migration   |
 | `npm run db:seed`            | Regenerate `supabase/seed.sql` from the demo fixtures  |
 | `npm run mock:media`         | Rebuild demo images in `public/mock-media` from photos |
+| `npm run media:upload-demo`  | Copy the demo images to the R2 bucket in `.env.local`  |
