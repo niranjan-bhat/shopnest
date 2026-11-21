@@ -76,6 +76,16 @@ export function parseRupees(input: string): Paise | null {
   return Number.isSafeInteger(paise) ? paise : null;
 }
 
+/**
+ * Paise as a plain rupee amount for a form field, the inverse of
+ * parseRupees: 249900 → "2499", 249950 → "2499.50". No symbol or grouping.
+ */
+export function toRupeesInput(paise: Paise): string {
+  assertPaise(paise);
+  const decimal = toDecimalString(paise);
+  return paise % PAISE_PER_RUPEE === 0 ? decimal.slice(0, -3) : decimal;
+}
+
 /** Unit price × quantity, rejecting non-integer quantities. */
 export function lineTotal(unitPaise: Paise, qty: number): Paise {
   assertPaise(unitPaise, 'unit price');

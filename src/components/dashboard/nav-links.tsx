@@ -33,7 +33,8 @@ const NAV: NavItem[] = [
   { href: '/dashboard/settings', label: 'Settings', icon: Settings },
 ];
 
-function isActive(pathname: string, item: NavItem): boolean {
+function isActive(pathname: string | null, item: NavItem): boolean {
+  if (pathname === null) return false;
   if (item.exact) return pathname === item.href;
   return pathname === item.href || pathname.startsWith(`${item.href}/`);
 }
@@ -41,9 +42,24 @@ function isActive(pathname: string, item: NavItem): boolean {
 const itemClass =
   'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors';
 
-/** The dashboard's main navigation, used in the sidebar and the phone menu. */
+/**
+ * The dashboard's main navigation, used in the sidebar and the phone menu.
+ * It reads the URL to highlight the current section; in a server-rendered
+ * layout, wrap it in <Suspense fallback={<NavList pathname={null} />}>
+ * (Cache Components requires that on routes with params).
+ */
 export function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
-  const pathname = usePathname();
+  return <NavList pathname={usePathname()} onNavigate={onNavigate} />;
+}
+
+/** The links themselves; `pathname` null highlights nothing. */
+export function NavList({
+  pathname,
+  onNavigate,
+}: {
+  pathname: string | null;
+  onNavigate?: () => void;
+}) {
   return (
     <nav aria-label="Dashboard">
       <ul className="grid gap-1">

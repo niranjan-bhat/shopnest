@@ -3,7 +3,7 @@ import { Suspense } from 'react';
 import { Brand } from '@/components/dashboard/brand';
 import { DashboardHeader } from '@/components/dashboard/dashboard-header';
 import { MobileNav } from '@/components/dashboard/mobile-nav';
-import { NavLinks } from '@/components/dashboard/nav-links';
+import { NavLinks, NavList } from '@/components/dashboard/nav-links';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Toaster } from '@/components/ui/sonner';
 
@@ -28,7 +28,11 @@ export default function DashboardLayout({
           <Brand />
         </div>
         <div className="flex-1 overflow-y-auto p-3">
-          <NavLinks />
+          {/* The highlight depends on the URL, which is only known per
+              request on routes like /dashboard/products/[id]. */}
+          <Suspense fallback={<NavList pathname={null} />}>
+            <NavLinks />
+          </Suspense>
         </div>
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">

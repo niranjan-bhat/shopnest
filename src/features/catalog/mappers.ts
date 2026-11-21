@@ -1,5 +1,10 @@
 import { z } from 'zod';
 import type { Json, Tables } from '@/types/database';
+import {
+  CLOTHING_ATTRIBUTE_KEYS,
+  CLOTHING_ATTRIBUTES,
+  SIZE_ORDER,
+} from './attributes';
 import type {
   Banner,
   CatalogItem,
@@ -11,8 +16,6 @@ import type {
 
 /** At or below this many units a variant counts as low stock. */
 export const LOW_STOCK_THRESHOLD = 3;
-
-const SIZE_ORDER = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'Free size'];
 
 const scalar = z.union([z.string(), z.number(), z.boolean()]);
 const stringRecord = z
@@ -29,33 +32,15 @@ export function toStringRecord(json: Json): Record<string, string> {
   return stringRecord.parse(json);
 }
 
-const ATTRIBUTE_LABELS: Record<string, string> = {
-  fabric: 'Fabric',
-  zari: 'Zari',
-  colour: 'Colour',
-  length: 'Length',
-  blouse: 'Blouse piece',
-  occasion: 'Occasion',
-  fit: 'Fit',
-  includes: 'Includes',
-  care: 'Care',
-};
+const ATTRIBUTE_LABELS: Record<string, string> = Object.fromEntries(
+  CLOTHING_ATTRIBUTES.map((a) => [a.key, a.label]),
+);
 
 // jsonb does not keep object key order (Postgres stores shorter keys first),
 // so display order is decided here. Unknown keys follow, alphabetically.
 
 /** Order of product details on the product page. */
-const ATTRIBUTE_ORDER = [
-  'fabric',
-  'zari',
-  'colour',
-  'fit',
-  'length',
-  'blouse',
-  'includes',
-  'occasion',
-  'care',
-] as const;
+const ATTRIBUTE_ORDER = CLOTHING_ATTRIBUTE_KEYS;
 
 /** Order of variant options in pickers and cart labels ("Rust · M"). */
 const OPTION_ORDER = ['colour', 'size'] as const;
@@ -241,5 +226,9 @@ export function toProductDetail(rows: ProductRows): ProductDetail {
     variants,
     optionNames,
     categories: rows.categories.map((c) => ({ slug: c.slug, name: c.name })),
+    seo: {
+      title: toStringRecord(rows.product.seo).title || null,
+      description: toStringRecord(rows.product.seo).description || null,
+    },
   };
 }

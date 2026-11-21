@@ -29,7 +29,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!found) return {};
   // Open Graph images need an absolute store URL; they arrive with the
   // Phase 6 SEO work once stores have real hostnames.
-  return { title: found.name, description: found.description ?? undefined };
+  return {
+    title: found.seo.title ?? found.name,
+    description: found.seo.description ?? found.description ?? undefined,
+  };
 }
 
 async function Product({ params }: Pick<Props, 'params'>) {

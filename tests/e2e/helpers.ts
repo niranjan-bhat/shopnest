@@ -56,6 +56,41 @@ export async function createStore(testInfo: TestInfo): Promise<TestStore> {
   return { id: tenant.id, slug, name };
 }
 
+/** Adds a visible menu category to a test store. */
+export async function createCategory(
+  store: TestStore,
+  name: string,
+  slug: string,
+) {
+  const { error } = await adminDb().from('categories').insert({
+    tenant_id: store.id,
+    name,
+    slug,
+    show_in_menu: true,
+  });
+  if (error) throw error;
+}
+
+/** Variant ids of a store's product, by option label (e.g. "Rust · S"). */
+export async function variantIds(
+  store: TestStore,
+  productSlug: string,
+): Promise<Record<string, string>> {
+  const { data, error } = await adminDb()
+    .from('products')
+    .select('product_variants(id, options)')
+    .eq('tenant_id', store.id)
+    .eq('slug', productSlug)
+    .single();
+  if (error) throw error;
+  return Object.fromEntries(
+    data.product_variants.map((v) => {
+      const options = v.options as Record<string, string>;
+      return [[options.colour, options.size].filter(Boolean).join(' · '), v.id];
+    }),
+  );
+}
+
 export async function deleteStore(store: TestStore) {
   const { error } = await adminDb().from('tenants').delete().eq('id', store.id);
   if (error) throw error;

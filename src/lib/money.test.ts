@@ -4,6 +4,7 @@ import {
   formatINR,
   lineTotal,
   parseRupees,
+  toRupeesInput,
   sumPaise,
 } from './money';
 
@@ -46,6 +47,18 @@ describe('parseRupees', () => {
       expect(parseRupees(input)).toBeNull();
     },
   );
+});
+
+describe('toRupeesInput', () => {
+  it.each([
+    [249900, '2499'],
+    [249950, '2499.50'],
+    [5, '0.05'],
+    [0, '0'],
+  ])('%i paise → %s', (paise, text) => {
+    expect(toRupeesInput(paise)).toBe(text);
+    expect(parseRupees(text)).toBe(paise);
+  });
 });
 
 describe('arithmetic', () => {

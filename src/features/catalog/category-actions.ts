@@ -1,10 +1,10 @@
 'use server';
 
-import { refresh, updateTag } from 'next/cache';
+import { refresh } from 'next/cache';
 import { requireStoreForAction } from '@/features/tenants/access';
 import type { ActionResult } from '@/lib/action-result';
 import { createServerSupabase } from '@/lib/supabase/server';
-import { catalogTag } from './queries';
+import { catalogChanged } from './cache';
 import {
   categoryFormSchema,
   categoryOrderSchema,
@@ -19,11 +19,6 @@ import {
 // the store's cached catalog so the storefront shows the change.
 
 const UNIQUE_VIOLATION = '23505';
-
-function catalogChanged(tenantId: string) {
-  updateTag(catalogTag(tenantId));
-  refresh();
-}
 
 /** Creates a category (id null) or updates one. */
 export async function saveCategory(

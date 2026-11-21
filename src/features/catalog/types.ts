@@ -69,4 +69,6 @@ export type ProductDetail = ProductCardData & {
   /** Option names in display order, e.g. ["colour", "size"]. */
   optionNames: string[];
   categories: { slug: string; name: string }[];
+  /** Search-engine title and description set by the merchant, if any. */
+  seo: { title: string | null; description: string | null };
 };

@@ -410,6 +410,9 @@ isOneToOne: true
                            },
 "reorder_categories":
 { Args: { "ordered_ids": (string)[],"tid": string }; Returns: undefined
+                           },
+"save_product":
+{ Args: { "pid"?: string,"product": Json,"tid": string }; Returns: string
                            }
           }
           Enums: {
