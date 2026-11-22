@@ -268,12 +268,12 @@ Eight phases, each ending in something demoable; MVP is Phases 0–5. I've reord
 
 ### Phase 3 — Merchant dashboard
 
-- [ ] Dashboard shell, tenant guard, navigation, empty states
-- [ ] Categories CRUD with drag-to-reorder
-- [ ] Products CRUD: details, attributes, variants, pricing, stock, status, with a clothing attribute preset (fabric, length, blouse piece, size, colour, care)
-- [ ] Image upload via presigned R2 URLs, reorder, alt text, delete
-- [ ] Storefront settings: logo, colours, fonts, banners, section order, draft/preview/publish
-- [ ] Store settings: name, WhatsApp number, address, policies pages
+- [x] Dashboard shell, tenant guard, navigation, empty states
+- [x] Categories CRUD with drag-to-reorder
+- [x] Products CRUD: details, attributes, variants, pricing, stock, status, with a clothing attribute preset (fabric, length, blouse piece, size, colour, care)
+- [x] Image upload via presigned R2 URLs, reorder, alt text, delete
+- [x] Storefront settings: logo, colours, fonts, banners, section order, draft/preview/publish
+- [x] Store settings: name, WhatsApp number, address, policies pages
 
 **Exit:** a merchant can build a full catalog and rebrand the store without developer help.
 
