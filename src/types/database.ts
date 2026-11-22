@@ -408,6 +408,9 @@ isOneToOne: true
 "is_tenant_member":
 { Args: { "tid": string }; Returns: boolean
                            },
+"reorder_banners":
+{ Args: { "ordered_ids": (string)[],"tid": string }; Returns: undefined
+                           },
 "reorder_categories":
 { Args: { "ordered_ids": (string)[],"tid": string }; Returns: undefined
                            },

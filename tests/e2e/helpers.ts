@@ -56,6 +56,26 @@ export async function createStore(testInfo: TestInfo): Promise<TestStore> {
   return { id: tenant.id, slug, name };
 }
 
+/**
+ * Replaces a test store's home sections (draft and live). Call it before the
+ * store's pages are first visited: they are cached afterwards.
+ */
+export async function setHomeSections(store: TestStore, sections: unknown[]) {
+  const db = adminDb();
+  const { data, error } = await db
+    .from('tenant_themes')
+    .select('published')
+    .eq('tenant_id', store.id)
+    .single();
+  if (error) throw error;
+  const theme = { ...(data.published as object), sections };
+  const { error: updateError } = await db
+    .from('tenant_themes')
+    .update({ draft: theme, published: theme })
+    .eq('tenant_id', store.id);
+  if (updateError) throw updateError;
+}
+
 /** Adds a visible menu category to a test store. */
 export async function createCategory(
   store: TestStore,
