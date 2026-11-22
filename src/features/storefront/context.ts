@@ -33,6 +33,7 @@ export async function loadStorefront(host: string): Promise<Storefront | null> {
       slug: store.slug,
       name: store.name,
       whatsappNumber: store.whatsappNumber,
+      contact: store.contact,
       branding: store.theme.branding,
       announcement: store.theme.announcement ?? null,
       basePath: STORE_BASE_PATH,

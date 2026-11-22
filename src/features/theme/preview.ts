@@ -5,6 +5,7 @@ import {
   type ResolvedSection,
 } from '@/features/storefront/home';
 import type { StoreChoice } from '@/features/tenants/active-store';
+import { CONTACT_COLUMNS, toStoreContact } from '@/features/tenants/settings';
 import { check } from '@/lib/supabase/result';
 import { createServerSupabase } from '@/lib/supabase/server';
 import type { StoreContext, TemplateDefinition } from '@/templates/contract';
@@ -33,13 +34,13 @@ export async function loadThemePreview(
     getThemeEditor(store.id),
     supabase
       .from('tenants')
-      .select('whatsapp_number')
+      .select(`whatsapp_number, ${CONTACT_COLUMNS}`)
       .eq('id', store.id)
       .single(),
     listCategories(store.id),
   ]);
   if (!editor) return null;
-  const { whatsapp_number } = check(tenant, 'tenants');
+  const tenantRow = check(tenant, 'tenants');
   const theme = editor.draft;
   const template = getTemplate(theme.templateKey);
   const sections = await resolveHomeSections(
@@ -56,7 +57,8 @@ export async function loadThemePreview(
       id: store.id,
       slug: store.slug,
       name: store.name,
-      whatsappNumber: whatsapp_number,
+      whatsappNumber: tenantRow.whatsapp_number,
+      contact: toStoreContact(tenantRow),
       branding: theme.branding,
       announcement: theme.announcement ?? null,
       basePath: store.url ?? '',

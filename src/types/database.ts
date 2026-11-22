@@ -375,14 +375,14 @@ isOneToOne: true
                   ]
                 },"tenants": {
                   Row: {
-                    "business_type": string,"created_at": string,"currency": string,"id": string,"name": string,"slug": string,"status": Database["public"]['Enums']["tenant_status"],"updated_at": string,"whatsapp_number": string
+                    "address": Json | null,"business_type": string,"contact_email": string | null,"contact_phone": string | null,"created_at": string,"currency": string,"id": string,"name": string,"opening_hours": string | null,"slug": string,"status": Database["public"]['Enums']["tenant_status"],"updated_at": string,"whatsapp_number": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "business_type"?: string,"created_at"?: string,"currency"?: string,"id"?: string,"name": string,"slug": string,"status"?: Database["public"]['Enums']["tenant_status"],"updated_at"?: string,"whatsapp_number": string
+                    "address"?: Json | null,"business_type"?: string,"contact_email"?: string | null,"contact_phone"?: string | null,"created_at"?: string,"currency"?: string,"id"?: string,"name": string,"opening_hours"?: string | null,"slug": string,"status"?: Database["public"]['Enums']["tenant_status"],"updated_at"?: string,"whatsapp_number": string
                   }
                   Update: {
-                    "business_type"?: string,"created_at"?: string,"currency"?: string,"id"?: string,"name"?: string,"slug"?: string,"status"?: Database["public"]['Enums']["tenant_status"],"updated_at"?: string,"whatsapp_number"?: string
+                    "address"?: Json | null,"business_type"?: string,"contact_email"?: string | null,"contact_phone"?: string | null,"created_at"?: string,"currency"?: string,"id"?: string,"name"?: string,"opening_hours"?: string | null,"slug"?: string,"status"?: Database["public"]['Enums']["tenant_status"],"updated_at"?: string,"whatsapp_number"?: string
                   }
                   Relationships: [
                     

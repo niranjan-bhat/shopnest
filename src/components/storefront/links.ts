@@ -16,4 +16,5 @@ export const storePaths = {
   product: (slug: string) => `/p/${slug}`,
   cart: '/cart',
   checkout: '/checkout',
+  contact: '/contact',
 };

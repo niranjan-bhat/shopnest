@@ -5,6 +5,7 @@ import type {
   ProductPageData,
 } from '@/features/storefront/pages';
 import type { ResolvedSection } from '@/features/storefront/home';
+import type { StoreContact } from '@/features/tenants/settings';
 import type { Branding, SectionType } from '@/features/theme/schema';
 
 /**
@@ -16,6 +17,8 @@ export type StoreContext = {
   slug: string;
   name: string;
   whatsappNumber: string;
+  /** Address, phone, email and hours, where the merchant gave them. */
+  contact: StoreContact;
   branding: Branding;
   announcement: string | null;
   /**
@@ -48,4 +51,6 @@ export type TemplateDefinition = {
   ProductPage: ComponentType<ProductPageProps>;
   CartPage: ComponentType<StorePageProps>;
   CheckoutPage: ComponentType<StorePageProps>;
+  /** How to reach the store: address, hours, WhatsApp, phone, email. */
+  ContactPage: ComponentType<StorePageProps>;
 };

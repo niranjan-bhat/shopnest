@@ -47,6 +47,18 @@ export type FixtureStore = {
   hostname: string;
   whatsapp: string;
   businessType: string;
+  contact: {
+    email: string | null;
+    phone: string | null;
+    address: {
+      line1: string;
+      line2?: string;
+      city: string;
+      state: string;
+      pincode: string;
+    } | null;
+    openingHours: string | null;
+  };
   /** Stored as tenant_themes.published; validated by parseThemeConfig. */
   theme: Record<string, unknown> & {
     tokens: Record<string, unknown> & {
@@ -131,6 +143,18 @@ const sareeStore: FixtureStore = {
   hostname: 'saree-demo.localhost',
   whatsapp: '+910000000001',
   businessType: 'saree',
+  contact: {
+    email: 'hello@taraweaves.example',
+    phone: '044 2345 6789',
+    address: {
+      line1: '14 Sannathi Street',
+      line2: 'Near Kamakshi Amman Temple',
+      city: 'Kanchipuram',
+      state: 'Tamil Nadu',
+      pincode: '631502',
+    },
+    openingHours: 'Mon–Sat, 10 am – 8 pm · Sunday by appointment',
+  },
   theme: {
     templateKey: 'silk',
     tokens: {
@@ -565,6 +589,17 @@ const boutiqueStore: FixtureStore = {
   hostname: 'boutique-demo.localhost',
   whatsapp: '+910000000002',
   businessType: 'ethnic-wear',
+  contact: {
+    email: 'studio@nooratelier.example',
+    phone: null,
+    address: {
+      line1: 'C-12, Bapu Bazaar Lane',
+      city: 'Jaipur',
+      state: 'Rajasthan',
+      pincode: '302003',
+    },
+    openingHours: 'Tue–Sun, 11 am – 7 pm',
+  },
   theme: {
     templateKey: 'silk',
     tokens: {
