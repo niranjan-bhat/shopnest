@@ -6,9 +6,9 @@
 insert into public.templates (key, name) values
   ('silk', 'Silk');
 
-insert into public.tenants (id, slug, name, status, business_type, whatsapp_number, currency, created_at, updated_at) values
-  ('00000001-0000-4000-8000-000000000001', 'saree-demo', 'Tara Weaves', 'active', 'saree', '+910000000001', 'INR', '2026-08-17T10:00:00.000Z', '2026-08-17T10:00:00.000Z'),
-  ('00000002-0000-4000-8000-000000000001', 'boutique-demo', 'Noor Atelier', 'active', 'ethnic-wear', '+910000000002', 'INR', '2026-08-17T10:00:00.000Z', '2026-08-17T10:00:00.000Z');
+insert into public.tenants (id, slug, name, status, business_type, whatsapp_number, contact_email, contact_phone, address, opening_hours, currency, created_at, updated_at) values
+  ('00000001-0000-4000-8000-000000000001', 'saree-demo', 'Tara Weaves', 'active', 'saree', '+910000000001', 'hello@taraweaves.example', '044 2345 6789', '{"line1":"14 Sannathi Street","line2":"Near Kamakshi Amman Temple","city":"Kanchipuram","state":"Tamil Nadu","pincode":"631502"}'::jsonb, 'Mon–Sat, 10 am – 8 pm · Sunday by appointment', 'INR', '2026-08-17T10:00:00.000Z', '2026-08-17T10:00:00.000Z'),
+  ('00000002-0000-4000-8000-000000000001', 'boutique-demo', 'Noor Atelier', 'active', 'ethnic-wear', '+910000000002', 'studio@nooratelier.example', null, '{"line1":"C-12, Bapu Bazaar Lane","city":"Jaipur","state":"Rajasthan","pincode":"302003"}'::jsonb, 'Tue–Sun, 11 am – 7 pm', 'INR', '2026-08-17T10:00:00.000Z', '2026-08-17T10:00:00.000Z');
 
 insert into public.tenant_domains (id, tenant_id, hostname, kind, is_primary, verified_at, created_at) values
   ('00000001-0001-4000-8000-000000000001', '00000001-0000-4000-8000-000000000001', 'saree-demo.localhost', 'subdomain', true, '2026-08-17T10:00:00.000Z', '2026-08-17T10:00:00.000Z'),
@@ -38,6 +38,40 @@ insert into public.banners (id, tenant_id, image_key, heading, link, position, s
   ('00000002-0006-4000-8000-000000000001', '00000002-0000-4000-8000-000000000001', 'tenants/00000002-0000-4000-8000-000000000001/banners/00000002-0006-4000-8000-000000000001.webp', 'The Noor festive edit', '/c/kurta-sets', 0, null, null, '2026-10-16T10:00:00.000Z', '2026-10-16T10:00:00.000Z'),
   ('00000002-0006-4000-8000-000000000002', '00000002-0000-4000-8000-000000000001', 'tenants/00000002-0000-4000-8000-000000000001/banners/00000002-0006-4000-8000-000000000002.webp', 'Lehengas, made to twirl', '/c/lehengas', 1, null, null, '2026-10-16T10:00:00.000Z', '2026-10-16T10:00:00.000Z'),
   ('00000002-0006-4000-8000-000000000003', '00000002-0000-4000-8000-000000000001', 'tenants/00000002-0000-4000-8000-000000000001/banners/00000002-0006-4000-8000-000000000003.webp', 'Co-ords for every day', '/c/co-ords', 2, null, null, '2026-10-16T10:00:00.000Z', '2026-10-16T10:00:00.000Z');
+
+insert into public.store_pages (id, tenant_id, slug, title, body, is_published, created_at, updated_at) values
+  ('00000001-0007-4000-8000-000000000001', '00000001-0000-4000-8000-000000000001', 'about', 'About us', 'Tara Weaves began as a single loom in Kanchipuram. Today we work with forty weaving families, paying fair wages and keeping traditional techniques like korvai and temple borders alive.
+
+Every saree is checked by hand before it reaches you.', true, '2026-09-16T10:00:00.000Z', '2026-09-16T10:00:00.000Z'),
+  ('00000001-0007-4000-8000-000000000002', '00000001-0000-4000-8000-000000000001', 'shipping', 'Shipping', 'We deliver across India. Orders are confirmed with you on WhatsApp, and we share tracking details once your parcel is on its way.
+
+- Dispatch: within 2–3 working days of payment.
+- Delivery: usually 4–7 working days after dispatch.
+- Shipping is free on orders above ₹5,000; otherwise ₹150.
+
+We do not ship outside India yet.', true, '2026-09-16T10:00:00.000Z', '2026-09-16T10:00:00.000Z'),
+  ('00000001-0007-4000-8000-000000000003', '00000001-0000-4000-8000-000000000001', 'returns', 'Returns & exchanges', 'Write to us on WhatsApp within 3 days of delivery with your order number and a photo.
+
+- Unused sarees with their tags can be exchanged within 7 days.
+- Sarees with fall, pico or blouse stitching cannot be returned.
+- Handloom pieces may show small irregularities in weave; these are part of their character.
+
+Refunds reach your original payment method within 7 working days of us receiving the saree.', true, '2026-09-16T10:00:00.000Z', '2026-09-16T10:00:00.000Z'),
+  ('00000002-0007-4000-8000-000000000001', '00000002-0000-4000-8000-000000000001', 'about', 'About us', 'Noor Atelier is a small studio in Jaipur making modern ethnic wear in small batches.
+
+Block prints, gota patti and chikankari are done by artisans we have worked with for years, so there is less waste and more care in every seam.', true, '2026-09-16T10:00:00.000Z', '2026-09-16T10:00:00.000Z'),
+  ('00000002-0007-4000-8000-000000000002', '00000002-0000-4000-8000-000000000001', 'shipping', 'Shipping', 'We deliver across India. Orders are confirmed with you on WhatsApp, and we share tracking details once your parcel is on its way.
+
+- Dispatch: within 2–3 working days of payment.
+- Delivery: usually 4–7 working days after dispatch.
+- Shipping is free on orders above ₹5,000; otherwise ₹150.
+
+We do not ship outside India yet.', true, '2026-09-16T10:00:00.000Z', '2026-09-16T10:00:00.000Z'),
+  ('00000002-0007-4000-8000-000000000003', '00000002-0000-4000-8000-000000000001', 'returns', 'Returns & exchanges', 'Easy 7-day exchanges: write to us on WhatsApp within 7 days of delivery.
+
+- Unworn pieces with tags can be exchanged for another size or style.
+- Custom-fit and altered pieces cannot be returned.
+- If something arrives damaged, send us an unboxing video within 48 hours and we will replace it.', true, '2026-09-16T10:00:00.000Z', '2026-09-16T10:00:00.000Z');
 
 insert into public.products (id, tenant_id, name, slug, description, price_mode, price_paise, compare_at_paise, status, attributes, is_featured, seo, created_at, updated_at) values
   ('00000001-0003-4000-8000-000000000001', '00000001-0000-4000-8000-000000000001', 'Ruby Temple-Border Kanjivaram', 'ruby-temple-border-kanjivaram', 'A classic ruby Kanjivaram with a contrast temple border and a rich pallu of peacocks and mango motifs, woven in pure mulberry silk.', 'fixed', 2450000, null, 'active', '{"fabric":"Pure mulberry silk","zari":"Silver zari, gold polished","colour":"Red","length":"5.5 m saree + 0.8 m blouse piece","blouse":"Included, unstitched","occasion":"Wedding","care":"Dry clean only"}'::jsonb, true, '{}'::jsonb, '2026-10-06T10:00:00.000Z', '2026-10-06T10:00:00.000Z'),

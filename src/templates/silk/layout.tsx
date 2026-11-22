@@ -3,6 +3,7 @@ import { MessageCircle } from 'lucide-react';
 import { CartButton } from '@/components/storefront/cart-button';
 import { storeHref, storePaths } from '@/components/storefront/links';
 import { StoreImage } from '@/components/storefront/store-image';
+import { addressLines, formatWhatsApp } from '@/features/tenants/settings';
 import type { StoreContext, StoreLayoutProps } from '../contract';
 import { MobileNav } from './mobile-nav';
 
@@ -79,9 +80,11 @@ function Header({ store }: { store: StoreContext }) {
 
 function Footer({ store }: { store: StoreContext }) {
   const items = navItems(store);
+  const { address, phone, email, openingHours } = store.contact;
+  const contactHref = storeHref(store.basePath, storePaths.contact);
   return (
     <footer className="mt-24 bg-store-primary text-store-on-primary">
-      <div className="mx-auto grid max-w-7xl gap-12 px-4 py-16 md:grid-cols-[1.4fr_1fr_1fr] md:px-8">
+      <div className="mx-auto grid max-w-7xl gap-12 px-4 py-16 md:grid-cols-2 md:px-8 lg:grid-cols-[1.3fr_1fr_1fr_1.1fr]">
         <div>
           <p className="font-store-heading text-3xl">{store.name}</p>
           {store.branding.tagline && (
@@ -105,15 +108,60 @@ function Footer({ store }: { store: StoreContext }) {
             ))}
           </ul>
         </nav>
-        <div>
+        <nav aria-label="Help">
           <h2 className="text-xs tracking-[0.18em] uppercase opacity-70">
-            How to order
+            Help
           </h2>
           <p className="mt-4 flex gap-2.5 opacity-90">
             <MessageCircle className="mt-0.5 size-4 shrink-0" aria-hidden />
             Add pieces to your bag and check out on WhatsApp. We confirm
             availability, delivery and payment with you there.
           </p>
+          <ul className="mt-5 space-y-2.5">
+            {[
+              ...store.pages.map((page) => ({
+                href: storeHref(store.basePath, storePaths.page(page.slug)),
+                label: page.title,
+              })),
+              { href: contactHref, label: 'Contact us' },
+            ].map((link) => (
+              <li key={link.href}>
+                <Link
+                  href={link.href}
+                  className="underline-offset-4 hover:underline"
+                >
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+        <div>
+          <h2 className="text-xs tracking-[0.18em] uppercase opacity-70">
+            {address ? 'Visit us' : 'Get in touch'}
+          </h2>
+          <div className="mt-4 space-y-3 opacity-90">
+            {address && (
+              <address className="not-italic">
+                {addressLines(address).map((line) => (
+                  <span key={line} className="block">
+                    {line}
+                  </span>
+                ))}
+              </address>
+            )}
+            {openingHours && <p>{openingHours}</p>}
+            <p>
+              WhatsApp {formatWhatsApp(store.whatsappNumber)}
+              {phone && (
+                <>
+                  <br />
+                  Phone {phone}
+                </>
+              )}
+            </p>
+            {email && <p className="break-all">{email}</p>}
+          </div>
         </div>
       </div>
       <div className="border-t border-store-on-primary/15">

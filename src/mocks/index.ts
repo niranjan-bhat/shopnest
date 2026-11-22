@@ -25,6 +25,7 @@ export type MockDb = {
   product_variants: Tables<'product_variants'>[];
   product_images: Tables<'product_images'>[];
   banners: Tables<'banners'>[];
+  store_pages: Tables<'store_pages'>[];
 };
 
 /** Fixed "now" so mock timestamps (and "newest" sorting) never drift. */
@@ -51,6 +52,10 @@ function addStore(db: MockDb, store: FixtureStore): void {
     status: 'active',
     business_type: store.businessType,
     whatsapp_number: store.whatsapp,
+    contact_email: store.contact.email,
+    contact_phone: store.contact.phone,
+    address: store.contact.address,
+    opening_hours: store.contact.openingHours,
     currency: 'INR',
     created_at: isoDaysAgo(90),
     updated_at: isoDaysAgo(90),
@@ -92,6 +97,19 @@ function addStore(db: MockDb, store: FixtureStore): void {
       show_in_menu: true,
       created_at: isoDaysAgo(90),
       updated_at: isoDaysAgo(90),
+    });
+  });
+
+  store.pages.forEach((page, i) => {
+    db.store_pages.push({
+      id: fixtureId(store.n, 'page', i + 1),
+      tenant_id: tenantId,
+      slug: page.slug,
+      title: page.title,
+      body: page.body,
+      is_published: true,
+      created_at: isoDaysAgo(60),
+      updated_at: isoDaysAgo(60),
     });
   });
 
@@ -191,6 +209,7 @@ function buildMockDb(): MockDb {
     product_variants: [],
     product_images: [],
     banners: [],
+    store_pages: [],
   };
   fixtureStores.forEach((store) => addStore(db, store));
   return db;

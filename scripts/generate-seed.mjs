@@ -22,6 +22,7 @@ const TABLES = [
   ['tenant_themes', mockDb.tenant_themes],
   ['categories', mockDb.categories],
   ['banners', mockDb.banners],
+  ['store_pages', mockDb.store_pages],
   ['products', mockDb.products],
   ['product_categories', mockDb.product_categories],
   ['product_variants', mockDb.product_variants],

@@ -113,7 +113,7 @@ test('a merchant builds, reorders, hides and deletes categories', async ({
   // Only Silk is in the top menu (present on every screen size, hidden on
   // small ones, so count the links rather than check visibility).
   await expect(
-    storefront.locator('header > nav[aria-label="Categories"] a'),
+    storefront.locator('header > div > nav[aria-label="Categories"] a'),
   ).toHaveText(['Silk']);
   // Streamed pages cannot change their status code, so check the page text
   // (as storefront.spec.ts does).

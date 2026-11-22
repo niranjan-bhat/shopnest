@@ -255,6 +255,26 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"store_pages": {
+                  Row: {
+                    "body": string,"created_at": string,"id": string,"is_published": boolean,"slug": string,"tenant_id": string,"title": string,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "body"?: string,"created_at"?: string,"id"?: string,"is_published"?: boolean,"slug": string,"tenant_id": string,"title": string,"updated_at"?: string
+                  }
+                  Update: {
+                    "body"?: string,"created_at"?: string,"id"?: string,"is_published"?: boolean,"slug"?: string,"tenant_id"?: string,"title"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "store_pages_tenant_id_fkey"
+      columns: ["tenant_id"]
+isOneToOne: false
+      referencedRelation: "tenants"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"subscriptions": {
                   Row: {
                     "created_at": string,"current_period_end": string | null,"id": string,"plan_id": string,"status": Database["public"]['Enums']["subscription_status"],"tenant_id": string,"updated_at": string
@@ -375,14 +395,14 @@ isOneToOne: true
                   ]
                 },"tenants": {
                   Row: {
-                    "business_type": string,"created_at": string,"currency": string,"id": string,"name": string,"slug": string,"status": Database["public"]['Enums']["tenant_status"],"updated_at": string,"whatsapp_number": string
+                    "address": Json | null,"business_type": string,"contact_email": string | null,"contact_phone": string | null,"created_at": string,"currency": string,"id": string,"name": string,"opening_hours": string | null,"slug": string,"status": Database["public"]['Enums']["tenant_status"],"updated_at": string,"whatsapp_number": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "business_type"?: string,"created_at"?: string,"currency"?: string,"id"?: string,"name": string,"slug": string,"status"?: Database["public"]['Enums']["tenant_status"],"updated_at"?: string,"whatsapp_number": string
+                    "address"?: Json | null,"business_type"?: string,"contact_email"?: string | null,"contact_phone"?: string | null,"created_at"?: string,"currency"?: string,"id"?: string,"name": string,"opening_hours"?: string | null,"slug": string,"status"?: Database["public"]['Enums']["tenant_status"],"updated_at"?: string,"whatsapp_number": string
                   }
                   Update: {
-                    "business_type"?: string,"created_at"?: string,"currency"?: string,"id"?: string,"name"?: string,"slug"?: string,"status"?: Database["public"]['Enums']["tenant_status"],"updated_at"?: string,"whatsapp_number"?: string
+                    "address"?: Json | null,"business_type"?: string,"contact_email"?: string | null,"contact_phone"?: string | null,"created_at"?: string,"currency"?: string,"id"?: string,"name"?: string,"opening_hours"?: string | null,"slug"?: string,"status"?: Database["public"]['Enums']["tenant_status"],"updated_at"?: string,"whatsapp_number"?: string
                   }
                   Relationships: [
                     

@@ -1,10 +1,12 @@
 import 'server-only';
 import { listCategories } from '@/features/catalog/queries';
+import { listPublishedPages } from '@/features/pages/queries';
 import {
   resolveHomeSections,
   type ResolvedSection,
 } from '@/features/storefront/home';
 import type { StoreChoice } from '@/features/tenants/active-store';
+import { CONTACT_COLUMNS, toStoreContact } from '@/features/tenants/settings';
 import { check } from '@/lib/supabase/result';
 import { createServerSupabase } from '@/lib/supabase/server';
 import type { StoreContext, TemplateDefinition } from '@/templates/contract';
@@ -29,17 +31,18 @@ export async function loadThemePreview(
   store: StoreChoice,
 ): Promise<ThemePreview | null> {
   const supabase = await createServerSupabase();
-  const [editor, tenant, categories] = await Promise.all([
+  const [editor, tenant, categories, pages] = await Promise.all([
     getThemeEditor(store.id),
     supabase
       .from('tenants')
-      .select('whatsapp_number')
+      .select(`whatsapp_number, ${CONTACT_COLUMNS}`)
       .eq('id', store.id)
       .single(),
     listCategories(store.id),
+    listPublishedPages(store.id),
   ]);
   if (!editor) return null;
-  const { whatsapp_number } = check(tenant, 'tenants');
+  const tenantRow = check(tenant, 'tenants');
   const theme = editor.draft;
   const template = getTemplate(theme.templateKey);
   const sections = await resolveHomeSections(
@@ -56,7 +59,9 @@ export async function loadThemePreview(
       id: store.id,
       slug: store.slug,
       name: store.name,
-      whatsappNumber: whatsapp_number,
+      whatsappNumber: tenantRow.whatsapp_number,
+      contact: toStoreContact(tenantRow),
+      pages,
       branding: theme.branding,
       announcement: theme.announcement ?? null,
       basePath: store.url ?? '',

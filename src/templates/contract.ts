@@ -5,6 +5,8 @@ import type {
   ProductPageData,
 } from '@/features/storefront/pages';
 import type { ResolvedSection } from '@/features/storefront/home';
+import type { PageLink, StorePage } from '@/features/pages/queries';
+import type { StoreContact } from '@/features/tenants/settings';
 import type { Branding, SectionType } from '@/features/theme/schema';
 
 /**
@@ -16,6 +18,10 @@ export type StoreContext = {
   slug: string;
   name: string;
   whatsappNumber: string;
+  /** Address, phone, email and hours, where the merchant gave them. */
+  contact: StoreContact;
+  /** Published information pages (About us, policies), for the footer. */
+  pages: PageLink[];
   branding: Branding;
   announcement: string | null;
   /**
@@ -35,6 +41,7 @@ export type HomePageProps = {
 export type CategoryPageProps = { store: StoreContext } & CategoryPageData;
 export type ProductPageProps = { store: StoreContext } & ProductPageData;
 export type StorePageProps = { store: StoreContext };
+export type ContentPageProps = { store: StoreContext; page: StorePage };
 
 export type TemplateDefinition = {
   key: string;
@@ -48,4 +55,8 @@ export type TemplateDefinition = {
   ProductPage: ComponentType<ProductPageProps>;
   CartPage: ComponentType<StorePageProps>;
   CheckoutPage: ComponentType<StorePageProps>;
+  /** How to reach the store: address, hours, WhatsApp, phone, email. */
+  ContactPage: ComponentType<StorePageProps>;
+  /** An information page: About us, Shipping, Returns, Privacy, Terms. */
+  ContentPage: ComponentType<ContentPageProps>;
 };

@@ -1,6 +1,7 @@
 import 'server-only';
 import { cacheLife, cacheTag } from 'next/cache';
 import { parseThemeConfig, type ThemeConfig } from '@/features/theme/schema';
+import { CONTACT_COLUMNS, toStoreContact, type StoreContact } from './settings';
 import { check } from '@/lib/supabase/result';
 import { storefrontDb } from '@/lib/supabase/storefront';
 import { normalizeHostname } from '@/lib/tenant';
@@ -12,6 +13,7 @@ export type Store = {
   /** E.164, e.g. +919876543210. */
   whatsappNumber: string;
   currency: string;
+  contact: StoreContact;
   theme: ThemeConfig;
 };
 
@@ -47,7 +49,9 @@ export async function getStoreByHost(host: string): Promise<Store | null> {
   const [tenantResult, themeResult] = await Promise.all([
     db
       .from('tenants')
-      .select('id, slug, name, status, whatsapp_number, currency')
+      .select(
+        `id, slug, name, status, whatsapp_number, currency, ${CONTACT_COLUMNS}`,
+      )
       .eq('id', domain.tenant_id)
       .maybeSingle(),
     // anon may read only these columns (never the draft).
@@ -67,6 +71,7 @@ export async function getStoreByHost(host: string): Promise<Store | null> {
     name: tenant.name,
     whatsappNumber: tenant.whatsapp_number,
     currency: tenant.currency,
+    contact: toStoreContact(tenant),
     theme: parseThemeConfig(theme.published),
   };
 }
