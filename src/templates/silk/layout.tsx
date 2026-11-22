@@ -21,7 +21,7 @@ function Wordmark({ store }: { store: StoreContext }) {
   return (
     <Link
       href={home}
-      className="block text-center"
+      className="block shrink-0"
       aria-label={`${store.name} home`}
     >
       {store.branding.logoKey ? (
@@ -34,7 +34,7 @@ function Wordmark({ store }: { store: StoreContext }) {
           }}
           sizes="240px"
           priority
-          className="mx-auto h-10 w-auto object-contain"
+          className="h-10 w-auto object-contain"
         />
       ) : (
         <span className="font-store-heading text-[1.65rem] leading-none tracking-[0.06em] md:text-4xl">
@@ -49,33 +49,30 @@ function Header({ store }: { store: StoreContext }) {
   const items = navItems(store);
   return (
     <header className="sticky top-0 z-40 border-b border-store-border bg-store-bg/95 backdrop-blur supports-[backdrop-filter]:bg-store-bg/85">
-      <div className="mx-auto grid max-w-7xl grid-cols-[1fr_auto_1fr] items-center px-4 py-3 md:px-8 lg:py-5">
-        <div className="flex">
-          <MobileNav
-            storeName={store.name}
-            basePath={store.basePath}
-            items={items}
-          />
-        </div>
+      {/* One row: logo on the left, the menu beside it, the bag on the right. */}
+      <div className="mx-auto flex max-w-7xl items-center gap-2 px-4 py-3 md:px-8 lg:gap-12 lg:py-5">
+        <MobileNav
+          storeName={store.name}
+          basePath={store.basePath}
+          items={items}
+        />
         <Wordmark store={store} />
-        <div className="flex justify-end">
-          <CartButton className="-mr-2" />
-        </div>
+        <nav aria-label="Categories" className="hidden min-w-0 lg:block">
+          <ul className="flex flex-wrap gap-x-8 gap-y-2 text-[0.8rem] tracking-[0.16em] uppercase">
+            {items.map((item) => (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  className="relative py-1 whitespace-nowrap transition-colors after:absolute after:inset-x-0 after:-bottom-0.5 after:h-px after:origin-left after:scale-x-0 after:bg-current after:transition-transform hover:text-store-primary hover:after:scale-x-100"
+                >
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+        <CartButton className="-mr-2 ml-auto shrink-0" />
       </div>
-      <nav aria-label="Categories" className="hidden pb-4 lg:block">
-        <ul className="flex justify-center gap-10 text-[0.8rem] tracking-[0.16em] uppercase">
-          {items.map((item) => (
-            <li key={item.href}>
-              <Link
-                href={item.href}
-                className="relative py-1 transition-colors after:absolute after:inset-x-0 after:-bottom-0.5 after:h-px after:origin-left after:scale-x-0 after:bg-current after:transition-transform hover:text-store-primary hover:after:scale-x-100"
-              >
-                {item.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
     </header>
   );
 }
