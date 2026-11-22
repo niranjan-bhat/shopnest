@@ -39,6 +39,23 @@ export const BRANDING_SIZES: Record<
 };
 
 /**
+ * Logos must stay readable in the header: at most 8 times as wide as tall
+ * (wider ones shrink to a sliver), and wide enough to look sharp.
+ */
+export const LOGO_LIMITS = { maxRatio: 8, minWidth: 200 } as const;
+
+/** Why a logo of this size will not work in the header, or null. */
+export function logoProblem(width: number, height: number): string | null {
+  if (width / height > LOGO_LIMITS.maxRatio) {
+    return 'This logo is too wide to read in the header. Use a version with less space around the name, or a stacked one.';
+  }
+  if (width < LOGO_LIMITS.minWidth) {
+    return 'This logo is too small to look sharp. Upload one at least 600 pixels wide.';
+  }
+  return null;
+}
+
+/**
  * R2 key for a new store image: tenants/{t}/branding/{kind}-{id}.{ext}, or
  * tenants/{t}/banners/{id}.{ext} for banners.
  */

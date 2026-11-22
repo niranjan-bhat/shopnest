@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   brandingKey,
   fitWithin,
+  logoProblem,
   isBrandingKey,
   isProductImageKey,
   MAX_IMAGE_BYTES,
@@ -12,6 +13,19 @@ import {
 const tenant = '00000001-0000-4000-8000-000000000001';
 const product = '00000001-0003-4000-8000-000000000001';
 const image = '0b0f6a2e-4c1d-4e3a-9b7f-1a2b3c4d5e6f';
+
+describe('logoProblem', () => {
+  it('accepts square to 8:1 logos at least 200 px wide', () => {
+    expect(logoProblem(600, 600)).toBeNull();
+    expect(logoProblem(800, 100)).toBeNull();
+    expect(logoProblem(200, 100)).toBeNull();
+  });
+
+  it('refuses very wide and very small logos', () => {
+    expect(logoProblem(800, 99)).toMatch(/too wide/);
+    expect(logoProblem(150, 100)).toMatch(/too small/);
+  });
+});
 
 describe('fitWithin', () => {
   it('shrinks the longest side to the limit, keeping the shape', () => {

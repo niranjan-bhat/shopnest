@@ -9,10 +9,13 @@ import { prepareBrandingUpload } from '@/features/media/branding-actions';
 import { ImageProblem, prepareImage } from '@/features/media/prepare-image';
 import { BRANDING_SIZES, type BrandingKind } from '@/features/media/rules';
 
+export type ImageSize = { width: number; height: number };
+
 /**
  * Picks one store image (logo, favicon, banner): resizes it in the browser,
- * uploads it straight to storage and reports the new key. The caller saves
- * the key with the rest of its form.
+ * uploads it straight to storage and reports the new key and its size. The
+ * caller saves them with the rest of its form. `check` can refuse an image
+ * by its size before anything is uploaded.
  */
 export function ImageField({
   kind,
@@ -22,14 +25,16 @@ export function ImageField({
   uploadsEnabled,
   previewClassName,
   error,
+  check,
 }: {
   kind: BrandingKind;
   label: string;
   value: string | null;
-  onChange: (key: string | null) => void;
+  onChange: (key: string | null, size?: ImageSize) => void;
   uploadsEnabled: boolean;
   previewClassName?: string;
   error?: string;
+  check?: (size: ImageSize) => string | null;
 }) {
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState('');
@@ -39,6 +44,11 @@ export function ImageField({
     setProblem('');
     try {
       const image = await prepareImage(file, BRANDING_SIZES[kind]);
+      const refused = check?.({ width: image.width, height: image.height });
+      if (refused) {
+        setProblem(refused);
+        return;
+      }
       const target = await prepareBrandingUpload({
         kind,
         type: image.type,
@@ -54,7 +64,7 @@ export function ImageField({
         headers: { 'Content-Type': target.contentType },
       });
       if (!response.ok) throw new Error(`Upload failed: ${response.status}`);
-      onChange(target.key);
+      onChange(target.key, { width: image.width, height: image.height });
     } catch (e) {
       setProblem(
         e instanceof ImageProblem

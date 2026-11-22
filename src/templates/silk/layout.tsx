@@ -26,16 +26,20 @@ function Wordmark({ store }: { store: StoreContext }) {
       aria-label={`${store.name} home`}
     >
       {store.branding.logoKey ? (
+        // Fitted to its shape: as large as the box allows (44 × 180 px on
+        // phones, 56 × 300 px from md up), so wide logos get width and
+        // square ones get height. Logos saved before sizes were recorded
+        // are assumed to be 3:1 until they load.
         <StoreImage
           image={{
             key: store.branding.logoKey,
             alt: store.name,
-            width: 240,
-            height: 80,
+            width: store.branding.logoWidth ?? 240,
+            height: store.branding.logoHeight ?? 80,
           }}
-          sizes="240px"
+          sizes="(min-width: 768px) 300px, 180px"
           priority
-          className="h-10 w-auto object-contain"
+          className="h-auto max-h-11 w-auto max-w-[180px] object-contain md:max-h-14 md:max-w-[300px]"
         />
       ) : (
         <span className="font-store-heading text-[1.65rem] leading-none tracking-[0.06em] md:text-4xl">

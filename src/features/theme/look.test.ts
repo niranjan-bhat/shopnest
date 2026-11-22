@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { colourWarnings, lookOf, sameTheme, withLook } from './look';
+import {
+  colourWarnings,
+  lookOf,
+  sameTheme,
+  themeLookSchema,
+  withLook,
+} from './look';
 import type { ThemeConfig } from './schema';
 
 const theme: ThemeConfig = {
@@ -46,6 +52,46 @@ describe('look', () => {
     expect(
       sameTheme(withLook(theme, { ...lookOf(theme), radius: 'lg' }), theme),
     ).toBe(false);
+  });
+});
+
+describe('logo size', () => {
+  const logo = 'tenants/t/branding/logo-1.png';
+
+  it('keeps the logo size with the logo, and drops it without one', () => {
+    const withLogo = withLook(theme, {
+      ...lookOf(theme),
+      logoKey: logo,
+      logoWidth: 800,
+      logoHeight: 200,
+    });
+    expect(withLogo.branding).toMatchObject({
+      logoKey: logo,
+      logoWidth: 800,
+      logoHeight: 200,
+    });
+    expect(lookOf(withLogo)).toMatchObject({ logoWidth: 800, logoHeight: 200 });
+    const removed = withLook(withLogo, { ...lookOf(withLogo), logoKey: null });
+    expect(removed.branding.logoWidth).toBeUndefined();
+  });
+
+  it('refuses logos too wide to read', () => {
+    const base = { ...lookOf(theme), logoKey: logo };
+    expect(
+      themeLookSchema.safeParse({ ...base, logoWidth: 800, logoHeight: 200 })
+        .success,
+    ).toBe(true);
+    const wide = themeLookSchema.safeParse({
+      ...base,
+      logoWidth: 800,
+      logoHeight: 90,
+    });
+    expect(wide.error?.issues[0]?.path).toEqual(['logoKey']);
+    // Logos saved before sizes were recorded are still accepted.
+    expect(
+      themeLookSchema.safeParse({ ...base, logoWidth: null, logoHeight: null })
+        .success,
+    ).toBe(true);
   });
 });
 

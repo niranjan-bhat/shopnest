@@ -33,6 +33,9 @@ export type ThemeTokens = z.infer<typeof themeTokensSchema>;
 
 export const brandingSchema = z.object({
   logoKey: z.string().min(1).nullable().default(null),
+  /** The logo's size in pixels, so the header can fit it to its shape. */
+  logoWidth: z.number().int().min(1).max(10_000).optional(),
+  logoHeight: z.number().int().min(1).max(10_000).optional(),
   faviconKey: z.string().min(1).nullable().default(null),
   tagline: z.string().max(120).optional(),
 });
