@@ -97,3 +97,79 @@ test('store details show on the contact page and in the footer', async ({
   await expect(store.getByRole('contentinfo')).toContainText('Get in touch');
   await store.close();
 });
+
+test('a policy page is written, shown in the store and hidden again', async ({
+  page,
+}) => {
+  const shipping = page.getByRole('link', { name: /^Shipping/ });
+  await expect(shipping).toContainText('Not written');
+  await shipping.click();
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'Shipping' }),
+  ).toBeVisible();
+  await page
+    .locator('form[data-hydrated]', { has: page.locator('#page-body') })
+    .waitFor();
+
+  // An empty page cannot go in the store.
+  await page.getByRole('switch', { name: 'Show in store' }).click();
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(
+    page.getByText('Write the page before showing it in your store'),
+  ).toBeVisible();
+
+  // The sample flags the parts still to fill in.
+  await page.getByRole('button', { name: 'Start from a sample' }).click();
+  await expect(page.getByTestId('placeholders')).toContainText('[2–3]');
+
+  // The merchant writes their own text instead.
+  await page
+    .getByLabel('Text')
+    .fill(
+      'We ship across India within 3 days.\n\n- Free above ₹5,000\n- Tracking on WhatsApp',
+    );
+  await expect(page.getByTestId('placeholders')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(
+    page.getByText('Saved. The page is in your store.'),
+  ).toBeVisible();
+
+  // It is linked from the footer and shown as paragraphs and a list.
+  const store = await page.context().newPage();
+  await store.goto(storeUrl(shop.slug));
+  await store
+    .getByRole('contentinfo')
+    .getByRole('link', { name: 'Shipping' })
+    .click();
+  await expect(
+    store.getByRole('heading', { level: 1, name: 'Shipping' }),
+  ).toBeVisible();
+  await expect(store.getByRole('main').getByRole('listitem')).toHaveText([
+    'Free above ₹5,000',
+    'Tracking on WhatsApp',
+  ]);
+
+  // Hidden again: the link and the page are gone.
+  await page.getByRole('switch', { name: 'Show in store' }).click();
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(
+    page.getByText('Saved. The page is hidden from your store.'),
+  ).toBeVisible();
+  // A render already under way when the cache was expired can still finish
+  // with the old page; reload until the change shows.
+  await expect(async () => {
+    await store.reload();
+    await expect(
+      store.getByRole('heading', { name: "We couldn't find that page" }),
+    ).toBeVisible({ timeout: 2_000 });
+  }).toPass({ timeout: 15_000 });
+  await expect(
+    store.getByRole('contentinfo').getByRole('link', { name: 'Shipping' }),
+  ).toHaveCount(0);
+  await store.close();
+
+  await page.getByRole('link', { name: 'Back to settings' }).click();
+  await expect(page.getByRole('link', { name: /^Shipping/ })).toContainText(
+    'Hidden',
+  );
+});

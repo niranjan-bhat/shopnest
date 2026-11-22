@@ -108,16 +108,34 @@ function Footer({ store }: { store: StoreContext }) {
             ))}
           </ul>
         </nav>
-        <div>
+        <nav aria-label="Help">
           <h2 className="text-xs tracking-[0.18em] uppercase opacity-70">
-            How to order
+            Help
           </h2>
           <p className="mt-4 flex gap-2.5 opacity-90">
             <MessageCircle className="mt-0.5 size-4 shrink-0" aria-hidden />
             Add pieces to your bag and check out on WhatsApp. We confirm
             availability, delivery and payment with you there.
           </p>
-        </div>
+          <ul className="mt-5 space-y-2.5">
+            {[
+              ...store.pages.map((page) => ({
+                href: storeHref(store.basePath, storePaths.page(page.slug)),
+                label: page.title,
+              })),
+              { href: contactHref, label: 'Contact us' },
+            ].map((link) => (
+              <li key={link.href}>
+                <Link
+                  href={link.href}
+                  className="underline-offset-4 hover:underline"
+                >
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
         <div>
           <h2 className="text-xs tracking-[0.18em] uppercase opacity-70">
             {address ? 'Visit us' : 'Get in touch'}
@@ -143,12 +161,6 @@ function Footer({ store }: { store: StoreContext }) {
               )}
             </p>
             {email && <p className="break-all">{email}</p>}
-            <Link
-              href={contactHref}
-              className="inline-block underline underline-offset-4"
-            >
-              Contact us
-            </Link>
           </div>
         </div>
       </div>

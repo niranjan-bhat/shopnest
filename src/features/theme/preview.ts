@@ -1,5 +1,6 @@
 import 'server-only';
 import { listCategories } from '@/features/catalog/queries';
+import { listPublishedPages } from '@/features/pages/queries';
 import {
   resolveHomeSections,
   type ResolvedSection,
@@ -30,7 +31,7 @@ export async function loadThemePreview(
   store: StoreChoice,
 ): Promise<ThemePreview | null> {
   const supabase = await createServerSupabase();
-  const [editor, tenant, categories] = await Promise.all([
+  const [editor, tenant, categories, pages] = await Promise.all([
     getThemeEditor(store.id),
     supabase
       .from('tenants')
@@ -38,6 +39,7 @@ export async function loadThemePreview(
       .eq('id', store.id)
       .single(),
     listCategories(store.id),
+    listPublishedPages(store.id),
   ]);
   if (!editor) return null;
   const tenantRow = check(tenant, 'tenants');
@@ -59,6 +61,7 @@ export async function loadThemePreview(
       name: store.name,
       whatsappNumber: tenantRow.whatsapp_number,
       contact: toStoreContact(tenantRow),
+      pages,
       branding: theme.branding,
       announcement: theme.announcement ?? null,
       basePath: store.url ?? '',

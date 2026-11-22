@@ -1,5 +1,6 @@
 import { cacheLife } from 'next/cache';
 import { listCategories } from '@/features/catalog/queries';
+import { listPublishedPages } from '@/features/pages/queries';
 import {
   getStoreByHost,
   listPrimaryStoreHosts,
@@ -24,7 +25,10 @@ export async function loadStorefront(host: string): Promise<Storefront | null> {
 
   const store = await getStoreByHost(host);
   if (!store) return null;
-  const categories = await listCategories(store.id);
+  const [categories, pages] = await Promise.all([
+    listCategories(store.id),
+    listPublishedPages(store.id),
+  ]);
 
   return {
     theme: store.theme,
@@ -34,6 +38,7 @@ export async function loadStorefront(host: string): Promise<Storefront | null> {
       name: store.name,
       whatsappNumber: store.whatsappNumber,
       contact: store.contact,
+      pages,
       branding: store.theme.branding,
       announcement: store.theme.announcement ?? null,
       basePath: STORE_BASE_PATH,

@@ -45,12 +45,14 @@ ignores the new database functions and keeps serving `/mock-media`.
 ## Deploy Phase 3.5–3.6 (storefront editor, store settings)
 
 1. [ ] **Database migrations** before merging `phase-3-storefront-editor`:
-       `npx supabase db push --remote --dry-run` should list `reorder_banners` and `store_contact`
+       `npx supabase db push --remote --dry-run` should list `reorder_banners`, `store_contact` and `store_pages`
        (plus any Phase 3 ones from step 1 above not yet applied), then `npx supabase db push --remote`.
 2. [ ] **Check the live site**: Storefront → Banners: add one (upload), edit its dates, reorder, delete;
        a scheduled banner appears on the store within about 5 minutes of its start time.
 3. [ ] **Store details**: Settings → fill in each live store's address, hours and email (the demo stores'
        details are in `seed.sql` only, which never runs on production), then check `/contact` and the footer.
+4. [ ] **Pages**: Settings → Pages: write at least Shipping, Returns and Privacy for each live store
+       (Razorpay asks for these later), show them, and check the footer links.
 
 ## Before the first real merchant
 

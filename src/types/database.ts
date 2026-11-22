@@ -255,6 +255,26 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"store_pages": {
+                  Row: {
+                    "body": string,"created_at": string,"id": string,"is_published": boolean,"slug": string,"tenant_id": string,"title": string,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "body"?: string,"created_at"?: string,"id"?: string,"is_published"?: boolean,"slug": string,"tenant_id": string,"title": string,"updated_at"?: string
+                  }
+                  Update: {
+                    "body"?: string,"created_at"?: string,"id"?: string,"is_published"?: boolean,"slug"?: string,"tenant_id"?: string,"title"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "store_pages_tenant_id_fkey"
+      columns: ["tenant_id"]
+isOneToOne: false
+      referencedRelation: "tenants"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"subscriptions": {
                   Row: {
                     "created_at": string,"current_period_end": string | null,"id": string,"plan_id": string,"status": Database["public"]['Enums']["subscription_status"],"tenant_id": string,"updated_at": string

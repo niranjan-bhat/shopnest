@@ -68,6 +68,8 @@ export type FixtureStore = {
   categories: FixtureCategory[];
   products: FixtureProduct[];
   banners: FixtureBanner[];
+  /** Published information pages. */
+  pages: { slug: string; title: string; body: string }[];
 };
 
 // ---------------------------------------------------------------------------
@@ -82,6 +84,7 @@ export const ID_KIND = {
   variant: 4,
   image: 5,
   banner: 6,
+  page: 7,
 } as const;
 
 const hex = (value: number, width: number) =>
@@ -155,6 +158,37 @@ const sareeStore: FixtureStore = {
     },
     openingHours: 'Mon–Sat, 10 am – 8 pm · Sunday by appointment',
   },
+  pages: [
+    {
+      slug: 'about',
+      title: 'About us',
+      body: `Tara Weaves began as a single loom in Kanchipuram. Today we work with forty weaving families, paying fair wages and keeping traditional techniques like korvai and temple borders alive.
+
+Every saree is checked by hand before it reaches you.`,
+    },
+    {
+      slug: 'shipping',
+      title: 'Shipping',
+      body: `We deliver across India. Orders are confirmed with you on WhatsApp, and we share tracking details once your parcel is on its way.
+
+- Dispatch: within 2–3 working days of payment.
+- Delivery: usually 4–7 working days after dispatch.
+- Shipping is free on orders above ₹5,000; otherwise ₹150.
+
+We do not ship outside India yet.`,
+    },
+    {
+      slug: 'returns',
+      title: 'Returns & exchanges',
+      body: `Write to us on WhatsApp within 3 days of delivery with your order number and a photo.
+
+- Unused sarees with their tags can be exchanged within 7 days.
+- Sarees with fall, pico or blouse stitching cannot be returned.
+- Handloom pieces may show small irregularities in weave; these are part of their character.
+
+Refunds reach your original payment method within 7 working days of us receiving the saree.`,
+    },
+  ],
   theme: {
     templateKey: 'silk',
     tokens: {
@@ -600,6 +634,35 @@ const boutiqueStore: FixtureStore = {
     },
     openingHours: 'Tue–Sun, 11 am – 7 pm',
   },
+  pages: [
+    {
+      slug: 'about',
+      title: 'About us',
+      body: `Noor Atelier is a small studio in Jaipur making modern ethnic wear in small batches.
+
+Block prints, gota patti and chikankari are done by artisans we have worked with for years, so there is less waste and more care in every seam.`,
+    },
+    {
+      slug: 'shipping',
+      title: 'Shipping',
+      body: `We deliver across India. Orders are confirmed with you on WhatsApp, and we share tracking details once your parcel is on its way.
+
+- Dispatch: within 2–3 working days of payment.
+- Delivery: usually 4–7 working days after dispatch.
+- Shipping is free on orders above ₹5,000; otherwise ₹150.
+
+We do not ship outside India yet.`,
+    },
+    {
+      slug: 'returns',
+      title: 'Returns & exchanges',
+      body: `Easy 7-day exchanges: write to us on WhatsApp within 7 days of delivery.
+
+- Unworn pieces with tags can be exchanged for another size or style.
+- Custom-fit and altered pieces cannot be returned.
+- If something arrives damaged, send us an unboxing video within 48 hours and we will replace it.`,
+    },
+  ],
   theme: {
     templateKey: 'silk',
     tokens: {
