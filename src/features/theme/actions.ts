@@ -7,28 +7,14 @@ import { tenantTag } from '@/features/tenants/queries';
 import type { ActionResult } from '@/lib/action-result';
 import { isR2Configured, statObject } from '@/lib/r2';
 import { createServerSupabase } from '@/lib/supabase/server';
+import { NO_THEME, writeDraft } from './draft';
 import { getThemeEditor } from './editor';
 import { themeLookSchema, withLook, type ThemeLook } from './look';
-import type { ThemeConfig } from './schema';
 
 // The storefront editor. Edits go to the draft; shoppers see a change only
 // after publishTheme copies the draft to the published theme.
 
-const NO_THEME =
-  'This store has no theme yet. Ask the Zarify team to set it up.';
-
 type LookField = keyof ThemeLook;
-
-async function writeDraft(tenantId: string, draft: ThemeConfig) {
-  const supabase = await createServerSupabase();
-  const { data, error } = await supabase
-    .from('tenant_themes')
-    .update({ draft, template_key: draft.templateKey })
-    .eq('tenant_id', tenantId)
-    .select('tenant_id');
-  if (error) throw new Error(`Saving theme failed: ${error.message}`);
-  return (data ?? []).length > 0;
-}
 
 /**
  * A logo or favicon key is accepted if it is unchanged, or a new upload of
