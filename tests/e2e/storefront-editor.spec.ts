@@ -114,11 +114,19 @@ test('draft changes are previewed, then published', async ({ page }) => {
   );
 });
 
-test('a logo replaces the store name in the header', async ({ page }) => {
+test('a logo replaces the store name, sized to its shape', async ({ page }) => {
   test.skip(!hasR2, 'Needs R2 keys (R2_* in .env.local)');
-  await page
-    .getByLabel('Upload logo')
-    .setInputFiles(pngFile('logo.png', [120, 30, 50], 320, 80));
+  const upload = page.getByLabel('Upload logo');
+
+  // Too wide to read: refused before anything is uploaded.
+  await upload.setInputFiles(pngFile('thin.png', [120, 30, 50], 1800, 200));
+  await expect(page.getByText(/too wide to read in the header/)).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Remove logo' })).toHaveCount(
+    0,
+  );
+
+  // A 6:1 logo uses the header's full logo width.
+  await upload.setInputFiles(pngFile('logo.png', [120, 30, 50], 1200, 200));
   await expect(page.getByRole('button', { name: 'Remove logo' })).toBeVisible();
   await saveDraft(page);
   await bar(page).getByRole('button', { name: 'Publish' }).click();
@@ -127,8 +135,14 @@ test('a logo replaces the store name in the header', async ({ page }) => {
   ).toBeVisible();
 
   const home = await liveHome(page);
-  await expect(
-    home.getByRole('link', { name: `${shop.name} home` }).getByRole('img'),
-  ).toBeVisible();
+  const logo = home
+    .getByRole('link', { name: `${shop.name} home` })
+    .getByRole('img');
+  await expect(logo).toBeVisible();
+  const box = await logo.boundingBox();
+  const wide = (home.viewportSize()?.width ?? 0) >= 768;
+  // 300 × 50 from md up, 180 × 30 on phones (it was 240 × 40 everywhere).
+  expect(box?.width).toBeCloseTo(wide ? 300 : 180, 0);
+  expect(box?.height).toBeCloseTo(wide ? 50 : 30, 0);
   await home.close();
 });

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { logoProblem } from '@/features/media/rules';
 import { FONT_NAMES, themeTokensSchema, type ThemeConfig } from './schema';
 import { contrastRatio } from './tokens';
 
@@ -8,19 +9,33 @@ import { contrastRatio } from './tokens';
 
 export const RADIUS_OPTIONS = ['none', 'sm', 'md', 'lg'] as const;
 
-export const themeLookSchema = z.object({
-  colors: themeTokensSchema.shape.colors,
-  headingFont: z.enum(FONT_NAMES),
-  bodyFont: z.enum(FONT_NAMES),
-  radius: z.enum(RADIUS_OPTIONS),
-  logoKey: z.string().max(300).nullable(),
-  faviconKey: z.string().max(300).nullable(),
-  tagline: z.string().trim().max(120, 'Keep the tagline under 120 characters'),
-  announcement: z
-    .string()
-    .trim()
-    .max(140, 'Keep the announcement under 140 characters'),
-});
+const dimension = z.number().int().min(1).max(10_000).nullable();
+
+export const themeLookSchema = z
+  .object({
+    colors: themeTokensSchema.shape.colors,
+    headingFont: z.enum(FONT_NAMES),
+    bodyFont: z.enum(FONT_NAMES),
+    radius: z.enum(RADIUS_OPTIONS),
+    logoKey: z.string().max(300).nullable(),
+    logoWidth: dimension,
+    logoHeight: dimension,
+    faviconKey: z.string().max(300).nullable(),
+    tagline: z
+      .string()
+      .trim()
+      .max(120, 'Keep the tagline under 120 characters'),
+    announcement: z
+      .string()
+      .trim()
+      .max(140, 'Keep the announcement under 140 characters'),
+  })
+  .superRefine((look, ctx) => {
+    if (!look.logoKey || !look.logoWidth || !look.logoHeight) return;
+    const problem = logoProblem(look.logoWidth, look.logoHeight);
+    if (problem)
+      ctx.addIssue({ code: 'custom', path: ['logoKey'], message: problem });
+  });
 
 export type ThemeLook = z.infer<typeof themeLookSchema>;
 
@@ -32,6 +47,8 @@ export function lookOf(theme: ThemeConfig): ThemeLook {
     bodyFont: theme.tokens.fonts.body,
     radius: theme.tokens.radius,
     logoKey: theme.branding.logoKey,
+    logoWidth: theme.branding.logoWidth ?? null,
+    logoHeight: theme.branding.logoHeight ?? null,
     faviconKey: theme.branding.faviconKey,
     tagline: theme.branding.tagline ?? '',
     announcement: theme.announcement ?? '',
@@ -49,6 +66,9 @@ export function withLook(theme: ThemeConfig, look: ThemeLook): ThemeConfig {
     },
     branding: {
       logoKey: look.logoKey,
+      ...(look.logoKey && look.logoWidth && look.logoHeight
+        ? { logoWidth: look.logoWidth, logoHeight: look.logoHeight }
+        : {}),
       faviconKey: look.faviconKey,
       ...(look.tagline ? { tagline: look.tagline } : {}),
     },

@@ -20,6 +20,7 @@ import {
   FieldLabel,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import { logoProblem } from '@/features/media/rules';
 import { saveThemeLook } from '@/features/theme/actions';
 import { storeFonts } from '@/features/theme/fonts';
 import {
@@ -102,6 +103,7 @@ export function ThemeLookForm({
     control,
     handleSubmit,
     setError,
+    setValue,
     reset,
     formState: { errors, isDirty },
   } = form;
@@ -172,16 +174,27 @@ export function ThemeLookForm({
                       kind="logo"
                       label="Logo"
                       value={field.value}
-                      onChange={field.onChange}
+                      onChange={(key, size) => {
+                        field.onChange(key);
+                        setValue('logoWidth', size?.width ?? null, {
+                          shouldDirty: true,
+                        });
+                        setValue('logoHeight', size?.height ?? null, {
+                          shouldDirty: true,
+                        });
+                      }}
+                      check={({ width, height }) => logoProblem(width, height)}
                       uploadsEnabled={uploadsEnabled}
                       error={errors.logoKey?.message}
                     />
                   )}
                 />
                 <FieldDescription>
-                  Shown in the header. Without one, your store name is shown in
-                  your heading font. A wide PNG with a transparent background
-                  works best.
+                  Shown in the header, sized to its shape. Without one, your
+                  store name is shown in your heading font. Best: a PNG with a
+                  transparent background, about 3 times as wide as tall and at
+                  least 600 pixels wide. Logos more than 8 times as wide as tall
+                  are too thin to read.
                 </FieldDescription>
               </Field>
               <Field data-invalid={Boolean(errors.faviconKey)}>
