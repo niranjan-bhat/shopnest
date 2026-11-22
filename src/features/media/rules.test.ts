@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
+  brandingKey,
   fitWithin,
+  isBrandingKey,
   isProductImageKey,
   MAX_IMAGE_BYTES,
   productImageKey,
@@ -55,5 +57,24 @@ describe('uploadRequestSchema', () => {
     expect(request('image/webp', 300_000)).toBe(true);
     expect(request('image/png', 300_000)).toBe(false);
     expect(request('image/webp', MAX_IMAGE_BYTES + 1)).toBe(false);
+  });
+});
+
+describe('branding keys', () => {
+  it('builds and recognises logo, favicon and banner keys', () => {
+    const logo = brandingKey(tenant, 'logo', image, 'image/png');
+    expect(logo).toBe(`tenants/${tenant}/branding/logo-${image}.png`);
+    expect(isBrandingKey(logo, tenant, 'logo')).toBe(true);
+    expect(isBrandingKey(logo, tenant, 'favicon')).toBe(false);
+
+    const banner = brandingKey(tenant, 'banner', image, 'image/jpeg');
+    expect(banner).toBe(`tenants/${tenant}/banners/${image}.jpg`);
+    expect(isBrandingKey(banner, tenant, 'banner')).toBe(true);
+
+    const otherStore = '00000002-0000-4000-8000-000000000001';
+    expect(isBrandingKey(logo, otherStore, 'logo')).toBe(false);
+    expect(
+      isBrandingKey(`tenants/${tenant}/branding/logo-1.png`, tenant, 'logo'),
+    ).toBe(false);
   });
 });

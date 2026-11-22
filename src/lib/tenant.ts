@@ -42,9 +42,9 @@ export function routeHost(
   return { kind: 'store', hostname: host };
 }
 
-/** Paths that belong to the app host (dashboard, admin and sign-in). */
+/** Paths that belong to the app host (dashboard, admin, sign-in, preview). */
 export function isAppPath(pathname: string): boolean {
-  return /^\/(dashboard|admin|login|auth)(\/|$)/.test(pathname);
+  return /^\/(dashboard|admin|login|auth|preview)(\/|$)/.test(pathname);
 }
 
 const isLocal = (hostname: string) =>

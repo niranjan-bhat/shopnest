@@ -1,11 +1,16 @@
-import { fitWithin, MAX_IMAGE_BYTES, type ImageType } from './rules';
+import {
+  fitWithin,
+  MAX_IMAGE_BYTES,
+  MAX_IMAGE_SIDE,
+  type UploadType,
+} from './rules';
 
-// Runs in the browser: shrinks a photo before upload, so a 6 MB phone photo
+// Runs in the browser: shrinks an image before upload, so a 6 MB phone photo
 // becomes a few hundred KB and uploads quickly on mobile data.
 
-export type PreparedImage = {
+export type PreparedImage<T extends UploadType = UploadType> = {
   blob: Blob;
-  type: ImageType;
+  type: T;
   width: number;
   height: number;
 };
@@ -19,7 +24,20 @@ function toBlob(canvas: HTMLCanvasElement, type: string): Promise<Blob | null> {
   return new Promise((resolve) => canvas.toBlob(resolve, type, QUALITY));
 }
 
-export async function prepareImage(file: File): Promise<PreparedImage> {
+/**
+ * Resizes so the longest side is at most `maxSide`, as WebP where the
+ * browser can make it, otherwise `fallback` (older Safari): JPEG for photos,
+ * PNG where transparency matters (logos).
+ */
+export async function prepareImage<
+  F extends 'image/jpeg' | 'image/png' = 'image/jpeg',
+>(
+  file: File,
+  {
+    maxSide = MAX_IMAGE_SIDE,
+    fallback = 'image/jpeg' as F,
+  }: { maxSide?: number; fallback?: F } = {},
+): Promise<PreparedImage<'image/webp' | F>> {
   if (!file.type.startsWith('image/')) {
     throw new ImageProblem('Not an image file.');
   }
@@ -29,30 +47,29 @@ export async function prepareImage(file: File): Promise<PreparedImage> {
     bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
   } catch {
     throw new ImageProblem(
-      'This browser cannot read this file. Use a JPEG, PNG or WebP photo.',
+      'This browser cannot read this file. Use a JPEG, PNG or WebP image.',
     );
   }
 
-  const { width, height } = fitWithin(bitmap.width, bitmap.height);
+  const { width, height } = fitWithin(bitmap.width, bitmap.height, maxSide);
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
   const context = canvas.getContext('2d');
-  if (!context) throw new ImageProblem('This browser cannot resize photos.');
+  if (!context) throw new ImageProblem('This browser cannot resize images.');
   context.imageSmoothingQuality = 'high';
   context.drawImage(bitmap, 0, 0, width, height);
   bitmap.close();
 
-  // WebP where the browser can make it (older Safari falls back to JPEG).
   let blob = await toBlob(canvas, 'image/webp');
-  let type: ImageType = 'image/webp';
+  let type: 'image/webp' | F = 'image/webp';
   if (!blob || blob.type !== 'image/webp') {
-    blob = await toBlob(canvas, 'image/jpeg');
-    type = 'image/jpeg';
+    blob = await toBlob(canvas, fallback);
+    type = fallback;
   }
-  if (!blob) throw new ImageProblem('This photo could not be processed.');
+  if (!blob) throw new ImageProblem('This image could not be processed.');
   if (blob.size > MAX_IMAGE_BYTES) {
-    throw new ImageProblem('This photo is too large even after resizing.');
+    throw new ImageProblem('This image is too large even after resizing.');
   }
   return { blob, type, width, height };
 }

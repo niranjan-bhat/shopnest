@@ -42,6 +42,14 @@ ignores the new database functions and keeps serving `/mock-media`.
 10. [ ] **Email templates**: if they still say "ShopNest", paste `supabase/templates/sign-in-code.html`
         into Supabase → Authentication → Emails → **Confirm sign up** and **Magic link or OTP**.
 
+## Deploy Phase 3.5 (storefront editor)
+
+1. [ ] **Database migration** before merging `phase-3-storefront-editor`:
+       `npx supabase db push --remote --dry-run` should list `reorder_banners`
+       (plus any Phase 3 ones from step 1 above not yet applied), then `npx supabase db push --remote`.
+2. [ ] **Check the live site**: Storefront → Banners: add one (upload), edit its dates, reorder, delete;
+       a scheduled banner appears on the store within about 5 minutes of its start time.
+
 ## Before the first real merchant
 
 - [ ] **Image domain.** `r2.dev` addresses are rate-limited and uncached (Cloudflare: development only).

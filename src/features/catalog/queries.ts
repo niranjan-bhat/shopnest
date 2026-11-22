@@ -154,9 +154,15 @@ export async function getCategoryBySlug(
   return row ? toCategory(row) : null;
 }
 
+/**
+ * Banners shoppers can see now. RLS applies each banner's start and end time
+ * when the query runs, so this cache is short: a scheduled banner goes up
+ * (or comes down) within a few minutes of its time, not hours later.
+ */
 export async function listBanners(tenantId: string): Promise<Banner[]> {
   'use cache';
-  cacheCatalog(tenantId);
+  cacheLife({ stale: 60, revalidate: 300, expire: 3600 });
+  cacheTag(catalogTag(tenantId));
   const rows = check(
     await storefrontDb()
       .from('banners')

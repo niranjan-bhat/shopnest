@@ -63,11 +63,16 @@ describe('isAppPath', () => {
     '/admin',
     '/login',
     '/auth/callback',
+    '/preview',
   ])('%s is an app path', (path) => expect(isAppPath(path)).toBe(true));
-  it.each(['/', '/c/silk', '/p/admin-saree', '/dashboards', '/loginx'])(
-    '%s is not',
-    (path) => expect(isAppPath(path)).toBe(false),
-  );
+  it.each([
+    '/',
+    '/c/silk',
+    '/p/admin-saree',
+    '/dashboards',
+    '/loginx',
+    '/previewing',
+  ])('%s is not', (path) => expect(isAppPath(path)).toBe(false));
 });
 
 describe('origins', () => {

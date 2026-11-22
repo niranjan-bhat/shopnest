@@ -56,6 +56,50 @@ export async function createStore(testInfo: TestInfo): Promise<TestStore> {
   return { id: tenant.id, slug, name };
 }
 
+/**
+ * Replaces a test store's home sections (draft and live). Call it before the
+ * store's pages are first visited: they are cached afterwards.
+ */
+export async function setHomeSections(store: TestStore, sections: unknown[]) {
+  const db = adminDb();
+  const { data, error } = await db
+    .from('tenant_themes')
+    .select('published')
+    .eq('tenant_id', store.id)
+    .single();
+  if (error) throw error;
+  const theme = { ...(data.published as object), sections };
+  const { error: updateError } = await db
+    .from('tenant_themes')
+    .update({ draft: theme, published: theme })
+    .eq('tenant_id', store.id);
+  if (updateError) throw updateError;
+}
+
+/**
+ * Adds always-shown banners with these headings, in order. Their image keys
+ * point at no real file: enough for tests that do not look at the photos.
+ */
+export async function createBanners(
+  store: TestStore,
+  headings: string[],
+): Promise<string[]> {
+  const { data, error } = await adminDb()
+    .from('banners')
+    .insert(
+      headings.map((heading, position) => ({
+        tenant_id: store.id,
+        image_key: `tenants/${store.id}/banners/${crypto.randomUUID()}.webp`,
+        heading,
+        position,
+      })),
+    )
+    .select('id, position')
+    .order('position');
+  if (error) throw error;
+  return data.map((b) => b.id);
+}
+
 /** Adds a visible menu category to a test store. */
 export async function createCategory(
   store: TestStore,
@@ -72,10 +116,15 @@ export async function createCategory(
 }
 
 /**
- * Adds draft products "Product 01".."Product NN" (one variant each), with
+ * Adds products "Product 01".."Product NN" (draft unless `status` says
+ * otherwise; one variant each), with
  * "Product 01" the most recently changed, so it lists first.
  */
-export async function createProducts(store: TestStore, count: number) {
+export async function createProducts(
+  store: TestStore,
+  count: number,
+  status: 'draft' | 'active' = 'draft',
+) {
   const db = adminDb();
   const now = Date.now();
   const rows = Array.from({ length: count }, (_, i) => {
@@ -86,6 +135,7 @@ export async function createProducts(store: TestStore, count: number) {
       slug: `product-${n}`,
       price_mode: 'fixed' as const,
       price_paise: 100000,
+      status,
       updated_at: new Date(now - i * 60_000).toISOString(),
     };
   });
