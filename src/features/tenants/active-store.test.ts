@@ -11,6 +11,7 @@ const summary = (id: string, name: string): StoreSummary => ({
   name,
   slug: id,
   status: 'active',
+  suspendedReason: null,
   url: null,
 });
 

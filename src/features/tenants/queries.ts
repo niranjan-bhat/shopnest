@@ -18,6 +18,8 @@ export type Store = {
 };
 
 export const tenantTag = (tenantId: string) => `tenant:${tenantId}`;
+/** The platform's list of live stores. */
+export const STORES_TAG = 'stores';
 export const hostTag = (hostname: string) => `host:${hostname}`;
 
 /**
@@ -76,10 +78,26 @@ export async function getStoreByHost(host: string): Promise<Store | null> {
   };
 }
 
+/** Whether a host name belongs to a suspended store (not just no store). */
+export async function isSuspendedHost(host: string): Promise<boolean> {
+  'use cache';
+  cacheLife('hours');
+  const hostname = normalizeHostname(decodeURIComponent(host));
+  if (!hostname) return false;
+  cacheTag(hostTag(hostname));
+  return (
+    check(
+      await storefrontDb().rpc('is_suspended_host', { host: hostname }),
+      'is_suspended_host',
+    ) === true
+  );
+}
+
 /** Host names of every live store; prerendered at build time. */
 export async function listStoreHosts(): Promise<string[]> {
   'use cache';
   cacheLife('hours');
+  cacheTag(STORES_TAG);
   const rows = check(
     await storefrontDb()
       .from('tenant_domains')
@@ -94,6 +112,7 @@ export async function listStoreHosts(): Promise<string[]> {
 export async function listPrimaryStoreHosts(): Promise<string[]> {
   'use cache';
   cacheLife('hours');
+  cacheTag(STORES_TAG);
   const rows = check(
     await storefrontDb()
       .from('tenant_domains')

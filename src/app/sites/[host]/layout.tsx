@@ -2,9 +2,10 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Suspense, type ReactNode } from 'react';
 import { StoreShellFallback } from '@/components/storefront/fallbacks';
+import { StoreUnavailable } from '@/components/storefront/store-unavailable';
 import { StoreRoot } from '@/components/storefront/store-root';
 import { loadStorefront } from '@/features/storefront/context';
-import { listStoreHosts } from '@/features/tenants/queries';
+import { isSuspendedHost, listStoreHosts } from '@/features/tenants/queries';
 import { mediaUrl } from '@/lib/media';
 import { atLeastOne } from '@/lib/static-params';
 import { getTemplate } from '@/templates/registry';
@@ -19,7 +20,11 @@ export async function generateMetadata({
 }: LayoutProps<'/sites/[host]'>): Promise<Metadata> {
   const { host } = await params;
   const storefront = await loadStorefront(host);
-  if (!storefront) return {};
+  if (!storefront) {
+    return (await isSuspendedHost(host))
+      ? { title: 'Store unavailable', robots: { index: false } }
+      : {};
+  }
   const { store } = storefront;
   return {
     title: { default: store.name, template: `%s · ${store.name}` },
@@ -39,7 +44,10 @@ async function Storefront({
 }) {
   const { host } = await params;
   const storefront = await loadStorefront(host);
-  if (!storefront) notFound();
+  if (!storefront) {
+    if (await isSuspendedHost(host)) return <StoreUnavailable />;
+    notFound();
+  }
   return (
     <StoreRoot
       store={storefront.store}

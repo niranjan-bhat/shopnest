@@ -56,6 +56,7 @@ function addStore(db: MockDb, store: FixtureStore): void {
     contact_phone: store.contact.phone,
     address: store.contact.address,
     opening_hours: store.contact.openingHours,
+    suspended_reason: null,
     currency: 'INR',
     created_at: isoDaysAgo(90),
     updated_at: isoDaysAgo(90),

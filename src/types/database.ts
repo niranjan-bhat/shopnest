@@ -5,7 +5,33 @@ export type Database = {
   
   "public": {
           Tables: {
-            "audit_log": {
+            "admin_edit_sessions": {
+                  Row: {
+                    "expires_at": string,"tenant_id": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "expires_at": string,"tenant_id": string,"user_id": string
+                  }
+                  Update: {
+                    "expires_at"?: string,"tenant_id"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "admin_edit_sessions_tenant_id_fkey"
+      columns: ["tenant_id"]
+isOneToOne: false
+      referencedRelation: "tenants"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "admin_edit_sessions_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["user_id"]
+    }
+                  ]
+                },"audit_log": {
                   Row: {
                     "action": string,"actor_id": string | null,"created_at": string,"diff": Json | null,"entity": string,"entity_id": string | null,"id": string,"tenant_id": string | null
                   }
@@ -395,14 +421,14 @@ isOneToOne: true
                   ]
                 },"tenants": {
                   Row: {
-                    "address": Json | null,"business_type": string,"contact_email": string | null,"contact_phone": string | null,"created_at": string,"currency": string,"id": string,"name": string,"opening_hours": string | null,"slug": string,"status": Database["public"]['Enums']["tenant_status"],"updated_at": string,"whatsapp_number": string
+                    "address": Json | null,"business_type": string,"contact_email": string | null,"contact_phone": string | null,"created_at": string,"currency": string,"id": string,"name": string,"opening_hours": string | null,"slug": string,"status": Database["public"]['Enums']["tenant_status"],"suspended_reason": string | null,"updated_at": string,"whatsapp_number": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "address"?: Json | null,"business_type"?: string,"contact_email"?: string | null,"contact_phone"?: string | null,"created_at"?: string,"currency"?: string,"id"?: string,"name": string,"opening_hours"?: string | null,"slug": string,"status"?: Database["public"]['Enums']["tenant_status"],"updated_at"?: string,"whatsapp_number": string
+                    "address"?: Json | null,"business_type"?: string,"contact_email"?: string | null,"contact_phone"?: string | null,"created_at"?: string,"currency"?: string,"id"?: string,"name": string,"opening_hours"?: string | null,"slug": string,"status"?: Database["public"]['Enums']["tenant_status"],"suspended_reason"?: string | null,"updated_at"?: string,"whatsapp_number": string
                   }
                   Update: {
-                    "address"?: Json | null,"business_type"?: string,"contact_email"?: string | null,"contact_phone"?: string | null,"created_at"?: string,"currency"?: string,"id"?: string,"name"?: string,"opening_hours"?: string | null,"slug"?: string,"status"?: Database["public"]['Enums']["tenant_status"],"updated_at"?: string,"whatsapp_number"?: string
+                    "address"?: Json | null,"business_type"?: string,"contact_email"?: string | null,"contact_phone"?: string | null,"created_at"?: string,"currency"?: string,"id"?: string,"name"?: string,"opening_hours"?: string | null,"slug"?: string,"status"?: Database["public"]['Enums']["tenant_status"],"suspended_reason"?: string | null,"updated_at"?: string,"whatsapp_number"?: string
                   }
                   Relationships: [
                     
@@ -413,7 +439,13 @@ isOneToOne: true
             [_ in never]: never
           }
           Functions: {
-            "can_manage_tenant":
+            "allow_editing":
+{ Args: { "tid": string }; Returns: string
+                           },
+"can_manage_tenant":
+{ Args: { "tid": string }; Returns: boolean
+                           },
+"can_view_tenant":
 { Args: { "tid": string }; Returns: boolean
                            },
 "create_store":
@@ -427,6 +459,9 @@ isOneToOne: true
                            },
 "is_super_admin":
 { Args: Record<PropertyKey, never>; Returns: boolean
+                           },
+"is_suspended_host":
+{ Args: { "host": string }; Returns: boolean
                            },
 "is_tenant_member":
 { Args: { "tid": string }; Returns: boolean
@@ -451,6 +486,15 @@ isOneToOne: true
                            },
 "set_order_status":
 { Args: { "next": Database["public"]['Enums']["order_status"],"ord": string,"tid": string }; Returns: Json
+                           },
+"set_store_status":
+{ Args: { "next": Database["public"]['Enums']["tenant_status"],"reason"?: string,"tid": string }; Returns: Json
+                           },
+"stop_editing":
+{ Args: { "tid": string }; Returns: undefined
+                           },
+"store_missing":
+{ Args: { "tid": string }; Returns: (string)[]
                            },
 "store_team":
 { Args: { "tid": string }; Returns: {

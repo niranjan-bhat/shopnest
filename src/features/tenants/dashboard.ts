@@ -14,6 +14,8 @@ export type StoreSummary = {
   name: string;
   slug: string;
   status: Enums<'tenant_status'>;
+  /** Why it is suspended; null otherwise. */
+  suspendedReason: string | null;
   /** Storefront URL on the primary host name, if the store has one. */
   url: string | null;
 };
@@ -25,6 +27,7 @@ type TenantRow = {
   name: string;
   slug: string;
   status: Enums<'tenant_status'>;
+  suspended_reason: string | null;
   tenant_domains: { hostname: string; is_primary: boolean }[];
 };
 
@@ -36,6 +39,7 @@ function toSummary(tenant: TenantRow): StoreSummary {
     name: tenant.name,
     slug: tenant.slug,
     status: tenant.status,
+    suspendedReason: tenant.suspended_reason,
     url: primary
       ? originFor(primary.hostname, getPublicEnv().NEXT_PUBLIC_ROOT_DOMAIN)
       : null,
@@ -43,7 +47,7 @@ function toSummary(tenant: TenantRow): StoreSummary {
 }
 
 const TENANT_FIELDS =
-  'id, name, slug, status, tenant_domains(hostname, is_primary)' as const;
+  'id, name, slug, status, suspended_reason, tenant_domains(hostname, is_primary)' as const;
 
 /** Stores the user belongs to, with their role in each. */
 export async function listMyStores(userId: string): Promise<MyStore[]> {

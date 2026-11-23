@@ -2,15 +2,17 @@ import { ArrowLeft, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 import { PageHeader } from '@/components/dashboard/page-header';
 import { Badge } from '@/components/ui/badge';
-import { buttonVariants } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { inviteMessage } from '@/features/admin/invite';
 import type { AdminStore } from '@/features/admin/queries';
 import { BUSINESS_TYPES } from '@/features/admin/store-schema';
 import { formatWhatsApp } from '@/features/tenants/settings';
 import { waLink } from '@/lib/whatsapp';
+import { switchStore } from '@/features/tenants/actions';
 import { CopyButton } from './copy-button';
 import { StoreStatusBadge } from './store-status-badge';
+import { StoreStatusCard } from './store-status-card';
 
 const date = new Intl.DateTimeFormat('en-IN', {
   dateStyle: 'medium',
@@ -66,7 +68,17 @@ export function StoreDetail({
             address
           )
         }
-        actions={<StoreStatusBadge status={store.status} />}
+        actions={
+          <>
+            <StoreStatusBadge status={store.status} />
+            <form action={switchStore}>
+              <input type="hidden" name="storeId" value={store.id} />
+              <Button type="submit" variant="outline">
+                View as merchant
+              </Button>
+            </form>
+          </>
+        }
       />
 
       {message && invitee && (
@@ -98,6 +110,14 @@ export function StoreDetail({
           </CardContent>
         </Card>
       )}
+
+      <StoreStatusCard
+        key={store.id}
+        storeId={store.id}
+        status={store.status}
+        missing={store.missing}
+        suspendedReason={store.suspendedReason}
+      />
 
       <div className="grid gap-6 md:grid-cols-2">
         <Card>

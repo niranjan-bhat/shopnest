@@ -7,6 +7,7 @@ import { createServerSupabase } from '@/lib/supabase/server';
 import { originFor } from '@/lib/tenant';
 import { templates as codeTemplates } from '@/templates/registry';
 import type { Enums } from '@/types/database';
+import { missingSchema, type Missing } from './status';
 import {
   storeSearch,
   type StoreListFilter,
@@ -29,7 +30,7 @@ export type AdminStoreRow = {
 };
 
 const FIELDS =
-  'id, name, slug, status, whatsapp_number, business_type, created_at, tenant_domains(hostname, is_primary), subscriptions(plans(name))' as const;
+  'id, name, slug, status, whatsapp_number, business_type, suspended_reason, created_at, tenant_domains(hostname, is_primary), subscriptions(plans(name))' as const;
 
 type Row = {
   id: string;
@@ -85,6 +86,9 @@ export async function listAdminStores(
 export type AdminStore = AdminStoreRow & {
   whatsappNumber: string;
   businessType: string;
+  suspendedReason: string | null;
+  /** What it still needs to go live. */
+  missing: Missing[];
   team: {
     userId: string;
     email: string;
@@ -102,14 +106,17 @@ export async function getAdminStore(id: string): Promise<AdminStore | null> {
     'tenants',
   );
   if (!row) return null;
-  const team = check(
-    await supabase.rpc('store_team', { tid: id }),
-    'store_team',
-  );
+  const [teamResult, missingResult] = await Promise.all([
+    supabase.rpc('store_team', { tid: id }),
+    supabase.rpc('store_missing', { tid: id }),
+  ]);
+  const team = check(teamResult, 'store_team');
   return {
     ...toRow(row),
     whatsappNumber: row.whatsapp_number,
     businessType: row.business_type,
+    suspendedReason: row.suspended_reason,
+    missing: missingSchema.parse(check(missingResult, 'store_missing')),
     team: team.map((member) => ({
       userId: member.user_id,
       email: member.email,

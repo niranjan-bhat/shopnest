@@ -4,6 +4,11 @@ import { Brand } from '@/components/dashboard/brand';
 import { DashboardHeader } from '@/components/dashboard/dashboard-header';
 import { MobileNav } from '@/components/dashboard/mobile-nav';
 import { NavLinks, NavList } from '@/components/dashboard/nav-links';
+import {
+  ReadOnlyGuard,
+  ReadOnlyProvider,
+} from '@/components/dashboard/read-only';
+import { StoreBanner } from '@/components/dashboard/store-banner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Toaster } from '@/components/ui/sonner';
 
@@ -42,9 +47,14 @@ export default function DashboardLayout({
             <DashboardHeader />
           </Suspense>
         </header>
-        <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 md:px-8">
-          {children}
-        </main>
+        <ReadOnlyProvider>
+          <Suspense fallback={null}>
+            <StoreBanner />
+          </Suspense>
+          <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 md:px-8">
+            <ReadOnlyGuard>{children}</ReadOnlyGuard>
+          </main>
+        </ReadOnlyProvider>
       </div>
       <Toaster position="top-center" />
     </div>

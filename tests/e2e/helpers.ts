@@ -396,3 +396,12 @@ export async function deleteStoreBySlug(slug: string) {
   const { error } = await adminDb().from('tenants').delete().eq('slug', slug);
   if (error) throw error;
 }
+
+/** Changes a test store's own row, e.g. its status. */
+export async function setStoreRow(store: TestStore, row: object) {
+  const { error } = await adminDb()
+    .from('tenants')
+    .update(row)
+    .eq('id', store.id);
+  if (error) throw error;
+}

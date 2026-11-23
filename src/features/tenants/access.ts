@@ -24,6 +24,11 @@ export type DashboardContext = {
   stores: StoreChoice[];
   /** The store the dashboard is working on; null when the user has none. */
   store: StoreChoice | null;
+  /**
+   * When a super admin's edit session on the store ends. Null without one
+   * (and for members, who do not need it).
+   */
+  editingUntil: string | null;
 };
 
 export type StoreContext = DashboardContext & { store: StoreChoice };
@@ -44,14 +49,32 @@ const loadDashboardContext = cache(
     ]);
     const stores = mergeStoreChoices(mine, all);
     const savedId = (await cookies()).get(ACTIVE_STORE_COOKIE)?.value;
+    const store = pickActiveStore(stores, savedId);
     return {
       user,
       superAdmin,
       stores,
-      store: pickActiveStore(stores, savedId),
+      store,
+      editingUntil:
+        store?.role === 'admin' ? await getEditingUntil(store.id) : null,
     };
   },
 );
+
+/** When the signed-in super admin's edit session on a store ends, if any. */
+async function getEditingUntil(tenantId: string): Promise<string | null> {
+  const supabase = await createServerSupabase();
+  const row = check(
+    await supabase
+      .from('admin_edit_sessions')
+      .select('expires_at')
+      .eq('tenant_id', tenantId)
+      .gt('expires_at', new Date().toISOString())
+      .maybeSingle(),
+    'admin_edit_sessions',
+  );
+  return row?.expires_at ?? null;
+}
 
 /** For UI that shows nothing to signed-out visitors (e.g. the header). */
 export function getDashboardContext(): Promise<DashboardContext | null> {
@@ -79,7 +102,8 @@ export async function requireStore(returnTo: string): Promise<StoreContext> {
 
 /**
  * For Server Actions that change a store's data: the user and the active
- * store, with access re-checked in the database right before the write.
+ * store, with access re-checked in the database right before the write (a
+ * super admin who is not a member needs an edit session).
  * Throws instead of redirecting, because a failed action is an error, not a
  * navigation. Writes must still filter by `store.id` explicitly.
  */

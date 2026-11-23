@@ -20,7 +20,8 @@ export const metadata: Metadata = {
  * On the app host, so it sits behind sign-in like the dashboard.
  */
 async function Preview() {
-  const { store } = await requireStore('/preview');
+  const { store, editingUntil } = await requireStore('/preview');
+  const readOnly = store.role === 'admin' && editingUntil === null;
   const preview = await loadThemePreview(store);
   if (!preview) notFound();
   const { template } = preview;
@@ -55,7 +56,7 @@ async function Preview() {
             Live store
           </a>
         )}
-        <PublishButton size="sm" disabled={!preview.hasChanges} />
+        <PublishButton size="sm" disabled={readOnly || !preview.hasChanges} />
       </div>
       <StoreRoot
         store={preview.store}
