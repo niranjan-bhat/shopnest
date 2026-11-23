@@ -19,7 +19,8 @@ async function Settings() {
   ]);
   const initial = settingsFormValues(settings);
   return (
-    <div className="grid gap-6">
+    // Room at the bottom for the form's fixed save bar.
+    <div className="grid gap-6 pb-24">
       <PageHeader
         title="Settings"
         description="Your store's name, WhatsApp number, contact details and pages. Changes go live when you save."

@@ -251,10 +251,26 @@ export function StoreSettingsForm({
         </FieldGroup>
       </Section>
 
-      <div className="flex justify-end">
-        <Button type="submit" disabled={pending}>
-          {pending ? 'Saving…' : 'Save'}
-        </Button>
+      {/* One bar for the whole form, always in view: it saves both cards
+          above (the Pages below save on their own). */}
+      <div
+        className="fixed inset-x-0 bottom-0 z-20 border-t bg-background/95 backdrop-blur md:left-60"
+        data-testid="settings-save-bar"
+      >
+        <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3 md:px-8">
+          <span className="text-sm text-muted-foreground" aria-live="polite">
+            {isDirty
+              ? 'Unsaved changes to your store details'
+              : 'Store details saved and live'}
+          </span>
+          <Button
+            type="submit"
+            disabled={pending || !isDirty}
+            className="ml-auto"
+          >
+            {pending ? 'Saving…' : 'Save details'}
+          </Button>
+        </div>
       </div>
     </form>
   );
