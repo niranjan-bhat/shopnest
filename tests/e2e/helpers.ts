@@ -151,6 +151,33 @@ export async function createProducts(
   if (variantError) throw variantError;
 }
 
+/** Changes a store's product behind the shopper's back (price, status). */
+export async function updateProduct(
+  store: TestStore,
+  productSlug: string,
+  patch: { price_paise?: number; status?: 'draft' | 'active' },
+) {
+  const { error } = await adminDb()
+    .from('products')
+    .update(patch)
+    .eq('tenant_id', store.id)
+    .eq('slug', productSlug);
+  if (error) throw error;
+}
+
+/** A store's orders with their lines, newest first. */
+export async function listOrders(store: TestStore) {
+  const { data, error } = await adminDb()
+    .from('orders')
+    .select(
+      'order_number, total_paise, order_items(name_snapshot, unit_price_paise, qty)',
+    )
+    .eq('tenant_id', store.id)
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return data;
+}
+
 /** Variant ids of a store's product, by option label (e.g. "Rust · S"). */
 export async function variantIds(
   store: TestStore,

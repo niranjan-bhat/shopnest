@@ -66,6 +66,8 @@ test.describe('storefront', () => {
     const text = await whatsappText();
     expect(page.url()).toContain('https://wa.me/910000000001');
     expect(text).toContain('Hello Tara Weaves');
+    // The order is saved first, so the message carries its number.
+    expect(text).toMatch(/I'd like to place an order \(#\d+\):/);
     expect(text).toContain(
       '1. Ruby Temple-Border Kanjivaram × 2, ₹24,500 each',
     );

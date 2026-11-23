@@ -86,6 +86,72 @@ export function summarizeCart(lines: CartLine[]): CartSummary {
   };
 }
 
+/** A line the server reported as changed (see features/orders/schema.ts). */
+export type ReportedChange = {
+  variantId: string;
+  problems: ('unavailable' | 'stock' | 'price')[];
+  unitPricePaise: Paise | null;
+  availableQty: number | null;
+};
+
+/** What happened to one line, for the checkout to tell the shopper. */
+export type CartNotice =
+  | { kind: 'removed'; name: string; optionsLabel: string }
+  | {
+      kind: 'changed';
+      name: string;
+      optionsLabel: string;
+      /** Set when the price changed. */
+      price?: { was: Paise | null; now: Paise | null };
+      /** Set when there were fewer left than the shopper wanted. */
+      qty?: { was: number; now: number };
+    };
+
+/**
+ * Brings the cart in line with today's prices and stock: lines no longer for
+ * sale (or sold out) are removed, quantities drop to what is left, and
+ * prices update. Returns the new lines and a notice for each change.
+ */
+export function applyChanges(
+  lines: CartLine[],
+  changes: ReportedChange[],
+): { lines: CartLine[]; notices: CartNotice[] } {
+  const byVariant = new Map(changes.map((c) => [c.variantId, c]));
+  const notices: CartNotice[] = [];
+  const next: CartLine[] = [];
+  for (const line of lines) {
+    const change = byVariant.get(line.variantId);
+    if (!change) {
+      next.push(line);
+      continue;
+    }
+    const label = { name: line.name, optionsLabel: line.optionsLabel };
+    const left = change.availableQty;
+    if (change.problems.includes('unavailable') || left === 0) {
+      notices.push({ kind: 'removed', ...label });
+      continue;
+    }
+    const updated: CartLine = {
+      ...line,
+      unitPricePaise: change.unitPricePaise,
+      maxQty: left,
+      qty: clampQty(line.qty, left),
+    };
+    notices.push({
+      kind: 'changed',
+      ...label,
+      ...(updated.unitPricePaise !== line.unitPricePaise && {
+        price: { was: line.unitPricePaise, now: updated.unitPricePaise },
+      }),
+      ...(updated.qty !== line.qty && {
+        qty: { was: line.qty, now: updated.qty },
+      }),
+    });
+    next.push(updated);
+  }
+  return { lines: next, notices };
+}
+
 /** "Colour: Indigo, Size: M" style label from variant options. */
 export function formatOptions(options: Record<string, string>): string {
   return Object.values(options).join(' · ');

@@ -18,6 +18,8 @@ type CartState = {
   setQty: (tenantId: string, variantId: string, qty: number) => void;
   remove: (tenantId: string, variantId: string) => void;
   clear: (tenantId: string) => void;
+  /** Replaces a store's lines, e.g. after the server updated prices. */
+  replace: (tenantId: string, lines: CartLine[]) => void;
 };
 
 export const useCartStore = create<CartState>()(
@@ -42,6 +44,7 @@ export const useCartStore = create<CartState>()(
         remove: (tenantId, variantId) =>
           update(tenantId, (lines) => removeLine(lines, variantId)),
         clear: (tenantId) => update(tenantId, () => []),
+        replace: (tenantId, lines) => update(tenantId, () => lines),
       };
     },
     {

@@ -2,6 +2,7 @@ import type { TemplateDefinition } from '../contract';
 import { SilkContactPage } from './contact-page';
 import { SilkContentPage } from './content-page';
 import { SilkLayout } from './layout';
+import { SilkOrderPage } from './order-page';
 import {
   SilkCartPage,
   SilkCategoryPage,
@@ -32,6 +33,7 @@ export const silkTemplate: TemplateDefinition = {
   ProductPage: SilkProductPage,
   CartPage: SilkCartPage,
   CheckoutPage: SilkCheckoutPage,
+  OrderPage: SilkOrderPage,
   ContactPage: SilkContactPage,
   ContentPage: SilkContentPage,
 };
