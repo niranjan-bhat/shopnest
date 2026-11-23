@@ -73,14 +73,14 @@ isOneToOne: false
                   ]
                 },"order_items": {
                   Row: {
-                    "created_at": string,"id": string,"name_snapshot": string,"options_snapshot": NonNullable<Json>,"order_id": string,"qty": number,"tenant_id": string,"unit_price_paise": number | null,"variant_id": string | null
+                    "created_at": string,"id": string,"name_snapshot": string,"options_snapshot": NonNullable<Json>,"order_id": string,"position": number,"qty": number,"tenant_id": string,"unit_price_paise": number | null,"variant_id": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"id"?: string,"name_snapshot": string,"options_snapshot"?: NonNullable<Json>,"order_id": string,"qty": number,"tenant_id": string,"unit_price_paise"?: number | null,"variant_id"?: string | null
+                    "created_at"?: string,"id"?: string,"name_snapshot": string,"options_snapshot"?: NonNullable<Json>,"order_id": string,"position"?: number,"qty": number,"tenant_id": string,"unit_price_paise"?: number | null,"variant_id"?: string | null
                   }
                   Update: {
-                    "created_at"?: string,"id"?: string,"name_snapshot"?: string,"options_snapshot"?: NonNullable<Json>,"order_id"?: string,"qty"?: number,"tenant_id"?: string,"unit_price_paise"?: number | null,"variant_id"?: string | null
+                    "created_at"?: string,"id"?: string,"name_snapshot"?: string,"options_snapshot"?: NonNullable<Json>,"order_id"?: string,"position"?: number,"qty"?: number,"tenant_id"?: string,"unit_price_paise"?: number | null,"variant_id"?: string | null
                   }
                   Relationships: [
                     {
@@ -105,14 +105,14 @@ isOneToOne: false
                   ]
                 },"orders": {
                   Row: {
-                    "address": NonNullable<Json>,"channel": Database["public"]['Enums']["order_channel"],"created_at": string,"customer_name": string,"customer_phone": string,"id": string,"notes": string | null,"order_number": number,"status": Database["public"]['Enums']["order_status"],"subtotal_paise": number,"tenant_id": string,"total_paise": number,"updated_at": string
+                    "address": NonNullable<Json>,"channel": Database["public"]['Enums']["order_channel"],"checkout_id": string | null,"created_at": string,"customer_name": string,"customer_phone": string,"id": string,"notes": string | null,"order_number": number,"status": Database["public"]['Enums']["order_status"],"subtotal_paise": number,"tenant_id": string,"total_paise": number,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "address": NonNullable<Json>,"channel"?: Database["public"]['Enums']["order_channel"],"created_at"?: string,"customer_name": string,"customer_phone": string,"id"?: string,"notes"?: string | null,"order_number"?: number,"status"?: Database["public"]['Enums']["order_status"],"subtotal_paise": number,"tenant_id": string,"total_paise": number,"updated_at"?: string
+                    "address": NonNullable<Json>,"channel"?: Database["public"]['Enums']["order_channel"],"checkout_id"?: string | null,"created_at"?: string,"customer_name": string,"customer_phone": string,"id"?: string,"notes"?: string | null,"order_number"?: number,"status"?: Database["public"]['Enums']["order_status"],"subtotal_paise": number,"tenant_id": string,"total_paise": number,"updated_at"?: string
                   }
                   Update: {
-                    "address"?: NonNullable<Json>,"channel"?: Database["public"]['Enums']["order_channel"],"created_at"?: string,"customer_name"?: string,"customer_phone"?: string,"id"?: string,"notes"?: string | null,"order_number"?: number,"status"?: Database["public"]['Enums']["order_status"],"subtotal_paise"?: number,"tenant_id"?: string,"total_paise"?: number,"updated_at"?: string
+                    "address"?: NonNullable<Json>,"channel"?: Database["public"]['Enums']["order_channel"],"checkout_id"?: string | null,"created_at"?: string,"customer_name"?: string,"customer_phone"?: string,"id"?: string,"notes"?: string | null,"order_number"?: number,"status"?: Database["public"]['Enums']["order_status"],"subtotal_paise"?: number,"tenant_id"?: string,"total_paise"?: number,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -427,6 +427,9 @@ isOneToOne: true
                            },
 "is_tenant_member":
 { Args: { "tid": string }; Returns: boolean
+                           },
+"place_order":
+{ Args: { "checkout": string,"customer": Json,"items": Json,"tid": string }; Returns: Json
                            },
 "reorder_banners":
 { Args: { "ordered_ids": (string)[],"tid": string }; Returns: undefined

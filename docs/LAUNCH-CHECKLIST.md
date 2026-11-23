@@ -54,6 +54,12 @@ ignores the new database functions and keeps serving `/mock-media`.
 4. [ ] **Pages**: Settings → Pages: write at least Shipping, Returns and Privacy for each live store
        (Razorpay asks for these later), show them, and check the footer links.
 
+## Deploy Phase 4 (ordering)
+
+1. [ ] **Database migrations** before merging `phase-4-ordering`:
+       `npx supabase db push --remote --dry-run` should list `place_order` (and the later Phase 4 ones),
+       then `npx supabase db push --remote`. The checkout breaks if the code ships without them.
+
 ## Before the first real merchant
 
 - [ ] **Image domain.** `r2.dev` addresses are rate-limited and uncached (Cloudflare: development only).
