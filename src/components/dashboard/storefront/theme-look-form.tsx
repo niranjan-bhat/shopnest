@@ -32,6 +32,7 @@ import {
 import { FONT_NAMES } from '@/features/theme/schema';
 import { tokensToCssVars } from '@/features/theme/tokens';
 import { useHydrated } from '@/lib/use-hydrated';
+import { useReportEditing } from './editor-status';
 import { ImageField } from './image-field';
 
 const COLOURS: {
@@ -109,6 +110,7 @@ export function ThemeLookForm({
   } = form;
   const values = useWatch({ control }) as ThemeLook;
   const warnings = colourWarnings(values.colors);
+  useReportEditing(isDirty);
 
   useEffect(() => {
     if (!isDirty) return;
@@ -368,7 +370,7 @@ export function ThemeLookForm({
           </Section>
         </div>
 
-        <div className="lg:sticky lg:top-20">
+        <div className="lg:sticky lg:top-50">
           <p className="mb-2 text-sm font-medium">Sample</p>
           <div
             className={cn(
@@ -409,10 +411,21 @@ export function ThemeLookForm({
               ? 'Unsaved changes'
               : 'Saved to the draft. Publish to make it live.'}
           </span>
+          {isDirty && (
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => reset()}
+              disabled={pending}
+              className="ml-auto"
+            >
+              Undo edits
+            </Button>
+          )}
           <Button
             type="submit"
             disabled={pending || !isDirty}
-            className="ml-auto"
+            className={isDirty ? undefined : 'ml-auto'}
           >
             {pending ? 'Saving…' : 'Save draft'}
           </Button>

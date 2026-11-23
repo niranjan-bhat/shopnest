@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+﻿import { expect, test, type Page } from '@playwright/test';
 import {
   createStore,
   deleteStore,
@@ -27,6 +27,7 @@ test.afterEach(async () => {
 });
 
 const bar = (page: Page) => page.getByTestId('publish-bar');
+const status = (page: Page) => page.getByTestId('publish-status');
 
 async function saveDraft(page: Page) {
   await page.getByRole('button', { name: 'Save draft' }).click();
@@ -43,7 +44,7 @@ async function liveHome(page: Page) {
 }
 
 test('draft changes are previewed, then published', async ({ page }) => {
-  await expect(bar(page)).toContainText('Live');
+  await expect(status(page)).toContainText('Live');
 
   await page.getByLabel('Announcement bar').fill('Diwali sale: 20% off');
   await page.getByLabel('Tagline').fill('Silks for every celebration');
@@ -63,7 +64,7 @@ test('draft changes are previewed, then published', async ({ page }) => {
   );
 
   await saveDraft(page);
-  await expect(bar(page)).toContainText('Unpublished changes');
+  await expect(status(page)).toContainText('Unpublished changes');
 
   // Shoppers do not see a draft.
   const before = await liveHome(page);
@@ -88,7 +89,7 @@ test('draft changes are previewed, then published', async ({ page }) => {
   await expect(
     page.getByText('Published. Your store is updated.'),
   ).toBeVisible();
-  await expect(bar(page)).toContainText('Live');
+  await expect(status(page)).toContainText('Live');
   const after = await liveHome(page);
   await expect(
     after.getByText('Diwali sale: 20% off', { exact: true }),
@@ -101,17 +102,72 @@ test('draft changes are previewed, then published', async ({ page }) => {
   // A later change can be thrown away.
   await page.getByLabel('Announcement bar').fill('Not this one');
   await saveDraft(page);
-  await expect(bar(page)).toContainText('Unpublished changes');
+  await expect(status(page)).toContainText('Unpublished changes');
   await bar(page).getByRole('button', { name: 'Discard changes' }).click();
   await page
     .getByRole('alertdialog', { name: 'Discard unpublished changes?' })
     .getByRole('button', { name: 'Discard' })
     .click();
-  await expect(bar(page)).toContainText('Live');
+  await expect(status(page)).toContainText('Live');
   await page.locator('form[data-hydrated]').waitFor();
   await expect(page.getByLabel('Announcement bar')).toHaveValue(
     'Diwali sale: 20% off',
   );
+});
+
+/** The step the publishing track is on: Edit, Draft or Live. */
+const step = (page: Page) => bar(page).locator('[aria-current="step"]');
+
+test('unsaved edits can be undone; the track follows each step', async ({
+  page,
+}) => {
+  const publish = bar(page).getByRole('button', { name: 'Publish' });
+  const brand = page.getByRole('textbox', {
+    name: 'Brand colour',
+    exact: true,
+  });
+  const before = await brand.inputValue();
+  const tagline = page.getByLabel('Tagline');
+  const taglineBefore = await tagline.inputValue();
+  await expect(step(page)).toContainText('Live');
+  await expect(page.getByRole('button', { name: 'Undo edits' })).toHaveCount(0);
+
+  // The bar stays in reach while scrolling, with a shadow only once pinned.
+  await expect(bar(page)).not.toHaveAttribute('data-stuck');
+  await page.evaluate(() => window.scrollTo(0, 800));
+  await expect(bar(page)).toHaveAttribute('data-stuck', 'true');
+  await expect(bar(page)).toBeInViewport();
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await expect(bar(page)).not.toHaveAttribute('data-stuck');
+
+  // An edit not yet saved: Publish waits, and the edit can be undone.
+  await brand.fill('#123456');
+  await tagline.fill('Not this either');
+  await expect(step(page)).toContainText('Edit');
+  await expect(status(page)).toContainText('Unsaved edits');
+  await expect(publish).toBeDisabled();
+  await page.getByRole('button', { name: 'Undo edits' }).click();
+  await expect(brand).toHaveValue(before);
+  await expect(tagline).toHaveValue(taglineBefore);
+  await expect(step(page)).toContainText('Live');
+  await expect(page.getByRole('button', { name: 'Save draft' })).toBeDisabled();
+
+  // Saved to the draft: waiting to publish. Undo goes back to the draft.
+  await brand.fill('#123456');
+  await saveDraft(page);
+  await expect(step(page)).toContainText('Draft');
+  await expect(status(page)).toContainText('Unpublished changes');
+  await expect(publish).toBeEnabled();
+  await brand.fill('#654321');
+  await page.getByRole('button', { name: 'Undo edits' }).click();
+  await expect(brand).toHaveValue('#123456');
+  await expect(step(page)).toContainText('Draft');
+
+  await publish.click();
+  await expect(
+    page.getByText('Published. Your store is updated.'),
+  ).toBeVisible();
+  await expect(step(page)).toContainText('Live');
 });
 
 test('a logo replaces the store name, sized to its shape', async ({ page }) => {
@@ -141,7 +197,7 @@ test('a logo replaces the store name, sized to its shape', async ({ page }) => {
   await expect(logo).toBeVisible();
   const box = await logo.boundingBox();
   const wide = (home.viewportSize()?.width ?? 0) >= 768;
-  // 300 × 50 from md up, 180 × 30 on phones (it was 240 × 40 everywhere).
+  // 300 Ã— 50 from md up, 180 Ã— 30 on phones (it was 240 Ã— 40 everywhere).
   expect(box?.width).toBeCloseTo(wide ? 300 : 180, 0);
   expect(box?.height).toBeCloseTo(wide ? 50 : 30, 0);
   await home.close();

@@ -263,10 +263,21 @@ export function StoreSettingsForm({
               ? 'Unsaved changes to your store details'
               : 'Store details saved and live'}
           </span>
+          {isDirty && (
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => reset()}
+              disabled={pending}
+              className="ml-auto"
+            >
+              Undo edits
+            </Button>
+          )}
           <Button
             type="submit"
             disabled={pending || !isDirty}
-            className="ml-auto"
+            className={isDirty ? undefined : 'ml-auto'}
           >
             {pending ? 'Saving…' : 'Save details'}
           </Button>
