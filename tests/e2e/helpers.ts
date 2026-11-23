@@ -391,3 +391,8 @@ export async function signIn(page: Page, email: string) {
   await page.getByRole('button', { name: 'Sign in' }).click();
   await expect(page).toHaveURL(app('/dashboard'));
 }
+
+export async function deleteStoreBySlug(slug: string) {
+  const { error } = await adminDb().from('tenants').delete().eq('slug', slug);
+  if (error) throw error;
+}

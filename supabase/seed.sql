@@ -10,6 +10,10 @@ insert into public.tenants (id, slug, name, status, business_type, whatsapp_numb
   ('00000001-0000-4000-8000-000000000001', 'saree-demo', 'Tara Weaves', 'active', 'saree', '+910000000001', 'hello@taraweaves.example', '044 2345 6789', '{"line1":"14 Sannathi Street","line2":"Near Kamakshi Amman Temple","city":"Kanchipuram","state":"Tamil Nadu","pincode":"631502"}'::jsonb, 'Mon–Sat, 10 am – 8 pm · Sunday by appointment', 'INR', '2026-08-17T10:00:00.000Z', '2026-08-17T10:00:00.000Z'),
   ('00000002-0000-4000-8000-000000000001', 'boutique-demo', 'Noor Atelier', 'active', 'ethnic-wear', '+910000000002', 'studio@nooratelier.example', null, '{"line1":"C-12, Bapu Bazaar Lane","city":"Jaipur","state":"Rajasthan","pincode":"302003"}'::jsonb, 'Tue–Sun, 11 am – 7 pm', 'INR', '2026-08-17T10:00:00.000Z', '2026-08-17T10:00:00.000Z');
 
+insert into public.subscriptions (tenant_id, plan_id) values
+  ('00000001-0000-4000-8000-000000000001', '00000000-0000-4000-8000-000000000002'),
+  ('00000002-0000-4000-8000-000000000001', '00000000-0000-4000-8000-000000000002');
+
 insert into public.tenant_domains (id, tenant_id, hostname, kind, is_primary, verified_at, created_at) values
   ('00000001-0001-4000-8000-000000000001', '00000001-0000-4000-8000-000000000001', 'saree-demo.localhost', 'subdomain', true, '2026-08-17T10:00:00.000Z', '2026-08-17T10:00:00.000Z'),
   ('00000002-0001-4000-8000-000000000001', '00000002-0000-4000-8000-000000000001', 'boutique-demo.localhost', 'subdomain', true, '2026-08-17T10:00:00.000Z', '2026-08-17T10:00:00.000Z');

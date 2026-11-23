@@ -65,6 +65,15 @@ ignores the new database functions and keeps serving `/mock-media`.
 3. [x] **Spam limits** need nothing set up: Vercel supplies the shopper's network address, and only a hash
        of it, keyed with the Supabase service-role key, is stored. Rotating that key restarts the hourly counts.
 
+## Deploy Phase 5 (super admin and subscriptions)
+
+1. [ ] **Database migrations** before merging `phase-5-admin`:
+       `npx supabase db push --remote --dry-run` should list `create_store`, then `npx supabase db push --remote`.
+       It adds the Starter and Growth plans and puts every existing store on Growth.
+2. [ ] **Plan prices.** Starter (₹999) and Growth (₹2,499) are placeholders: set the real ones before billing anyone.
+3. [ ] **Create a test store** at `https://app.zarify.in/admin`, with an owner email you can read: the owner signs in
+       with a code and sees the store, and `https://<address>.zarify.in` says "Page not found" until it is live.
+
 ## Before the first real merchant
 
 - [ ] **Image domain.** `r2.dev` addresses are rate-limited and uncached (Cloudflare: development only).

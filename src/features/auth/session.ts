@@ -42,3 +42,14 @@ export async function requireSuperAdmin(
   if (!(await isSuperAdmin())) notFound();
   return user;
 }
+
+/**
+ * For Server Actions only a super admin may run. Throws instead of showing a
+ * 404: the page already checked, so this is an error, not a navigation.
+ */
+export async function requireSuperAdminForAction(): Promise<SessionUser> {
+  const user = await getSessionUser();
+  if (!user) throw new Error('Not signed in');
+  if (!(await isSuperAdmin())) throw new Error('Super admins only');
+  return user;
+}

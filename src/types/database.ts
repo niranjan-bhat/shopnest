@@ -296,7 +296,7 @@ isOneToOne: false
     },{
       foreignKeyName: "subscriptions_tenant_id_fkey"
       columns: ["tenant_id"]
-isOneToOne: false
+isOneToOne: true
       referencedRelation: "tenants"
       referencedColumns: ["id"]
     }
@@ -416,6 +416,9 @@ isOneToOne: true
             "can_manage_tenant":
 { Args: { "tid": string }; Returns: boolean
                            },
+"create_store":
+{ Args: { "actor": string,"root": string,"store": Json }; Returns: Json
+                           },
 "is_live_product":
 { Args: { "pid": string }; Returns: boolean
                            },
@@ -448,6 +451,11 @@ isOneToOne: true
                            },
 "set_order_status":
 { Args: { "next": Database["public"]['Enums']["order_status"],"ord": string,"tid": string }; Returns: Json
+                           },
+"store_team":
+{ Args: { "tid": string }; Returns: {
+              "email": string,"role": Database["public"]['Enums']["member_role"],"signed_in": boolean,"user_id": string
+            }[]
                            }
           }
           Enums: {
