@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   addLine,
+  applyChanges,
   clampQty,
   formatOptions,
   MAX_QTY_PER_LINE,
@@ -68,5 +69,84 @@ describe('cart', () => {
   it('formats variant options', () => {
     expect(formatOptions({ colour: 'Indigo', size: 'M' })).toBe('Indigo · M');
     expect(formatOptions({})).toBe('');
+  });
+});
+
+describe('applyChanges', () => {
+  const line = (overrides: Partial<CartItemInput> = {}, qty = 2) =>
+    addLine([], item(overrides), qty)[0]!;
+  const bag = [
+    line({ variantId: 'price', name: 'Saree', optionsLabel: '' }),
+    line({ variantId: 'few', name: 'Kurta', maxQty: 5 }, 4),
+    line({ variantId: 'gone', name: 'Dupatta', optionsLabel: '' }),
+    line({ variantId: 'sold', name: 'Stole', optionsLabel: '' }),
+    line({ variantId: 'same', name: 'Blouse' }),
+  ];
+
+  it('updates prices and stock, drops what is gone, and says what changed', () => {
+    const { lines, notices } = applyChanges(bag, [
+      {
+        variantId: 'price',
+        problems: ['price'],
+        unitPricePaise: 150_000,
+        availableQty: null,
+      },
+      {
+        variantId: 'few',
+        problems: ['stock'],
+        unitPricePaise: 129_900,
+        availableQty: 3,
+      },
+      {
+        variantId: 'gone',
+        problems: ['unavailable'],
+        unitPricePaise: null,
+        availableQty: null,
+      },
+      {
+        variantId: 'sold',
+        problems: ['stock'],
+        unitPricePaise: 129_900,
+        availableQty: 0,
+      },
+    ]);
+    expect(
+      lines.map((l) => [l.variantId, l.qty, l.unitPricePaise, l.maxQty]),
+    ).toEqual([
+      ['price', 2, 150_000, null],
+      ['few', 3, 129_900, 3],
+      ['same', 2, 129_900, null],
+    ]);
+    expect(notices).toEqual([
+      {
+        kind: 'changed',
+        name: 'Saree',
+        optionsLabel: '',
+        price: { was: 129_900, now: 150_000 },
+      },
+      {
+        kind: 'changed',
+        name: 'Kurta',
+        optionsLabel: 'M',
+        qty: { was: 4, now: 3 },
+      },
+      { kind: 'removed', name: 'Dupatta', optionsLabel: '' },
+      { kind: 'removed', name: 'Stole', optionsLabel: '' },
+    ]);
+  });
+
+  it('reports a move to and from price on request', () => {
+    const { notices } = applyChanges(
+      [bag[0]!],
+      [
+        {
+          variantId: 'price',
+          problems: ['price'],
+          unitPricePaise: null,
+          availableQty: null,
+        },
+      ],
+    );
+    expect(notices[0]).toMatchObject({ price: { was: 129_900, now: null } });
   });
 });

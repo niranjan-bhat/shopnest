@@ -44,7 +44,7 @@ ignores the new database functions and keeps serving `/mock-media`.
 
 ## Deploy Phase 3.5–3.6 (storefront editor, store settings)
 
-1. [ ] **Database migrations** before merging `phase-3-storefront-editor`:
+1. [x] **Database migrations** before merging `phase-3-storefront-editor` (all on production, checked 2026-11-23):
        `npx supabase db push --remote --dry-run` should list `reorder_banners`, `store_contact` and `store_pages`
        (plus any Phase 3 ones from step 1 above not yet applied), then `npx supabase db push --remote`.
 2. [ ] **Check the live site**: Storefront → Banners: add one (upload), edit its dates, reorder, delete;
@@ -53,6 +53,17 @@ ignores the new database functions and keeps serving `/mock-media`.
        details are in `seed.sql` only, which never runs on production), then check `/contact` and the footer.
 4. [ ] **Pages**: Settings → Pages: write at least Shipping, Returns and Privacy for each live store
        (Razorpay asks for these later), show them, and check the footer links.
+
+## Deploy Phase 4 (ordering)
+
+1. [ ] **Database migrations** before merging `phase-4-ordering`:
+       `npx supabase db push --remote --dry-run` should list `place_order`, `order_status` and `order_limits`,
+       then `npx supabase db push --remote`. The checkout breaks if the code ships without them.
+2. [ ] **Place a test order** on a live store from your phone: it reaches WhatsApp with an order number, shows
+       up under Dashboard → Orders as New with the same total, and confirming then cancelling it moves the stock
+       down and back. Cancel the test order afterwards.
+3. [ ] **Spam limits** need nothing set up: Vercel supplies the shopper's network address, and only a hash
+       of it, keyed with the Supabase service-role key, is stored. Rotating that key restarts the hourly counts.
 
 ## Before the first real merchant
 

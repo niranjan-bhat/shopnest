@@ -28,7 +28,7 @@ const NAV: NavItem[] = [
   { href: '/dashboard', label: 'Overview', icon: LayoutDashboard, exact: true },
   { href: '/dashboard/products', label: 'Products', icon: Package },
   { href: '/dashboard/categories', label: 'Categories', icon: FolderTree },
-  { href: '/dashboard/orders', label: 'Orders', icon: ShoppingBag, soon: true },
+  { href: '/dashboard/orders', label: 'Orders', icon: ShoppingBag },
   { href: '/dashboard/storefront', label: 'Storefront', icon: Palette },
   { href: '/dashboard/settings', label: 'Settings', icon: Settings },
 ];

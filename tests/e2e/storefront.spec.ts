@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { randomMobile } from './helpers';
 import { store } from './urls';
 
 /** Stops WhatsApp navigation and returns the pre-filled message text. */
@@ -23,13 +24,14 @@ async function openStore(page: Page, url: string) {
   await page.locator('html[data-hydrated]').waitFor({ state: 'attached' });
 }
 
-async function fillCheckout(page: Page) {
+async function fillCheckout(page: Page, phone = randomMobile()) {
   await page.getByLabel('Full name').fill('Asha Rao');
-  await page.getByLabel('Mobile number').fill('98765 43210');
+  await page.getByLabel('Mobile number').fill(phone);
   await page.getByLabel('Address', { exact: true }).fill('12 MG Road');
   await page.getByLabel('City').fill('Bengaluru');
   await page.getByLabel('PIN code').fill('560001');
   await page.getByLabel('State').selectOption('Karnataka');
+  return phone;
 }
 
 test.describe('storefront', () => {
@@ -60,17 +62,19 @@ test.describe('storefront', () => {
     await page.getByRole('button', { name: 'Place order on WhatsApp' }).click();
     await expect(page.getByText('Enter your name')).toBeVisible();
 
-    await fillCheckout(page);
+    const phone = await fillCheckout(page);
     await page.getByRole('button', { name: 'Place order on WhatsApp' }).click();
 
     const text = await whatsappText();
     expect(page.url()).toContain('https://wa.me/910000000001');
     expect(text).toContain('Hello Tara Weaves');
+    // The order is saved first, so the message carries its number.
+    expect(text).toMatch(/I'd like to place an order \(#\d+\):/);
     expect(text).toContain(
       '1. Ruby Temple-Border Kanjivaram × 2, ₹24,500 each',
     );
     expect(text).toContain('Total: ₹49,000');
-    expect(text).toContain('Phone: +91 9876543210');
+    expect(text).toContain(`Phone: +91 ${phone}`);
     expect(text).toContain('12 MG Road, Bengaluru, Karnataka 560001');
   });
 

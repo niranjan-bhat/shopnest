@@ -5,6 +5,7 @@ import type {
   ProductPageData,
 } from '@/features/storefront/pages';
 import type { ResolvedSection } from '@/features/storefront/home';
+import type { ShopperOrder } from '@/features/orders/queries';
 import type { PageLink, StorePage } from '@/features/pages/queries';
 import type { StoreContact } from '@/features/tenants/settings';
 import type { Branding, SectionType } from '@/features/theme/schema';
@@ -42,6 +43,7 @@ export type CategoryPageProps = { store: StoreContext } & CategoryPageData;
 export type ProductPageProps = { store: StoreContext } & ProductPageData;
 export type StorePageProps = { store: StoreContext };
 export type ContentPageProps = { store: StoreContext; page: StorePage };
+export type OrderPageProps = { store: StoreContext; order: ShopperOrder };
 
 export type TemplateDefinition = {
   key: string;
@@ -55,6 +57,8 @@ export type TemplateDefinition = {
   ProductPage: ComponentType<ProductPageProps>;
   CartPage: ComponentType<StorePageProps>;
   CheckoutPage: ComponentType<StorePageProps>;
+  /** After checkout: the order number, its lines and Send on WhatsApp. */
+  OrderPage: ComponentType<OrderPageProps>;
   /** How to reach the store: address, hours, WhatsApp, phone, email. */
   ContactPage: ComponentType<StorePageProps>;
   /** An information page: About us, Shipping, Returns, Privacy, Terms. */
