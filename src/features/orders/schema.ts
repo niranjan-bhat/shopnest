@@ -15,6 +15,11 @@ const paise = z.number().int().nonnegative();
 export const createOrderSchema = z.object({
   /** One id per checkout, so a repeat returns the same order. */
   checkoutId: z.uuid(),
+  /**
+   * A field shoppers never see, so it stays empty; bots that fill in every
+   * field give themselves away (createOrder saves nothing for them).
+   */
+  website: z.string().max(500).optional(),
   customer: checkoutSchema,
   lines: z
     .array(
@@ -67,6 +72,10 @@ export const placeOrderResultSchema = z.discriminatedUnion('status', [
     status: z.literal('changed'),
     lines: z.array(changedLine).min(1),
   }),
+  z.object({
+    status: z.literal('limited'),
+    limit: z.enum(['phone', 'network']),
+  }),
 ]);
 
 export type PlaceOrderResult = z.infer<typeof placeOrderResultSchema>;
@@ -84,4 +93,6 @@ export type LineChange = {
 export type CreateOrderResult =
   | { status: 'placed'; orderId: string; whatsappUrl: string }
   | { status: 'changed'; changes: LineChange[] }
+  /** Too many orders in the last hour: message the store instead. */
+  | { status: 'limited'; error: string; whatsappUrl: string }
   | { status: 'error'; error: string };

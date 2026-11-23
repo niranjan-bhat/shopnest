@@ -3,11 +3,17 @@ import {
   createProducts,
   createStore,
   deleteStore,
+  freshEmail,
+  grantAccess,
   listOrders,
+  placeOrder,
+  randomMobile,
+  signIn,
+  stockOf,
   updateProduct,
   type TestStore,
 } from './helpers';
-import { store as storeUrl } from './urls';
+import { app, store as storeUrl } from './urls';
 
 let shop: TestStore;
 
@@ -44,9 +50,9 @@ async function addToBag(page: Page, slug: string) {
   await expect(page.getByTestId('cart-count')).toBeVisible();
 }
 
-async function fillCheckout(page: Page) {
+async function fillCheckout(page: Page, phone = randomMobile()) {
   await page.getByLabel('Full name').fill('Asha Rao');
-  await page.getByLabel('Mobile number').fill('98765 43210');
+  await page.getByLabel('Mobile number').fill(phone);
   await page.getByLabel('Address', { exact: true }).fill('12 MG Road');
   await page.getByLabel('City').fill('Bengaluru');
   await page.getByLabel('PIN code').fill('560001');
@@ -151,4 +157,94 @@ test('another link to the order sends a short message, and unknown orders 404', 
     other.getByRole('heading', { name: "We couldn't find that page" }),
   ).toBeVisible();
   await other.close();
+});
+
+test('exit: an order matches on WhatsApp and in the dashboard, and stock follows it', async ({
+  page,
+}, testInfo) => {
+  // The shopper orders both products.
+  const whatsappText = await captureWhatsApp(page);
+  await addToBag(page, 'product-01');
+  await addToBag(page, 'product-02');
+  await open(page, '/checkout');
+  await fillCheckout(page);
+  await page.getByRole('button', { name: 'Place order on WhatsApp' }).click();
+  const text = await whatsappText();
+  expect(text).toContain('(#1001)');
+  expect(text).toContain('Total: ₹2,000');
+  await page.goBack();
+  const orderUrl = page.url();
+
+  // The merchant finds the same order, with the same total.
+  const email = freshEmail(testInfo);
+  await signIn(page, email);
+  await grantAccess(email, { store: shop.slug });
+  await page.goto(app('/dashboard/orders'));
+  await page.getByTestId('order-row').filter({ hasText: '#1001' }).click();
+  await page.locator('[data-testid="order-actions"][data-hydrated]').waitFor();
+  await expect(page.getByTestId('order-total')).toHaveText('₹2,000');
+
+  // Confirming takes the stock, and the shopper's page says so.
+  await page.getByRole('button', { name: 'Confirm order' }).click();
+  await expect(page.getByText('Order marked as confirmed')).toBeVisible();
+  expect(await stockOf(shop, 'product-01')).toBe(0);
+  expect(await stockOf(shop, 'product-02')).toBe(0);
+  const shopper = await page.context().newPage();
+  await shopper.goto(orderUrl);
+  await expect(shopper.getByTestId('order-status')).toHaveText(
+    'Confirmed by the store',
+  );
+  await shopper.close();
+
+  // Cancelling puts it back.
+  await page.getByRole('button', { name: 'Cancel order' }).click();
+  await page
+    .getByRole('alertdialog', { name: 'Cancel this order?' })
+    .getByRole('button', { name: 'Cancel order' })
+    .click();
+  await expect(page.getByText('Order cancelled')).toBeVisible();
+  expect(await stockOf(shop, 'product-01')).toBe(1);
+  expect(await stockOf(shop, 'product-02')).toBe(1);
+});
+
+test('a fourth order within the hour from one phone is turned away kindly', async ({
+  page,
+}) => {
+  // Three orders from this number already (the helpers' customer phone).
+  for (let i = 0; i < 3; i++) {
+    await placeOrder(shop, [{ productSlug: 'product-01', qty: 1 }]);
+  }
+  await addToBag(page, 'product-01');
+  await open(page, '/checkout');
+  await fillCheckout(page, '98765 43210');
+  await page.getByRole('button', { name: 'Place order on WhatsApp' }).click();
+
+  const error = page.getByTestId('checkout-error');
+  await expect(error).toContainText(
+    `You've placed several orders in the last hour. Please message ${shop.name} on WhatsApp`,
+  );
+  await expect(
+    error.getByRole('link', { name: 'Message the store on WhatsApp' }),
+  ).toHaveAttribute('href', /^https:\/\/wa\.me\/919800000000\?text=/);
+  expect(await listOrders(shop)).toHaveLength(3);
+
+  // Another number is fine.
+  const whatsappText = await captureWhatsApp(page);
+  await page.getByLabel('Mobile number').fill(randomMobile());
+  await page.getByRole('button', { name: 'Place order on WhatsApp' }).click();
+  expect(await whatsappText()).toContain('(#1004)');
+});
+
+test('a bot that fills the hidden field places nothing', async ({ page }) => {
+  await addToBag(page, 'product-01');
+  await open(page, '/checkout');
+  await fillCheckout(page);
+  // Shoppers never see this field; a form-filling bot does.
+  await page.locator('#website').fill('https://spam.example');
+  await page.getByRole('button', { name: 'Place order on WhatsApp' }).click();
+  await expect(page.getByTestId('checkout-error')).toContainText(
+    'Something went wrong placing your order.',
+  );
+  expect(await listOrders(shop)).toHaveLength(0);
+  await expect(page.getByTestId('cart-count')).toBeVisible();
 });

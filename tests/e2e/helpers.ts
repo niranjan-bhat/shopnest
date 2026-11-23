@@ -151,6 +151,14 @@ export async function createProducts(
   if (variantError) throw variantError;
 }
 
+/**
+ * A fresh Indian mobile number (10 digits) for a checkout, so repeated runs
+ * stay under place_order's limit of 3 orders an hour per phone per store.
+ */
+export function randomMobile(): string {
+  return `9${String(Math.floor(Math.random() * 1e9)).padStart(9, '0')}`;
+}
+
 /** Changes a store's product behind the shopper's back (price, status). */
 export async function updateProduct(
   store: TestStore,

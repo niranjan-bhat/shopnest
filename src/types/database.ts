@@ -105,14 +105,14 @@ isOneToOne: false
                   ]
                 },"orders": {
                   Row: {
-                    "address": NonNullable<Json>,"channel": Database["public"]['Enums']["order_channel"],"checkout_id": string | null,"created_at": string,"customer_name": string,"customer_phone": string,"id": string,"notes": string | null,"order_number": number,"staff_notes": string | null,"status": Database["public"]['Enums']["order_status"],"subtotal_paise": number,"tenant_id": string,"total_paise": number,"updated_at": string
+                    "address": NonNullable<Json>,"channel": Database["public"]['Enums']["order_channel"],"checkout_id": string | null,"client_hash": string | null,"created_at": string,"customer_name": string,"customer_phone": string,"id": string,"notes": string | null,"order_number": number,"staff_notes": string | null,"status": Database["public"]['Enums']["order_status"],"subtotal_paise": number,"tenant_id": string,"total_paise": number,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "address": NonNullable<Json>,"channel"?: Database["public"]['Enums']["order_channel"],"checkout_id"?: string | null,"created_at"?: string,"customer_name": string,"customer_phone": string,"id"?: string,"notes"?: string | null,"order_number"?: number,"staff_notes"?: string | null,"status"?: Database["public"]['Enums']["order_status"],"subtotal_paise": number,"tenant_id": string,"total_paise": number,"updated_at"?: string
+                    "address": NonNullable<Json>,"channel"?: Database["public"]['Enums']["order_channel"],"checkout_id"?: string | null,"client_hash"?: string | null,"created_at"?: string,"customer_name": string,"customer_phone": string,"id"?: string,"notes"?: string | null,"order_number"?: number,"staff_notes"?: string | null,"status"?: Database["public"]['Enums']["order_status"],"subtotal_paise": number,"tenant_id": string,"total_paise": number,"updated_at"?: string
                   }
                   Update: {
-                    "address"?: NonNullable<Json>,"channel"?: Database["public"]['Enums']["order_channel"],"checkout_id"?: string | null,"created_at"?: string,"customer_name"?: string,"customer_phone"?: string,"id"?: string,"notes"?: string | null,"order_number"?: number,"staff_notes"?: string | null,"status"?: Database["public"]['Enums']["order_status"],"subtotal_paise"?: number,"tenant_id"?: string,"total_paise"?: number,"updated_at"?: string
+                    "address"?: NonNullable<Json>,"channel"?: Database["public"]['Enums']["order_channel"],"checkout_id"?: string | null,"client_hash"?: string | null,"created_at"?: string,"customer_name"?: string,"customer_phone"?: string,"id"?: string,"notes"?: string | null,"order_number"?: number,"staff_notes"?: string | null,"status"?: Database["public"]['Enums']["order_status"],"subtotal_paise"?: number,"tenant_id"?: string,"total_paise"?: number,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -429,7 +429,7 @@ isOneToOne: true
 { Args: { "tid": string }; Returns: boolean
                            },
 "place_order":
-{ Args: { "checkout": string,"customer": Json,"items": Json,"tid": string }; Returns: Json
+{ Args: { "checkout": string,"client"?: string,"customer": Json,"items": Json,"tid": string }; Returns: Json
                            },
 "reorder_banners":
 { Args: { "ordered_ids": (string)[],"tid": string }; Returns: undefined

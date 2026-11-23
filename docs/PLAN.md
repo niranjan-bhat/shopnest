@@ -279,10 +279,10 @@ Eight phases, each ending in something demoable; MVP is Phases 0–5. I've reord
 
 ### Phase 4 — Ordering
 
-- [ ] `createOrder` server action: validate cart, re-price from DB, check stock, create order + items, return WhatsApp link
-- [ ] Order confirmation page with order number; carts with price-on-request items show the total as "to be confirmed"
-- [ ] Dashboard orders list, detail, status changes, stock decrement on confirm
-- [ ] Rate limiting and basic spam protection on checkout
+- [x] `createOrder` server action: validate cart, re-price from DB, check stock, create order + items, return WhatsApp link
+- [x] Order confirmation page with order number; carts with price-on-request items show the total as "to be confirmed"
+- [x] Dashboard orders list, detail, status changes, stock decrement on confirm
+- [x] Rate limiting and basic spam protection on checkout
 
 **Exit:** a test order appears in the dashboard and in WhatsApp with matching totals.
 

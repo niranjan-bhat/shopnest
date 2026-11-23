@@ -2,7 +2,12 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState, type ComponentProps, type ReactNode } from 'react';
+import {
+  useState,
+  type BaseSyntheticEvent,
+  type ComponentProps,
+  type ReactNode,
+} from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { MessageCircle } from 'lucide-react';
@@ -77,6 +82,14 @@ function a11y(id: string, error?: string): ComponentProps<'input'> {
 
 const TRY_AGAIN = 'Something went wrong placing your order. Please try again.';
 
+/** The hidden trap field's value (see createOrderSchema.website). */
+function trapValue(event?: BaseSyntheticEvent): string | undefined {
+  const form = event?.target;
+  if (!(form instanceof HTMLFormElement)) return undefined;
+  const value = new FormData(form).get('website');
+  return typeof value === 'string' && value ? value : undefined;
+}
+
 const price = (paise: Paise | null) =>
   paise === null ? 'price on request' : formatINR(paise);
 
@@ -133,7 +146,10 @@ export function CheckoutForm() {
   // One id per checkout: a double click or retry returns the same order.
   const [checkoutId] = useState(() => crypto.randomUUID());
   const [notices, setNotices] = useState<CartNotice[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<{
+    text: string;
+    whatsappUrl?: string;
+  } | null>(null);
   const [placed, setPlaced] = useState(false);
   const summary = summarizeCart(lines);
 
@@ -154,12 +170,16 @@ export function CheckoutForm() {
     },
   });
 
-  const onSubmit = async (values: CheckoutValues) => {
+  const onSubmit = async (
+    values: CheckoutValues,
+    event?: BaseSyntheticEvent,
+  ) => {
     setError(null);
     let result: Awaited<ReturnType<typeof createOrder>>;
     try {
       result = await createOrder({
         checkoutId,
+        website: trapValue(event),
         customer: values,
         lines: lines.map((line) => ({
           variantId: line.variantId,
@@ -168,11 +188,15 @@ export function CheckoutForm() {
         })),
       });
     } catch {
-      setError(TRY_AGAIN);
+      setError({ text: TRY_AGAIN });
       return;
     }
     if (result.status === 'error') {
-      setError(result.error);
+      setError({ text: result.error });
+      return;
+    }
+    if (result.status === 'limited') {
+      setError({ text: result.error, whatsappUrl: result.whatsappUrl });
       return;
     }
     if (result.status === 'changed') {
@@ -354,9 +378,38 @@ export function CheckoutForm() {
           </Field>
         </fieldset>
 
+        {/* Hidden from shoppers and screen readers; only bots fill it in. */}
+        <div
+          aria-hidden="true"
+          className="absolute -left-[9999px] h-px w-px overflow-hidden"
+        >
+          <label htmlFor="website">Website</label>
+          <input
+            id="website"
+            name="website"
+            type="text"
+            tabIndex={-1}
+            autoComplete="off"
+          />
+        </div>
         {error && (
-          <p role="alert" className="text-sm text-red-700">
-            {error}
+          <p
+            role="alert"
+            className="text-sm text-red-700"
+            data-testid="checkout-error"
+          >
+            {error.text}
+            {error.whatsappUrl && (
+              <>
+                {' '}
+                <a
+                  href={error.whatsappUrl}
+                  className="font-medium underline underline-offset-4"
+                >
+                  Message the store on WhatsApp
+                </a>
+              </>
+            )}
           </p>
         )}
         <button
