@@ -25,7 +25,7 @@ test.afterEach(async () => {
 });
 
 async function save(page: Page) {
-  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await page.getByRole('button', { name: 'Save details' }).click();
   await expect(
     page.getByText('Saved. Your store shows the new details.'),
   ).toBeVisible();
@@ -34,10 +34,17 @@ async function save(page: Page) {
 test('store details show on the contact page and in the footer', async ({
   page,
 }) => {
+  // One save bar for the whole form, enabled once something changes.
+  const bar = page.getByTestId('settings-save-bar');
+  await expect(bar).toContainText('Store details saved and live');
+  await expect(
+    bar.getByRole('button', { name: 'Save details' }),
+  ).toBeDisabled();
+
   // Mistakes are caught before saving.
   await page.getByLabel('WhatsApp number for orders').fill('12345');
   await page.getByLabel('City').fill('Kanchipuram');
-  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await page.getByRole('button', { name: 'Save details' }).click();
   await expect(
     page.getByText('Enter a 10-digit Indian mobile number'),
   ).toBeVisible();
@@ -52,6 +59,7 @@ test('store details show on the contact page and in the footer', async ({
   await page.getByLabel('State').selectOption('Tamil Nadu');
   await page.getByLabel('PIN code').fill('631502');
   await page.getByLabel('Opening hours').fill('Mon–Sat, 10 am – 8 pm');
+  await expect(bar).toContainText('Unsaved changes to your store details');
   await save(page);
 
   // The number is stored in full and shown tidied.
