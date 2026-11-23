@@ -41,6 +41,15 @@ test('store details show on the contact page and in the footer', async ({
     bar.getByRole('button', { name: 'Save details' }),
   ).toBeDisabled();
 
+  // Edits not wanted are undone in one go.
+  const city = page.getByLabel('City');
+  const cityBefore = await city.inputValue();
+  await city.fill('Nowhere');
+  await bar.getByRole('button', { name: 'Undo edits' }).click();
+  await expect(city).toHaveValue(cityBefore);
+  await expect(bar).toContainText('Store details saved and live');
+  await expect(bar.getByRole('button', { name: 'Undo edits' })).toHaveCount(0);
+
   // Mistakes are caught before saving.
   await page.getByLabel('WhatsApp number for orders').fill('12345');
   await page.getByLabel('City').fill('Kanchipuram');

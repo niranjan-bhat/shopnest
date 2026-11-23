@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { EmptyState } from '@/components/dashboard/empty-state';
 import { PageHeader } from '@/components/dashboard/page-header';
+import { EditorStatusProvider } from '@/components/dashboard/storefront/editor-status';
 import { BannerLibrary } from '@/components/dashboard/storefront/banner-library';
 import { HomeSections } from '@/components/dashboard/storefront/home-sections';
 import { PublishBar } from '@/components/dashboard/storefront/publish-bar';
@@ -43,30 +44,32 @@ async function StorefrontEditor() {
   }
   const look = lookOf(editor.draft);
   return (
-    <div className="grid gap-6">
-      {header}
-      <PublishBar
-        hasChanges={editor.hasChanges}
-        publishedAt={editor.publishedAt}
-        canDiscard={editor.published !== null}
-      />
-      <ThemeLookForm
-        // Restarts from fresh values when the draft changes elsewhere
-        // (discard, another tab), not after its own saves.
-        key={JSON.stringify(look)}
-        initial={look}
-        storeName={store.name}
-        uploadsEnabled={uploadsEnabled}
-      />
-      <HomeSections
-        sections={editor.draft.sections}
-        banners={banners}
-        allowed={allowedSectionTypes(
-          getTemplate(editor.draft.templateKey).sections,
-        )}
-      />
-      <BannerLibrary banners={banners} uploadsEnabled={uploadsEnabled} />
-    </div>
+    <EditorStatusProvider>
+      <div className="grid gap-6">
+        {header}
+        <PublishBar
+          hasChanges={editor.hasChanges}
+          publishedAt={editor.publishedAt}
+          hasPublished={editor.published !== null}
+        />
+        <ThemeLookForm
+          // Restarts from fresh values when the draft changes elsewhere
+          // (discard, another tab), not after its own saves.
+          key={JSON.stringify(look)}
+          initial={look}
+          storeName={store.name}
+          uploadsEnabled={uploadsEnabled}
+        />
+        <HomeSections
+          sections={editor.draft.sections}
+          banners={banners}
+          allowed={allowedSectionTypes(
+            getTemplate(editor.draft.templateKey).sections,
+          )}
+        />
+        <BannerLibrary banners={banners} uploadsEnabled={uploadsEnabled} />
+      </div>
+    </EditorStatusProvider>
   );
 }
 

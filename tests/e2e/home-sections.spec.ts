@@ -34,6 +34,7 @@ test.afterEach(async () => {
 
 const rows = (page: Page) => page.getByTestId('section-row');
 const bar = (page: Page) => page.getByTestId('publish-bar');
+const status = (page: Page) => page.getByTestId('publish-status');
 
 async function addSection(page: Page, type: RegExp, dialogName: string) {
   await page.getByRole('button', { name: 'Add section' }).click();
@@ -60,7 +61,7 @@ test('a merchant builds the home page in the draft, then publishes it', async ({
 }) => {
   await expect(rows(page)).toHaveCount(1);
   await expect(rows(page).first()).toContainText('All live banners');
-  await expect(bar(page)).toContainText('Live');
+  await expect(status(page)).toContainText('Live');
 
   // A brand story needs its text.
   const story = await addSection(page, /^Brand story/, 'Add brand story');
@@ -73,7 +74,7 @@ test('a merchant builds the home page in the draft, then publishes it', async ({
   await story.getByRole('button', { name: 'Add section' }).click();
   await expect(story).toBeHidden();
   await expect(rows(page)).toHaveCount(2);
-  await expect(bar(page)).toContainText('Unpublished changes');
+  await expect(status(page)).toContainText('Unpublished changes');
 
   // A grid of the newest products.
   const grid = await addSection(page, /^Product grid/, 'Add product grid');
