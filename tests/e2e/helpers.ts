@@ -155,7 +155,11 @@ export async function createProducts(
 export async function updateProduct(
   store: TestStore,
   productSlug: string,
-  patch: { price_paise?: number; status?: 'draft' | 'active' },
+  patch: {
+    price_paise?: number | null;
+    price_mode?: 'fixed' | 'on_request';
+    status?: 'draft' | 'active';
+  },
 ) {
   const { error } = await adminDb()
     .from('products')
@@ -163,6 +167,69 @@ export async function updateProduct(
     .eq('tenant_id', store.id)
     .eq('slug', productSlug);
   if (error) throw error;
+}
+
+/**
+ * Places an order as the checkout would (place_order with the service
+ * role), at today's prices. Returns its order number.
+ */
+export async function placeOrder(
+  store: TestStore,
+  lines: { productSlug: string; qty: number }[],
+  customer = 'Asha Rao',
+): Promise<number> {
+  const db = adminDb();
+  const items = [];
+  for (const line of lines) {
+    const { data, error } = await db
+      .from('products')
+      .select('price_mode, price_paise, product_variants(id)')
+      .eq('tenant_id', store.id)
+      .eq('slug', line.productSlug)
+      .single();
+    if (error) throw error;
+    items.push({
+      variant_id: data.product_variants[0]!.id,
+      qty: line.qty,
+      unit_price_paise: data.price_mode === 'fixed' ? data.price_paise : null,
+    });
+  }
+  const { data, error } = await db.rpc('place_order', {
+    tid: store.id,
+    checkout: crypto.randomUUID(),
+    customer: {
+      name: customer,
+      phone: '+919876543210',
+      notes: 'Please call before delivery',
+      address: {
+        line1: '12 MG Road',
+        line2: '',
+        city: 'Bengaluru',
+        state: 'Karnataka',
+        pincode: '560001',
+      },
+    },
+    items,
+  });
+  if (error) throw error;
+  const result = data as { status: string; order_number?: number };
+  if (result.status !== 'placed') throw new Error(JSON.stringify(result));
+  return result.order_number!;
+}
+
+/** Units in stock of a store's (single-variant) product. */
+export async function stockOf(
+  store: TestStore,
+  productSlug: string,
+): Promise<number> {
+  const { data, error } = await adminDb()
+    .from('products')
+    .select('product_variants(stock_qty)')
+    .eq('tenant_id', store.id)
+    .eq('slug', productSlug)
+    .single();
+  if (error) throw error;
+  return data.product_variants[0]!.stock_qty;
 }
 
 /** A store's orders with their lines, newest first. */

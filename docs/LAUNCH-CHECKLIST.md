@@ -57,7 +57,7 @@ ignores the new database functions and keeps serving `/mock-media`.
 ## Deploy Phase 4 (ordering)
 
 1. [ ] **Database migrations** before merging `phase-4-ordering`:
-       `npx supabase db push --remote --dry-run` should list `place_order` (and the later Phase 4 ones),
+       `npx supabase db push --remote --dry-run` should list `place_order` and `order_status` (and any later Phase 4 ones),
        then `npx supabase db push --remote`. The checkout breaks if the code ships without them.
 
 ## Before the first real merchant

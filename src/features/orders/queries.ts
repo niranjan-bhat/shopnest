@@ -5,9 +5,7 @@ import { idSchema } from '@/features/catalog/schemas';
 import type { Paise } from '@/lib/money';
 import { adminDb } from '@/lib/supabase/admin';
 import { check } from '@/lib/supabase/result';
-import type { Database } from '@/types/database';
-
-export type OrderStatus = Database['public']['Enums']['order_status'];
+import type { OrderStatus } from './status';
 
 export type ShopperOrderLine = {
   name: string;

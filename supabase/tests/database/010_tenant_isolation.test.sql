@@ -251,7 +251,8 @@ select throws_ok(
 
 update public.products set name = 'Hacked' where id = 'b3000000-0000-4000-8000-000000000001';
 delete from public.categories where id = 'b2000000-0000-4000-8000-000000000001';
-update public.orders set status = 'cancelled' where tenant_id = 'b0000000-0000-4000-8000-000000000000';
+-- Status changes only through set_order_status (090); staff notes are editable.
+update public.orders set staff_notes = 'Hacked' where tenant_id = 'b0000000-0000-4000-8000-000000000000';
 
 select lives_ok(
   $$ update public.products set name = 'A live (edited)' where id = 'a3000000-0000-4000-8000-000000000001' $$,
@@ -299,8 +300,8 @@ select is(
 );
 
 select is(
-  (select status::text from public.orders where tenant_id = 'b0000000-0000-4000-8000-000000000000'),
-  'pending',
+  (select staff_notes from public.orders where tenant_id = 'b0000000-0000-4000-8000-000000000000'),
+  null,
   'member update of another store''s order changed nothing'
 );
 
