@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { AdminAccount } from '@/components/admin/admin-account';
+import { ZarifyLogo } from '@/components/zarify-logo';
 import { buttonVariants } from '@/components/ui/button';
 import { Toaster } from '@/components/ui/sonner';
 
@@ -18,11 +19,17 @@ export default function AdminLayout({ children }: LayoutProps<'/admin'>) {
   return (
     <div className="flex min-h-full flex-1 flex-col">
       <header className="sticky top-0 z-30 border-b bg-background">
-        <div className="mx-auto flex h-14 w-full max-w-5xl items-center gap-2 px-4 md:px-8">
-          <Link href="/admin" className="font-semibold tracking-tight">
-            Zarify <span className="text-muted-foreground">admin</span>
+        <div className="mx-auto flex h-14 w-full max-w-5xl items-center gap-1 px-4 sm:gap-2 md:px-8">
+          <Link href="/admin" className="flex items-center gap-2">
+            <ZarifyLogo className="h-5 sm:h-7" />
+            <span className="sr-only text-muted-foreground sm:not-sr-only">
+              admin
+            </span>
           </Link>
-          <nav aria-label="Admin" className="ml-2 flex items-center gap-1">
+          <nav
+            aria-label="Admin"
+            className="flex items-center sm:ml-2 sm:gap-1"
+          >
             <Link
               href="/admin"
               className={buttonVariants({ variant: 'ghost', size: 'sm' })}
@@ -36,7 +43,7 @@ export default function AdminLayout({ children }: LayoutProps<'/admin'>) {
               Plans
             </Link>
           </nav>
-          <div className="ml-auto flex items-center gap-1">
+          <div className="ml-auto flex items-center sm:gap-1">
             <Link
               href="/dashboard"
               className={buttonVariants({ variant: 'ghost', size: 'sm' })}

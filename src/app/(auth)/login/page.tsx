@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
 import { LoginForm } from '@/components/auth/login-form';
+import { ZarifyLogo } from '@/components/zarify-logo';
 import { safeNextPath } from '@/features/auth/schemas';
 import { getSessionUser } from '@/features/auth/session';
 
@@ -37,10 +38,8 @@ async function Login({
 export default function LoginPage(props: PageProps<'/login'>) {
   return (
     <main className="mx-auto w-full max-w-sm flex-1 px-6 py-20">
-      <p className="text-sm tracking-widest text-muted-foreground uppercase">
-        Zarify
-      </p>
-      <h1 className="mt-2 text-3xl font-semibold tracking-tight">Sign in</h1>
+      <ZarifyLogo className="h-9" />
+      <h1 className="mt-8 text-3xl font-semibold tracking-tight">Sign in</h1>
       <p className="mt-2 text-muted-foreground">
         We&apos;ll email you a 6-digit code. No password needed.
       </p>

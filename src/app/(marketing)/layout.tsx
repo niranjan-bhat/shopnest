@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import { Inter, Plus_Jakarta_Sans } from 'next/font/google';
 import Link from 'next/link';
-import { Monogram } from '@/components/marketing/logo';
 import '@/components/marketing/marketing.css';
+import { ZarifyLogo } from '@/components/zarify-logo';
 import {
   loginUrl,
   SALES_PHONE_LABEL,
@@ -43,8 +43,7 @@ export default function MarketingLayout({ children }: LayoutProps<'/'>) {
           className="mk-wrap flex h-18 items-center gap-4 sm:gap-6"
         >
           <Link href="/" className="mk-logo">
-            <Monogram className="size-8" />
-            Zarify
+            <ZarifyLogo className="h-9" />
           </Link>
           <span className="ml-10 hidden gap-8 lg:flex">
             {LINKS.map((link) => (
@@ -65,8 +64,7 @@ export default function MarketingLayout({ children }: LayoutProps<'/'>) {
       <footer className="mk-footer">
         <div className="mk-wrap flex flex-wrap items-center gap-x-8 gap-y-3 py-10">
           <span className="mk-logo mr-auto">
-            <Monogram className="size-7" />
-            Zarify
+            <ZarifyLogo className="h-9" />
           </span>
           {LINKS.map((link) => (
             <Link key={link.href} href={link.href} className="lg:hidden!">

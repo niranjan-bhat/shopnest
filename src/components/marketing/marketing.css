@@ -41,7 +41,7 @@
 .mk-anchor {
   scroll-margin-top: 4.5rem;
 }
-:is(.mk-h1, .mk-h2, .mk-h3, .mk-logo) {
+:is(.mk-h1, .mk-h2, .mk-h3) {
   font-family: var(--font-jakarta), system-ui, sans-serif;
 }
 .mk-h1 {
@@ -97,11 +97,6 @@
 }
 .mk-logo {
   display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-size: 1.25rem;
-  font-weight: 700;
-  letter-spacing: -0.03em;
 }
 .mk-hero {
   --soft: #5b6a80;

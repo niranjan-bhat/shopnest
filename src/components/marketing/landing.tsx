@@ -3,7 +3,7 @@ import {
   Boxes,
   LayoutGrid,
   MessageCircle,
-  Store,
+  Palette,
 } from 'lucide-react';
 import Image, { type StaticImageData } from 'next/image';
 import boutiqueWide from '@/assets/marketing/boutique-wide.jpg';
@@ -20,7 +20,11 @@ import { DEMOS, demoUrl, salesLink } from '@/features/marketing/site';
 const DEMO_SHOTS = { 'saree-demo': sareeWide, 'boutique-demo': boutiqueWide };
 
 const FEATURES = [
-  { icon: Store, title: 'Your own store', text: 'Your brand. Your identity.' },
+  {
+    icon: Palette,
+    title: 'Your own store',
+    text: 'Your brand. Your identity.',
+  },
   {
     icon: LayoutGrid,
     title: 'Product catalog',

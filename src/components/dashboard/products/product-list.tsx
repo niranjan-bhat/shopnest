@@ -91,7 +91,7 @@ export function ProductList({
 }) {
   if (counts.all === 0) {
     return (
-      <div className="grid gap-6">
+      <div className="grid grid-cols-1 gap-6">
         <PageHeader
           title="Products"
           description="Everything you sell, with prices, sizes and stock."
@@ -108,7 +108,7 @@ export function ProductList({
   }
 
   return (
-    <div className="grid gap-6">
+    <div className="grid grid-cols-1 gap-6">
       <PageHeader
         title="Products"
         description="Everything you sell, with prices, sizes and stock."

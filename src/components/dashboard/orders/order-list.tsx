@@ -55,7 +55,7 @@ export function OrderList({
 }) {
   if (counts.all === 0) {
     return (
-      <div className="grid gap-6">
+      <div className="grid grid-cols-1 gap-6">
         <PageHeader title="Orders" description={DESCRIPTION} />
         <EmptyState
           icon={ShoppingBag}
@@ -68,7 +68,7 @@ export function OrderList({
   }
 
   return (
-    <div className="grid gap-6">
+    <div className="grid grid-cols-1 gap-6">
       <PageHeader title="Orders" description={DESCRIPTION} />
 
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
