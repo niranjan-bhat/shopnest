@@ -10,6 +10,20 @@ test('each store host serves its own store from the database', async ({
   await expect(page).toHaveTitle('Noor Atelier');
 });
 
+test('the platform and each store have their own tab icon', async ({
+  page,
+  request,
+}) => {
+  const icon = page.locator('link[rel="icon"]');
+  await page.goto(platform());
+  await expect(icon).toHaveCount(1);
+  await expect(icon).toHaveAttribute('href', /zarify-icon/);
+  expect((await request.get(platform('/favicon.ico'))).ok()).toBe(true);
+  await page.goto(store('saree-demo'));
+  await expect(icon).toHaveCount(1);
+  await expect(icon).not.toHaveAttribute('href', /zarify/);
+});
+
 test('internal /sites routes are not reachable directly', async ({
   request,
 }) => {

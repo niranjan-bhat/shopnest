@@ -41,6 +41,14 @@ test.afterEach(async () => {
   await deleteStore(shop);
 });
 
+test('the order list fits the screen', async ({ page }) => {
+  await expect(rows(page)).toHaveCount(2);
+  const overflow = await page.evaluate(
+    () => document.documentElement.scrollWidth - screen.width,
+  );
+  expect(overflow).toBeLessThanOrEqual(0);
+});
+
 const rows = (page: Page) => page.getByTestId('order-row');
 const badge = (page: Page) => page.getByTestId('order-status-badge');
 

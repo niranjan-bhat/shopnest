@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 export default function TermsPage() {
   return (
     <article className="mk-wrap mk-text">
-      <h1 className="mk-display mk-h2">Terms</h1>
+      <h1 className="mk-h2">Terms</h1>
       <p>Last updated 24 November 2026</p>
       <p>These terms are for shops that use Zarify.</p>
       <h2>What we provide</h2>

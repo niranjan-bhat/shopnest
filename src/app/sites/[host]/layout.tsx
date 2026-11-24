@@ -7,6 +7,7 @@ import { StoreRoot } from '@/components/storefront/store-root';
 import { loadStorefront } from '@/features/storefront/context';
 import { isSuspendedHost, listStoreHosts } from '@/features/tenants/queries';
 import { mediaUrl } from '@/lib/media';
+import { storeIcon } from '@/lib/store-icon';
 import { atLeastOne } from '@/lib/static-params';
 import { getTemplate } from '@/templates/registry';
 
@@ -25,13 +26,15 @@ export async function generateMetadata({
       ? { title: 'Store unavailable', robots: { index: false } }
       : {};
   }
-  const { store } = storefront;
+  const { store, theme } = storefront;
   return {
     title: { default: store.name, template: `%s · ${store.name}` },
     description: store.branding.tagline,
-    ...(store.branding.faviconKey
-      ? { icons: { icon: mediaUrl(store.branding.faviconKey) } }
-      : {}),
+    icons: {
+      icon: store.branding.faviconKey
+        ? mediaUrl(store.branding.faviconKey)
+        : storeIcon(store.name, theme.tokens.colors),
+    },
   };
 }
 

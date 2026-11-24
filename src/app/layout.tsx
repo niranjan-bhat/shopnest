@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
+import zarifyIcon from '@/assets/zarify-icon.svg';
 import './globals.css';
 
 const geistSans = Geist({
@@ -15,6 +16,8 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: 'Zarify',
   description: 'Online stores for Indian clothing brands.',
+  // Not an icon file in app/: those are added to stores' own icons too.
+  icons: { icon: zarifyIcon.src },
 };
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {

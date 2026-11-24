@@ -7,11 +7,11 @@ test('the platform site leads to WhatsApp, the demos and sign-in', async ({
 }) => {
   await page.goto(platform());
   await expect(page.getByRole('heading', { level: 1 })).toContainText(
-    'Launch your fashion store online',
+    /Your brand. Your store. Now online./,
   );
-  const chat = page.getByRole('link', { name: 'Chat on WhatsApp' });
-  await expect(chat).toHaveCount(3);
-  for (const link of await chat.all()) {
+  const start = page.getByRole('link', { name: /^Get started/ });
+  await expect(start).toHaveCount(4);
+  for (const link of await start.all()) {
     await expect(link).toHaveAttribute(
       'href',
       /^https:\/\/wa\.me\/919632531541\?text=Hi/,

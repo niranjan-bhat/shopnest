@@ -35,7 +35,7 @@ export function StoreList({
 }) {
   const pages = Math.ceil(total / STORE_PAGE_SIZE);
   return (
-    <div className="grid gap-6">
+    <div className="grid grid-cols-1 gap-6">
       <PageHeader
         title="Stores"
         description="Every store on the platform."
