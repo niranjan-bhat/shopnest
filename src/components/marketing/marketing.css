@@ -1,144 +1,117 @@
-/* The platform site only (zarify.in): maroon and blush, with a line of zari. */
+/* The platform site only (zarify.in). */
 .marketing {
-  --maroon: #741733;
-  --maroon-deep: #4a0d20;
-  --blush: #f8e9e6;
-  --zari: #d9ad55;
-  --paper: #fffaf7;
-  --ink: #26141a;
-  --soft: #66525a;
-  --line: #ead7d4;
+  --navy: #101722;
+  --gold: #b68a35;
+  --ivory: #f7f4ed;
+  --soft: #64748b;
+  --line: #e6e3db;
+  --radius-box: 0.875rem;
   display: flex;
   min-height: 100%;
   flex: 1;
   flex-direction: column;
-  background: var(--paper);
-  color: var(--ink);
-  font-family: var(--font-mukta), system-ui, sans-serif;
-  font-size: 1.0625rem;
+  background: #fff;
+  color: var(--navy);
+  font-family: var(--font-inter), system-ui, sans-serif;
   line-height: 1.6;
 }
+/* The secondary text colour, darkened to stay readable on ivory. */
+.mk-ivory {
+  --soft: #5b6a80;
+  background: var(--ivory);
+}
 .marketing :focus-visible {
-  outline: 3px solid var(--maroon);
-  outline-offset: 3px;
+  outline: 2px solid var(--navy);
+  outline-offset: 4px;
 }
 .marketing :is(.mk-close, .mk-footer) :focus-visible {
-  outline-color: var(--zari);
+  outline-color: var(--gold);
 }
 .mk-wrap {
   width: 100%;
-  max-width: 78rem;
+  max-width: 80rem;
   margin-inline: auto;
   padding-inline: 1.25rem;
 }
-.mk-display {
-  font-family: var(--font-display), Georgia, serif;
-  line-height: 1.08;
-  text-wrap: balance;
+@media (min-width: 48rem) {
+  .mk-wrap {
+    padding-inline: 2rem;
+  }
+}
+.mk-anchor {
+  scroll-margin-top: 4.5rem;
+}
+:is(.mk-h1, .mk-h2, .mk-h3, .mk-logo) {
+  font-family: var(--font-jakarta), system-ui, sans-serif;
+}
+.mk-h1 {
+  font-size: clamp(2.5rem, 6vw, 3.25rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  word-spacing: 0.04em;
+  line-height: 1.1;
 }
 .mk-h2 {
-  font-size: clamp(1.9rem, 5vw, 3rem);
+  font-size: clamp(1.875rem, 3.4vw, 2.75rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  word-spacing: 0.04em;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+.mk-h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+@media (min-width: 64rem) {
+  .mk-h1 {
+    font-size: clamp(2.5rem, 3.35vw, 3rem);
+  }
+}
+.mk-label {
+  /* Gold, darkened so small text stays readable. */
+  color: #86631c;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 .mk-header {
+  position: sticky;
+  z-index: 10;
+  top: 0;
   border-bottom: 1px solid var(--line);
+  background: #fff;
+  font-size: 0.9375rem;
 }
-.mk-logo {
-  color: var(--maroon);
-}
-.mk-signin {
+.mk-header nav a:not(.mk-btn, .mk-logo) {
   display: inline-flex;
   min-height: 2.75rem;
   align-items: center;
-  border: 1.5px solid var(--maroon);
-  border-radius: 0.6rem;
-  padding-inline: 1.25rem;
-  color: var(--maroon);
-  font-weight: 700;
+  font-weight: 500;
+  transition: color 150ms;
 }
-.mk-signin:hover {
-  background: var(--blush);
+.mk-header nav a:not(.mk-btn, .mk-logo):hover {
+  color: #86631c;
+}
+.mk-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
 }
 .mk-hero {
+  --soft: #5b6a80;
   overflow: hidden;
-  background: linear-gradient(105deg, #fff6f0, var(--blush) 55%, #efd0cd);
-}
-.mk-hero em {
-  color: var(--maroon);
-}
-.mk-for {
-  color: var(--maroon);
-  font-weight: 700;
-}
-/* Phones: just the phone, cut off by the gold line. Wide: laptop and phone. */
-.mk-devices {
-  position: relative;
-}
-.mk-laptop {
-  display: none;
-}
-.mk-devices .mk-phone {
-  width: 16rem;
-  margin: 0 auto -10rem;
-}
-.mk-screen {
-  overflow: hidden;
-  border: 10px solid #17100f;
-  border-radius: 1rem 1rem 0 0;
-}
-.mk-screen img {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-@media (min-width: 64rem) {
-  .mk-devices {
-    padding-right: 3rem;
-  }
-  .mk-laptop {
-    display: block;
-  }
-  .mk-laptop::after {
-    display: block;
-    width: 110%;
-    height: 0.9rem;
-    margin-left: -5%;
-    border-radius: 0 0 1rem 1rem;
-    background: linear-gradient(#cbbfbe, #8f8281);
-    content: '';
-  }
-  .mk-devices .mk-phone {
-    position: absolute;
-    right: 0;
-    bottom: -3rem;
-    width: 30%;
-    margin: 0;
-    border-width: 6px;
-    border-radius: 1.6rem;
-  }
-  .mk-devices .mk-phone img {
-    aspect-ratio: 390 / 700;
-    border-radius: 1.2rem;
-    object-fit: cover;
-    object-position: top;
-  }
-}
-.mk-phone {
-  overflow: hidden;
-  border: 8px solid #0a1714;
-  border-radius: 2.25rem;
-  background: #0a1714;
-}
-.mk-phone img {
-  display: block;
-  width: 100%;
-  height: auto;
-  border-radius: 1.75rem;
-}
-/* A line of zari under the hero. */
-.mk-border {
-  position: relative;
-  height: 3px;
-  background: var(--zari);
+  background: radial-gradient(
+      45rem 32rem at 72% 45%,
+      #fff,
+      rgb(255 255 255 / 0%)
+    )
+    var(--ivory);
 }
 .mk-btn {
   display: inline-flex;
@@ -146,82 +119,169 @@
   align-items: center;
   justify-content: center;
   gap: 0.6rem;
-  border: 1.5px solid var(--maroon);
-  border-radius: 0.6rem;
+  border: 1px solid var(--navy);
+  border-radius: 0.625rem;
   padding: 0.5rem 1.5rem;
-  background: var(--maroon);
+  background: var(--navy);
   color: #fff;
-  font-weight: 700;
-  transition: background-color 150ms;
+  font-weight: 600;
+  transition:
+    background-color 150ms,
+    border-color 150ms;
 }
 .mk-btn:hover {
-  background: var(--maroon-deep);
+  background: #26324a;
+}
+.mk-btn-small {
+  min-height: 2.75rem;
+  padding-inline: 1.1rem;
 }
 .mk-btn-quiet {
+  border-color: #cfcabd;
   background: transparent;
-  color: var(--maroon);
+  color: var(--navy);
 }
 .mk-btn-quiet:hover {
+  border-color: var(--navy);
   background: #fff;
 }
-.mk-card {
-  display: flex;
-  gap: 1rem;
-  border-radius: 1rem;
-  padding: 1.25rem;
-  background: var(--blush);
+.mk-btn-gold {
+  border-color: var(--gold);
+  background: var(--gold);
+  color: var(--navy);
 }
-.mk-card h3 {
-  color: var(--maroon);
+.mk-btn-gold:hover {
+  background: #c79c48;
 }
-.mk-icon {
-  display: grid;
+.mk-arrow {
   flex: none;
-  width: 3rem;
-  height: 3rem;
-  place-items: center;
-  border-radius: 0.75rem;
-  background: #f1cfca;
-  color: var(--maroon);
+  transition: transform 200ms;
+}
+:is(.mk-btn, .mk-demo):hover .mk-arrow {
+  transform: translateX(3px);
+}
+/* Laptop with a phone in front of it. */
+.mk-devices {
+  position: relative;
+  padding: 0 8% 6% 4%;
+}
+.mk-screen {
+  overflow: hidden;
+  border: 9px solid #15181e;
+  border-radius: 1rem 1rem 0 0;
+  background: #15181e;
+  box-shadow: 0 30px 60px -20px rgb(16 23 34 / 35%);
+}
+.mk-screen img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 0.4rem 0.4rem 0 0;
+}
+.mk-laptop::after {
+  display: block;
+  width: 112%;
+  height: 0.85rem;
+  margin-left: -6%;
+  border-radius: 0 0 0.9rem 0.9rem;
+  background: linear-gradient(#dcdee2, #a3a7af);
+  box-shadow: 0 22px 30px -12px rgb(16 23 34 / 35%);
+  content: '';
+}
+.mk-phone {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  width: 27%;
+  border: clamp(4px, 0.5vw, 7px) solid #15181e;
+  border-radius: clamp(1rem, 2vw, 1.75rem);
+  background: #15181e;
+  box-shadow:
+    0 0 0 1px #3a3f49,
+    0 30px 50px -15px rgb(16 23 34 / 50%);
+}
+.mk-phone img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 390 / 700;
+  border-radius: clamp(0.75rem, 1.6vw, 1.35rem);
+  object-fit: cover;
+  object-position: top;
+}
+@media (max-width: 47.99rem) {
+  .mk-devices {
+    padding: 0 3% 14%;
+  }
+  .mk-screen {
+    border-width: 6px;
+  }
+  .mk-phone {
+    width: 34%;
+  }
+}
+.mk-window {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-box);
+  background: #fff;
+  box-shadow: 0 20px 50px -25px rgb(16 23 34 / 28%);
+  transition:
+    box-shadow 250ms,
+    transform 250ms;
+}
+.mk-window img {
+  width: 100%;
+  height: auto;
+}
+.mk-demo {
+  display: block;
+}
+.mk-demo:hover .mk-window {
+  box-shadow: 0 28px 60px -25px rgb(16 23 34 / 42%);
+  transform: translateY(-3px);
+}
+.mk-faq details {
+  border-bottom: 1px solid var(--line);
+}
+.mk-faq summary {
+  cursor: pointer;
+  padding: 1.25rem 0;
+  font-weight: 600;
 }
 .mk-close {
-  background: var(--maroon-deep);
+  background: var(--navy);
   color: #fff;
 }
-.mk-close .mk-btn {
-  border-color: var(--zari);
-  background: var(--zari);
-  color: var(--ink);
-}
-.mk-close .mk-btn:hover {
-  background: #edc97e;
-}
 .mk-footer {
-  border-top: 1px solid rgb(255 255 255 / 18%);
-  background: var(--maroon-deep);
-  color: #f6e3e0;
+  border-top: 1px solid #2a3342;
+  background: var(--navy);
+  color: #b9c2cf;
+  font-size: 0.9375rem;
+}
+.mk-footer .mk-logo {
+  color: #fff;
 }
 .mk-footer a {
   display: inline-flex;
   min-height: 2.75rem;
   align-items: center;
 }
-.mk-faq summary {
-  cursor: pointer;
-  padding: 1rem 0;
-  font-weight: 700;
-}
-.mk-faq details {
-  border-bottom: 1px solid var(--line);
+.mk-footer a:hover {
+  color: #fff;
 }
 .mk-text {
-  max-width: 46rem;
-  padding-block: 3.5rem;
+  padding-block: 4rem;
+}
+.mk-text > * {
+  max-width: 44rem;
 }
 .mk-text h2 {
-  margin-top: 2.25rem;
-  font-size: 1.35rem;
-  font-weight: 700;
+  margin-top: 2.5rem;
+  font-family: var(--font-jakarta), system-ui, sans-serif;
+  font-size: 1.25rem;
+  font-weight: 600;
 }
 .mk-text :is(p, ul) {
   margin-top: 0.75rem;
@@ -237,5 +297,22 @@
 @media (prefers-reduced-motion: no-preference) {
   html:has(.marketing) {
     scroll-behavior: smooth;
+  }
+  .mk-rise {
+    animation: mk-rise 600ms ease-out both;
+  }
+  .mk-rise-late {
+    animation-delay: 120ms;
+  }
+  @keyframes mk-rise {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .marketing * {
+    transition: none !important;
   }
 }

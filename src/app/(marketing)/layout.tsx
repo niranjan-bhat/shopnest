@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
-import { DM_Serif_Display, Mukta } from 'next/font/google';
+import { Inter, Plus_Jakarta_Sans } from 'next/font/google';
 import Link from 'next/link';
+import { Monogram } from '@/components/marketing/logo';
 import '@/components/marketing/marketing.css';
 import {
   loginUrl,
@@ -9,60 +10,72 @@ import {
   siteOrigin,
 } from '@/features/marketing/site';
 
-const display = DM_Serif_Display({
-  variable: '--font-display',
-  weight: '400',
-  style: ['normal', 'italic'],
+const heading = Plus_Jakarta_Sans({
+  variable: '--font-jakarta',
   subsets: ['latin'],
 });
-const body = Mukta({
-  variable: '--font-mukta',
-  weight: ['400', '700'],
-  subsets: ['latin'],
-});
+const body = Inter({ variable: '--font-inter', subsets: ['latin'] });
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteOrigin()),
   title: {
-    default: 'Zarify: online stores for saree shops and boutiques',
+    default: 'Zarify: online stores for fashion brands',
     template: '%s · Zarify',
   },
   description:
-    'Your boutique’s own online store, with prices, sizes and stock. Orders come to your WhatsApp.',
+    'Showcase your collections, manage inventory and receive orders on WhatsApp. We handle the setup.',
   openGraph: { siteName: 'Zarify', type: 'website', locale: 'en_IN' },
   twitter: { card: 'summary_large_image' },
 };
 
+const LINKS = [
+  { href: '/#features', label: 'Features' },
+  { href: '/#demos', label: 'Demo stores' },
+  { href: '/#pricing', label: 'Pricing' },
+];
+
 export default function MarketingLayout({ children }: LayoutProps<'/'>) {
   return (
-    <div className={`marketing ${display.variable} ${body.variable}`}>
+    <div className={`marketing ${heading.variable} ${body.variable}`}>
       <header className="mk-header">
-        <div className="mk-wrap flex h-16 items-center gap-5">
-          <Link href="/" className="mk-display mk-logo text-3xl">
+        <nav
+          aria-label="Main"
+          className="mk-wrap flex h-18 items-center gap-4 sm:gap-6"
+        >
+          <Link href="/" className="mk-logo">
+            <Monogram className="size-8" />
             Zarify
           </Link>
-          <nav aria-label="Main" className="ml-auto flex items-center gap-5">
-            <Link href="/#demos" className="hidden sm:inline">
-              Demo stores
-            </Link>
-            <Link href="/#pricing" className="hidden sm:inline">
-              Pricing
-            </Link>
-            <a href={loginUrl()} className="mk-signin">
-              Sign in
-            </a>
-          </nav>
-        </div>
+          <span className="ml-10 hidden gap-8 lg:flex">
+            {LINKS.map((link) => (
+              <Link key={link.href} href={link.href}>
+                {link.label}
+              </Link>
+            ))}
+          </span>
+          <a href={loginUrl()} className="ml-auto">
+            Sign in
+          </a>
+          <a href={salesLink} className="mk-btn mk-btn-small">
+            Get started
+          </a>
+        </nav>
       </header>
       <main className="flex-1">{children}</main>
       <footer className="mk-footer">
-        <div className="mk-wrap flex flex-wrap items-center gap-x-6 gap-y-3 py-8">
-          <span className="mk-display text-xl">Zarify</span>
-          <a href={salesLink}>WhatsApp {SALES_PHONE_LABEL}</a>
-          <span className="flex gap-6 sm:ml-auto">
-            <Link href="/privacy">Privacy</Link>
-            <Link href="/terms">Terms</Link>
+        <div className="mk-wrap flex flex-wrap items-center gap-x-8 gap-y-3 py-10">
+          <span className="mk-logo mr-auto">
+            <Monogram className="size-7" />
+            Zarify
           </span>
+          {LINKS.map((link) => (
+            <Link key={link.href} href={link.href} className="lg:hidden!">
+              {link.label}
+            </Link>
+          ))}
+          <a href={salesLink}>WhatsApp {SALES_PHONE_LABEL}</a>
+          <Link href="/privacy">Privacy</Link>
+          <Link href="/terms">Terms</Link>
         </div>
       </footer>
     </div>

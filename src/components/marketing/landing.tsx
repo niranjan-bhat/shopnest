@@ -1,62 +1,43 @@
 import {
-  Check,
-  Eye,
-  Layers,
+  ArrowRight,
+  Boxes,
+  LayoutGrid,
   MessageCircle,
-  Paintbrush,
-  ShoppingBag,
+  Store,
 } from 'lucide-react';
-import Image from 'next/image';
-import boutiqueShot from '@/assets/marketing/boutique-demo.jpg';
-import laptopShot from '@/assets/marketing/laptop.jpg';
+import Image, { type StaticImageData } from 'next/image';
+import boutiqueWide from '@/assets/marketing/boutique-wide.jpg';
+import deskInventory from '@/assets/marketing/desk-inventory.jpg';
+import deskOrders from '@/assets/marketing/desk-orders.jpg';
+import deskProducts from '@/assets/marketing/desk-products.jpg';
+import sareeWide from '@/assets/marketing/laptop.jpg';
+import phoneInventory from '@/assets/marketing/phone-inventory.jpg';
+import phoneOrders from '@/assets/marketing/phone-orders.jpg';
+import phoneProducts from '@/assets/marketing/phone-products.jpg';
 import productShot from '@/assets/marketing/product.jpg';
-import sareeShot from '@/assets/marketing/saree-demo.jpg';
 import { DEMOS, demoUrl, salesLink } from '@/features/marketing/site';
 
-const SHOTS = { 'saree-demo': sareeShot, 'boutique-demo': boutiqueShot };
-
-const TICKS = [
-  'No coding needed',
-  'We set it up for you',
-  'Built for clothing shops',
-];
+const DEMO_SHOTS = { 'saree-demo': sareeWide, 'boutique-demo': boutiqueWide };
 
 const FEATURES = [
+  { icon: Store, title: 'Your own store', text: 'Your brand. Your identity.' },
   {
-    icon: Paintbrush,
-    title: 'Your brand',
-    text: 'Your logo, colours, fonts and banners, at yourshop.zarify.in.',
-  },
-  {
-    icon: ShoppingBag,
-    title: 'Your products',
-    text: 'Photos, prices, sizes and colours. Add them from your phone.',
+    icon: LayoutGrid,
+    title: 'Product catalog',
+    text: 'Manage collections easily.',
   },
   {
     icon: MessageCircle,
     title: 'WhatsApp orders',
-    text: 'Shoppers send you the full order. A copy stays in your dashboard.',
+    text: 'Receive orders directly.',
   },
-  {
-    icon: Layers,
-    title: 'Stock',
-    text: 'Shoppers see what is left, and sold out when it is gone.',
-  },
+  { icon: Boxes, title: 'Inventory', text: 'Stay on top of stock.' },
 ];
 
 const STEPS = [
-  {
-    title: 'Message us',
-    text: 'Tell us about your shop and send your logo and a few photos.',
-  },
-  {
-    title: 'We set up your store',
-    text: 'You get a sign-in. Add your products and check how it looks.',
-  },
-  {
-    title: 'Share your link',
-    text: 'Put it in your bio. Orders arrive on your WhatsApp.',
-  },
+  { title: 'Message us', text: 'Tell us about your brand on WhatsApp.' },
+  { title: 'We set up your store', text: 'Sign in and add your products.' },
+  { title: 'Share your link', text: 'Orders arrive on your WhatsApp.' },
 ];
 
 const FAQ = [
@@ -82,12 +63,59 @@ const FAQ = [
   },
 ];
 
-function WhatsAppButton() {
+/** Sign-up is a WhatsApp chat: stores are set up by the Zarify team. */
+function GetStarted({ gold = false }: { gold?: boolean }) {
   return (
-    <a href={salesLink} className="mk-btn">
-      <MessageCircle aria-hidden className="size-5" />
-      Chat on WhatsApp
+    <a
+      href={salesLink}
+      className={gold ? 'mk-btn mk-btn-gold' : 'mk-btn'}
+      aria-label="Get started on WhatsApp"
+    >
+      Get started
+      <ArrowRight aria-hidden className="mk-arrow size-4" />
     </a>
+  );
+}
+
+/** A dashboard screen: the desktop layout, or the phone layout on phones. */
+function Screen({
+  title,
+  text,
+  wide,
+  phone,
+  large = false,
+}: {
+  title: string;
+  text: string;
+  wide: StaticImageData;
+  phone: StaticImageData;
+  large?: boolean;
+}) {
+  return (
+    <figure className={large ? 'md:col-span-2' : undefined}>
+      <div className="mk-window">
+        <Image
+          src={wide}
+          alt={`${title} in the Zarify dashboard`}
+          sizes={large ? '(min-width: 80rem) 76rem, 94vw' : '60vw'}
+          className={
+            large
+              ? 'hidden md:block'
+              : 'hidden aspect-[956/700] object-cover object-right md:block'
+          }
+        />
+        <Image
+          src={phone}
+          alt={`${title} in the Zarify dashboard on a phone`}
+          sizes="92vw"
+          className="md:hidden"
+        />
+      </div>
+      <figcaption className="mt-5">
+        <span className="mk-h3">{title}</span>
+        <span className="block text-(--soft)">{text}</span>
+      </figcaption>
+    </figure>
   );
 }
 
@@ -96,156 +124,173 @@ export function Landing() {
   return (
     <>
       <section className="mk-hero">
-        <div className="mk-wrap grid items-center gap-12 pt-10 lg:grid-cols-[1fr_1.25fr] lg:pt-14 lg:pb-24">
-          <div>
-            <p className="mk-for">For boutiques and fashion brands</p>
-            <h1 className="mk-display mt-4 text-[clamp(2.7rem,4.2vw,3.75rem)]">
-              Launch your <em className="block">fashion store online</em>
+        <div className="mk-wrap grid items-center gap-14 py-14 md:py-20 lg:grid-cols-[1fr_1.2fr] lg:py-28">
+          <div className="mk-rise">
+            <p className="mk-label">Built for fashion brands</p>
+            <h1 className="mk-h1 mt-5">
+              Your brand. <span className="whitespace-nowrap">Your store.</span>{' '}
+              <span className="block text-(--gold)">Now online.</span>
             </h1>
-            <p className="mt-5 max-w-[33rem] text-lg text-(--soft) md:text-xl">
-              A beautiful store for your sarees and ethnic wear, with{' '}
-              <strong className="text-(--ink)">orders on WhatsApp</strong>.
+            <p className="mt-6 max-w-[29rem] text-lg leading-relaxed text-(--soft) md:text-xl md:leading-relaxed">
+              Showcase your collections, manage inventory and receive orders on
+              WhatsApp.
             </p>
-            <div className="mt-7 grid gap-3 sm:flex sm:flex-wrap">
-              <WhatsAppButton />
+            <div className="mt-9 grid gap-3 sm:flex sm:flex-wrap">
+              <GetStarted />
               <a href="#demos" className="mk-btn mk-btn-quiet">
-                <Eye aria-hidden className="size-5" />
-                View sample stores
+                Explore demo stores
               </a>
             </div>
-            <ul className="mt-7 flex flex-wrap gap-x-6 gap-y-2">
-              {TICKS.map((tick) => (
-                <li key={tick} className="flex items-center gap-2">
-                  <Check aria-hidden className="size-4 text-(--maroon)" />
-                  {tick}
-                </li>
-              ))}
-            </ul>
+            <p className="mt-5 text-sm text-(--soft)">
+              No coding. We handle the setup.
+            </p>
           </div>
-          <div className="mk-devices">
+          <div className="mk-devices mk-rise mk-rise-late">
             <div className="mk-laptop">
               <div className="mk-screen">
                 <Image
-                  src={laptopShot}
-                  alt="The Tara Weaves demo store on a laptop"
-                  sizes="(min-width: 64rem) 36rem, 90vw"
+                  src={sareeWide}
+                  alt="A demo store, Tara Weaves, on a laptop"
+                  sizes="(min-width: 64rem) 40rem, 92vw"
+                  loading="eager"
+                  fetchPriority="high"
                 />
               </div>
             </div>
             <div className="mk-phone">
               <Image
                 src={productShot}
-                alt="A saree’s page in the demo store, on a phone"
-                sizes="16rem"
+                alt="A product page in the demo store, on a phone"
+                sizes="13rem"
                 loading="eager"
-                fetchPriority="high"
               />
             </div>
           </div>
         </div>
-        <div className="mk-border" aria-hidden />
       </section>
 
-      <section className="mk-wrap py-12 md:py-16">
-        <h2 className="sr-only">What your shop gets</h2>
-        <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <section id="features" className="mk-wrap mk-anchor py-16 md:py-24">
+        <h2 className="sr-only">Features</h2>
+        <ul className="grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
           {FEATURES.map(({ icon: Icon, title, text }) => (
-            <li key={title} className="mk-card">
-              <span className="mk-icon">
-                <Icon aria-hidden className="size-6" strokeWidth={1.75} />
-              </span>
-              <div>
-                <h3 className="mk-display text-xl">{title}</h3>
-                <p className="mt-1.5 leading-snug text-(--soft)">{text}</p>
+            <li key={title} className="flex gap-4 lg:block">
+              <Icon
+                aria-hidden
+                className="size-7 shrink-0 text-(--gold)"
+                strokeWidth={1.5}
+              />
+              <div className="lg:mt-5">
+                <h3 className="mk-h3">{title}</h3>
+                <p className="mt-1 text-(--soft)">{text}</p>
               </div>
             </li>
           ))}
         </ul>
       </section>
 
-      <section id="demos" className="scroll-mt-4 bg-white py-16 md:py-24">
+      <section className="mk-ivory py-20 md:py-32">
         <div className="mk-wrap">
-          <h2 className="mk-display mk-h2">Try a demo store</h2>
-          <p className="mt-3 max-w-[36rem] text-(--soft)">
-            These shops are made up, but the stores work. Open one on your phone
-            and look around.
-          </p>
-          <ul className="mt-10 grid gap-12 sm:grid-cols-2">
-            {DEMOS.map((demo) => (
-              <li key={demo.slug}>
-                <a
-                  href={demoUrl(demo.slug)}
-                  className="mx-auto block max-w-[17rem]"
-                >
-                  <span className="mk-phone block">
-                    <Image src={SHOTS[demo.slug]} alt="" sizes="17rem" />
-                  </span>
-                  <span className="mt-5 block text-xl font-bold underline decoration-(--maroon) decoration-2 underline-offset-4">
-                    {demo.name}
-                  </span>
-                  <span className="block text-(--soft)">
-                    {demo.kind} (demo)
-                  </span>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-
-      <section className="mk-wrap grid gap-14 py-16 md:grid-cols-2 md:gap-16 md:py-24">
-        <div>
-          <h2 className="mk-display mk-h2">How it works</h2>
-          <ol className="mt-7 grid gap-6">
-            {STEPS.map(({ title, text }, i) => (
-              <li key={title} className="grid grid-cols-[3rem_1fr]">
-                <span
-                  className="mk-display text-4xl text-(--maroon)"
-                  aria-hidden
-                >
-                  {i + 1}
-                </span>
-                <span>
-                  <span className="block text-xl font-bold">{title}</span>
-                  <span className="text-(--soft)">{text}</span>
-                </span>
-              </li>
-            ))}
-          </ol>
-        </div>
-        <div id="pricing" className="scroll-mt-4">
-          <h2 className="mk-display mk-h2">Pricing</h2>
-          <p className="mt-7 text-xl">
-            One setup fee, then a monthly fee, depending on what your shop
-            needs.
-          </p>
-          <p className="mt-3 text-(--soft)">
-            Tell us about your shop and we’ll send you the exact amount.
-          </p>
-          <div className="mt-6">
-            <WhatsAppButton />
+          <h2 className="mk-h2 max-w-[18ch]">
+            Everything you need to run your store.
+          </h2>
+          <div className="mt-12 grid gap-x-8 gap-y-14 md:mt-16 md:grid-cols-2">
+            <Screen
+              large
+              title="Products"
+              text="Your whole collection in one place."
+              wide={deskProducts}
+              phone={phoneProducts}
+            />
+            <Screen
+              title="Orders"
+              text="From new to delivered."
+              wide={deskOrders}
+              phone={phoneOrders}
+            />
+            <Screen
+              title="Inventory"
+              text="Stock for every product."
+              wide={deskInventory}
+              phone={phoneInventory}
+            />
           </div>
         </div>
       </section>
 
-      <section className="mk-wrap pb-16 md:pb-24">
-        <h2 className="mk-display mk-h2">Common questions</h2>
-        <div className="mk-faq mt-6 max-w-[46rem]">
+      <section id="demos" className="mk-wrap mk-anchor py-20 md:py-32">
+        <h2 className="mk-h2">See it for yourself.</h2>
+        <p className="mt-4 text-lg text-(--soft)">
+          Two demo stores you can browse.
+        </p>
+        <ul className="mt-12 grid gap-x-8 gap-y-12 md:mt-16 md:grid-cols-2">
+          {DEMOS.map((demo) => (
+            <li key={demo.slug}>
+              <a href={demoUrl(demo.slug)} className="mk-demo">
+                <span className="mk-window block">
+                  <Image
+                    src={DEMO_SHOTS[demo.slug]}
+                    alt=""
+                    sizes="(min-width: 48rem) 46vw, 92vw"
+                  />
+                </span>
+                <span className="mt-5 flex items-center justify-between gap-4">
+                  <span>
+                    <span className="mk-h3 block">{demo.name}</span>
+                    <span className="text-(--soft)">{demo.kind} (demo)</span>
+                  </span>
+                  <ArrowRight aria-hidden className="mk-arrow size-5" />
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="mk-ivory py-20 md:py-28">
+        <div className="mk-wrap grid gap-16 lg:grid-cols-[1.4fr_1fr] lg:gap-24">
+          <div>
+            <h2 className="mk-h2">How it works</h2>
+            <ol className="mt-10 grid gap-8">
+              {STEPS.map(({ title, text }, i) => (
+                <li key={title} className="grid grid-cols-[2.5rem_1fr]">
+                  <span className="mk-h3 text-(--gold)" aria-hidden>
+                    {i + 1}
+                  </span>
+                  <span>
+                    <span className="mk-h3 block">{title}</span>
+                    <span className="text-(--soft)">{text}</span>
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </div>
+          <div id="pricing" className="mk-anchor">
+            <h2 className="mk-h2">Pricing</h2>
+            <p className="mk-h3 mt-10">A setup fee, then a monthly fee.</p>
+            <p className="mt-2 mb-8 text-(--soft)">
+              Tell us what you need and we’ll send you the exact amount.
+            </p>
+            <GetStarted />
+          </div>
+        </div>
+      </section>
+
+      <section className="mk-wrap grid gap-10 py-20 md:py-28 lg:grid-cols-[1fr_1.4fr] lg:gap-24">
+        <h2 className="mk-h2">Questions</h2>
+        <div className="mk-faq">
           {FAQ.map(({ question, answer }) => (
             <details key={question}>
               <summary>{question}</summary>
-              <p className="pb-5 text-(--soft)">{answer}</p>
+              <p className="pb-6 text-(--soft)">{answer}</p>
             </details>
           ))}
         </div>
       </section>
 
       <section className="mk-close">
-        <div className="mk-wrap flex flex-col items-start gap-7 py-16 md:py-20">
-          <h2 className="mk-display mk-h2 max-w-[18ch]">
-            Let’s put your shop online
-          </h2>
-          <WhatsAppButton />
+        <div className="mk-wrap flex flex-col items-start gap-8 py-20 md:flex-row md:items-center md:justify-between md:py-24">
+          <h2 className="mk-h2">Ready to go online?</h2>
+          <GetStarted gold />
         </div>
       </section>
     </>

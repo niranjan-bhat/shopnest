@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 export default function PrivacyPage() {
   return (
     <article className="mk-wrap mk-text">
-      <h1 className="mk-display mk-h2">Privacy</h1>
+      <h1 className="mk-h2">Privacy</h1>
       <p>Last updated 24 November 2026</p>
       <p>
         Zarify runs online stores for shops in India. This page says what
