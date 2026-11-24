@@ -1,5 +1,6 @@
 import { ArrowLeft, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
+import type { ReactNode } from 'react';
 import { PageHeader } from '@/components/dashboard/page-header';
 import { Badge } from '@/components/ui/badge';
 import { Button, buttonVariants } from '@/components/ui/button';
@@ -23,9 +24,11 @@ const date = new Intl.DateTimeFormat('en-IN', {
 export function StoreDetail({
   store,
   loginUrl,
+  billing,
 }: {
   store: AdminStore;
   loginUrl: string;
+  billing: ReactNode;
 }) {
   const address = store.url?.replace(/^https?:\/\//, '');
   const invitee = store.team.find((m) => m.role === 'owner' && !m.signedIn);
@@ -112,12 +115,14 @@ export function StoreDetail({
       )}
 
       <StoreStatusCard
-        key={store.id}
+        key={`status:${store.id}`}
         storeId={store.id}
         status={store.status}
         missing={store.missing}
         suspendedReason={store.suspendedReason}
       />
+
+      {billing}
 
       <div className="grid gap-6 md:grid-cols-2">
         <Card>

@@ -2,6 +2,7 @@ import { cn } from 'cn';
 import { Plus, Search } from 'lucide-react';
 import Link from 'next/link';
 import { PageHeader } from '@/components/dashboard/page-header';
+import { Badge } from '@/components/ui/badge';
 import { buttonVariants } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { STORE_PAGE_SIZE, type AdminStoreRow } from '@/features/admin/queries';
@@ -19,6 +20,7 @@ const TABS: { status: StoreListFilter['status']; label: string }[] = [
     status,
     label: TENANT_STATUS_LABEL[status],
   })),
+  { status: 'overdue', label: 'Overdue' },
 ];
 
 /** Every store on the platform: status tabs, search, rows and page links. */
@@ -118,6 +120,7 @@ export function StoreList({
                     {store.slug} · {store.planName ?? 'No plan'}
                   </span>
                 </span>
+                {store.overdue && <Badge variant="destructive">Overdue</Badge>}
                 <StoreStatusBadge status={store.status} />
               </Link>
             </li>

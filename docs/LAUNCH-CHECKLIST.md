@@ -68,13 +68,15 @@ ignores the new database functions and keeps serving `/mock-media`.
 ## Deploy Phase 5 (super admin and subscriptions)
 
 1. [ ] **Database migrations** before merging `phase-5-admin`:
-       `npx supabase db push --remote --dry-run` should list `create_store` and `store_status`, then `npx supabase db push --remote`.
+       `npx supabase db push --remote --dry-run` should list `create_store`, `store_status` and `billing`, then `npx supabase db push --remote`.
        It adds the Starter and Growth plans and puts every existing store on Growth.
-2. [ ] **Plan prices.** Starter (₹999) and Growth (₹2,499) are placeholders: set the real ones before billing anyone.
+2. [ ] **Plan prices.** Starter (₹999) and Growth (₹2,499) are placeholders: set the real ones in Admin → Plans before billing anyone.
 3. [ ] **Create a test store** at `https://app.zarify.in/admin`, with an owner email you can read: the owner signs in
        with a code and sees the store, and `https://<address>.zarify.in` says "Page not found" until it is live.
 4. [ ] **Go live, then suspend it** from its admin page: the address opens, then says "currently unavailable".
 5. [ ] **Super admins are read-only now** in stores they are not a member of: use "Allow editing" in the dashboard.
+6. [ ] **Billing dates.** Existing stores are not billed until you set "Billing starts" on their admin page; new stores
+       start the day they first go live. Plan limits apply to existing stores at once (Growth: 500 products, 6 people).
 
 ## Before the first real merchant
 

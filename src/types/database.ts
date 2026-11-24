@@ -301,16 +301,36 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
-                },"subscriptions": {
+                },"subscription_payments": {
                   Row: {
-                    "created_at": string,"current_period_end": string | null,"id": string,"plan_id": string,"status": Database["public"]['Enums']["subscription_status"],"tenant_id": string,"updated_at": string
+                    "amount_paise": number,"created_at": string,"id": string,"method": Database["public"]['Enums']["payment_method"],"months": number,"paid_on": string,"recorded_by": string | null,"reference": string | null,"tenant_id": string,"void_reason": string | null,"voided_at": string | null,"voided_by": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"current_period_end"?: string | null,"id"?: string,"plan_id": string,"status"?: Database["public"]['Enums']["subscription_status"],"tenant_id": string,"updated_at"?: string
+                    "amount_paise": number,"created_at"?: string,"id": string,"method": Database["public"]['Enums']["payment_method"],"months": number,"paid_on": string,"recorded_by"?: string | null,"reference"?: string | null,"tenant_id": string,"void_reason"?: string | null,"voided_at"?: string | null,"voided_by"?: string | null
                   }
                   Update: {
-                    "created_at"?: string,"current_period_end"?: string | null,"id"?: string,"plan_id"?: string,"status"?: Database["public"]['Enums']["subscription_status"],"tenant_id"?: string,"updated_at"?: string
+                    "amount_paise"?: number,"created_at"?: string,"id"?: string,"method"?: Database["public"]['Enums']["payment_method"],"months"?: number,"paid_on"?: string,"recorded_by"?: string | null,"reference"?: string | null,"tenant_id"?: string,"void_reason"?: string | null,"voided_at"?: string | null,"voided_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "subscription_payments_tenant_id_fkey"
+      columns: ["tenant_id"]
+isOneToOne: false
+      referencedRelation: "tenants"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"subscriptions": {
+                  Row: {
+                    "billing_start": string | null,"created_at": string,"id": string,"next_due": string | null,"plan_id": string,"status": Database["public"]['Enums']["subscription_status"],"tenant_id": string,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "billing_start"?: string | null,"created_at"?: string,"id"?: string,"next_due"?: string | null,"plan_id": string,"status"?: Database["public"]['Enums']["subscription_status"],"tenant_id": string,"updated_at"?: string
+                  }
+                  Update: {
+                    "billing_start"?: string | null,"created_at"?: string,"id"?: string,"next_due"?: string | null,"plan_id"?: string,"status"?: Database["public"]['Enums']["subscription_status"],"tenant_id"?: string,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -469,6 +489,12 @@ isOneToOne: true
 "place_order":
 { Args: { "checkout": string,"client"?: string,"customer": Json,"items": Json,"tid": string }; Returns: Json
                            },
+"plan_limit":
+{ Args: { "tid": string,"what": string }; Returns: number
+                           },
+"record_payment":
+{ Args: { "amount": number,"how": Database["public"]['Enums']["payment_method"],"months": number,"paid": string,"pid": string,"ref"?: string,"tid": string }; Returns: undefined
+                           },
 "reorder_banners":
 { Args: { "ordered_ids": (string)[],"tid": string }; Returns: undefined
                            },
@@ -477,6 +503,12 @@ isOneToOne: true
                            },
 "reorder_product_images":
 { Args: { "ordered_ids": (string)[],"pid": string,"tid": string }; Returns: undefined
+                           },
+"require_super_admin":
+{ Args: Record<PropertyKey, never>; Returns: undefined
+                           },
+"save_plan":
+{ Args: { "active": boolean,"max_products"?: number,"max_team"?: number,"monthly_fee": number,"pid"?: string,"plan_name": string,"setup_fee": number }; Returns: string
                            },
 "save_product":
 { Args: { "pid"?: string,"product": Json,"tid": string }; Returns: string
@@ -490,6 +522,9 @@ isOneToOne: true
 "set_store_status":
 { Args: { "next": Database["public"]['Enums']["tenant_status"],"reason"?: string,"tid": string }; Returns: Json
                            },
+"set_subscription":
+{ Args: { "plan": string,"starts"?: string,"tid": string }; Returns: undefined
+                           },
 "stop_editing":
 { Args: { "tid": string }; Returns: undefined
                            },
@@ -500,10 +535,16 @@ isOneToOne: true
 { Args: { "tid": string }; Returns: {
               "email": string,"role": Database["public"]['Enums']["member_role"],"signed_in": boolean,"user_id": string
             }[]
+                           },
+"sync_next_due":
+{ Args: { "tid": string }; Returns: undefined
+                           },
+"void_payment":
+{ Args: { "pid": string,"reason": string,"tid": string }; Returns: undefined
                            }
           }
           Enums: {
-            "domain_kind": "subdomain"|"custom","member_role": "owner"|"staff","order_channel": "whatsapp"|"razorpay","order_status": "pending"|"confirmed"|"packed"|"shipped"|"delivered"|"cancelled","price_mode": "fixed"|"on_request","product_status": "draft"|"active"|"archived","subscription_status": "active"|"past_due"|"cancelled","tenant_status": "onboarding"|"active"|"suspended"
+            "domain_kind": "subdomain"|"custom","member_role": "owner"|"staff","order_channel": "whatsapp"|"razorpay","order_status": "pending"|"confirmed"|"packed"|"shipped"|"delivered"|"cancelled","payment_method": "upi"|"bank"|"cash"|"card"|"other","price_mode": "fixed"|"on_request","product_status": "draft"|"active"|"archived","subscription_status": "active"|"past_due"|"cancelled","tenant_status": "onboarding"|"active"|"suspended"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -619,7 +660,7 @@ export type CompositeTypes<
 export const Constants = {
   "public": {
           Enums: {
-            "domain_kind": ["subdomain", "custom"],"member_role": ["owner", "staff"],"order_channel": ["whatsapp", "razorpay"],"order_status": ["pending", "confirmed", "packed", "shipped", "delivered", "cancelled"],"price_mode": ["fixed", "on_request"],"product_status": ["draft", "active", "archived"],"subscription_status": ["active", "past_due", "cancelled"],"tenant_status": ["onboarding", "active", "suspended"]
+            "domain_kind": ["subdomain", "custom"],"member_role": ["owner", "staff"],"order_channel": ["whatsapp", "razorpay"],"order_status": ["pending", "confirmed", "packed", "shipped", "delivered", "cancelled"],"payment_method": ["upi", "bank", "cash", "card", "other"],"price_mode": ["fixed", "on_request"],"product_status": ["draft", "active", "archived"],"subscription_status": ["active", "past_due", "cancelled"],"tenant_status": ["onboarding", "active", "suspended"]
           }
         }
 } as const

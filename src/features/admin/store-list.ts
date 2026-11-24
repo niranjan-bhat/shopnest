@@ -18,7 +18,7 @@ export const TENANT_STATUS_LABEL: Record<TenantStatus, string> = {
 };
 
 export type StoreListFilter = {
-  status: TenantStatus | 'all';
+  status: TenantStatus | 'all' | 'overdue';
   /** Part of the store's name or address. */
   search: string;
   /** 1-based. */
@@ -26,7 +26,7 @@ export type StoreListFilter = {
 };
 
 const filterSchema = z.object({
-  status: z.enum(['all', ...TENANT_STATUSES]).catch('all'),
+  status: z.enum(['all', ...TENANT_STATUSES, 'overdue']).catch('all'),
   search: z.string().trim().max(80).catch(''),
   page: z.coerce.number().int().min(1).max(10_000).catch(1),
 });

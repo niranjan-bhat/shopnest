@@ -22,6 +22,20 @@ export default function AdminLayout({ children }: LayoutProps<'/admin'>) {
           <Link href="/admin" className="font-semibold tracking-tight">
             Zarify <span className="text-muted-foreground">admin</span>
           </Link>
+          <nav aria-label="Admin" className="ml-2 flex items-center gap-1">
+            <Link
+              href="/admin"
+              className={buttonVariants({ variant: 'ghost', size: 'sm' })}
+            >
+              Stores
+            </Link>
+            <Link
+              href="/admin/plans"
+              className={buttonVariants({ variant: 'ghost', size: 'sm' })}
+            >
+              Plans
+            </Link>
+          </nav>
           <div className="ml-auto flex items-center gap-1">
             <Link
               href="/dashboard"

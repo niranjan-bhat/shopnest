@@ -1,10 +1,13 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
+import { BillingCard } from '@/components/admin/billing-card';
 import { StoreDetail } from '@/components/admin/store-detail';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getAdminStore } from '@/features/admin/queries';
+import { getAdminStore, listStoreOptions } from '@/features/admin/queries';
 import { requireSuperAdmin } from '@/features/auth/session';
+import { todayInIndia } from '@/features/billing/dates';
+import { getStorePlan, listPayments } from '@/features/billing/queries';
 import { getPublicEnv } from '@/lib/env.public';
 import { appOrigin } from '@/lib/tenant';
 
@@ -18,7 +21,27 @@ async function Store({ params }: Pick<Props, 'params'>) {
   const store = await getAdminStore(id);
   if (!store) notFound();
   const origin = appOrigin(getPublicEnv().NEXT_PUBLIC_ROOT_DOMAIN);
-  return <StoreDetail store={store} loginUrl={`${origin}/login`} />;
+  const [subscription, payments, { plans }] = await Promise.all([
+    getStorePlan(store.id),
+    listPayments(store.id),
+    listStoreOptions(),
+  ]);
+  return (
+    <StoreDetail
+      store={store}
+      loginUrl={`${origin}/login`}
+      billing={
+        <BillingCard
+          key={`billing:${store.id}`}
+          storeId={store.id}
+          subscription={subscription}
+          plans={plans}
+          payments={payments}
+          today={todayInIndia()}
+        />
+      }
+    />
+  );
 }
 
 export default function StorePage({ params }: Props) {

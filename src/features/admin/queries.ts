@@ -1,5 +1,7 @@
 import 'server-only';
 import { z } from 'zod';
+import { isOverdue, todayInIndia } from '@/features/billing/dates';
+import { listOverdueStoreIds } from '@/features/billing/queries';
 import { getPublicEnv } from '@/lib/env.public';
 import type { Paise } from '@/lib/money';
 import { check } from '@/lib/supabase/result';
@@ -26,11 +28,12 @@ export type AdminStoreRow = {
   status: TenantStatus;
   url: string | null;
   planName: string | null;
+  overdue: boolean;
   createdAt: string;
 };
 
 const FIELDS =
-  'id, name, slug, status, whatsapp_number, business_type, suspended_reason, created_at, tenant_domains(hostname, is_primary), subscriptions(plans(name))' as const;
+  'id, name, slug, status, whatsapp_number, business_type, suspended_reason, created_at, tenant_domains(hostname, is_primary), subscriptions(next_due, plans(name))' as const;
 
 type Row = {
   id: string;
@@ -39,7 +42,7 @@ type Row = {
   status: TenantStatus;
   created_at: string;
   tenant_domains: { hostname: string; is_primary: boolean }[];
-  subscriptions: { plans: { name: string } } | null;
+  subscriptions: { next_due: string | null; plans: { name: string } } | null;
 };
 
 function toRow(row: Row): AdminStoreRow {
@@ -54,6 +57,7 @@ function toRow(row: Row): AdminStoreRow {
       ? originFor(domain.hostname, getPublicEnv().NEXT_PUBLIC_ROOT_DOMAIN)
       : null,
     planName: row.subscriptions?.plans.name ?? null,
+    overdue: isOverdue(row.subscriptions?.next_due ?? null, todayInIndia()),
     createdAt: row.created_at,
   };
 }
@@ -73,7 +77,11 @@ export async function listAdminStores(
     .order('created_at', { ascending: false })
     .order('id')
     .range(from, from + STORE_PAGE_SIZE - 1);
-  if (filter.status !== 'all') query = query.eq('status', filter.status);
+  if (filter.status === 'overdue') {
+    query = query.in('id', await listOverdueStoreIds());
+  } else if (filter.status !== 'all') {
+    query = query.eq('status', filter.status);
+  }
   if (filter.search) query = query.or(storeSearch(filter.search));
   const result = await query;
   if (result.error?.code === PAST_LAST_PAGE) {

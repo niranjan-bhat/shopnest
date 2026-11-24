@@ -405,3 +405,8 @@ export async function setStoreRow(store: TestStore, row: object) {
     .eq('id', store.id);
   if (error) throw error;
 }
+
+export async function deletePlan(name: string) {
+  const { error } = await adminDb().from('plans').delete().eq('name', name);
+  if (error) throw error;
+}
