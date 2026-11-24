@@ -14,7 +14,7 @@ import { Brand } from './brand';
 import { NavLinks } from './nav-links';
 
 /** The sidebar navigation in a slide-in panel, for phones and tablets. */
-export function MobileNav() {
+export function MobileNav({ staff }: { staff: boolean }) {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
   return (
@@ -38,7 +38,7 @@ export function MobileNav() {
           </SheetTitle>
         </SheetHeader>
         <div className="p-3">
-          <NavLinks onNavigate={close} />
+          <NavLinks staff={staff} onNavigate={close} />
         </div>
       </SheetContent>
     </Sheet>

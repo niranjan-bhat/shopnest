@@ -91,18 +91,20 @@ export async function listAdminStores(
   return { stores: rows.map(toRow), total: result.count ?? rows.length };
 }
 
+export type TeamMember = {
+  userId: string;
+  email: string;
+  role: Enums<'member_role'>;
+  signedIn: boolean;
+};
+
 export type AdminStore = AdminStoreRow & {
   whatsappNumber: string;
   businessType: string;
   suspendedReason: string | null;
   /** What it still needs to go live. */
   missing: Missing[];
-  team: {
-    userId: string;
-    email: string;
-    role: Enums<'member_role'>;
-    signedIn: boolean;
-  }[];
+  team: TeamMember[];
 };
 
 /** One store with its team; null when there is no such store. */
@@ -134,7 +136,13 @@ export async function getAdminStore(id: string): Promise<AdminStore | null> {
   };
 }
 
-export type PlanOption = { id: string; name: string; monthlyFeePaise: Paise };
+export type PlanOption = {
+  id: string;
+  name: string;
+  monthlyFeePaise: Paise;
+  /** Null: every template. */
+  templateKeys: string[] | null;
+};
 export type TemplateOption = { key: string; name: string };
 export type StoreOptions = {
   plans: PlanOption[];
@@ -147,7 +155,7 @@ export async function listStoreOptions(): Promise<StoreOptions> {
   const [plans, templates] = await Promise.all([
     supabase
       .from('plans')
-      .select('id, name, monthly_fee_paise')
+      .select('id, name, monthly_fee_paise, template_keys')
       .eq('is_active', true)
       .order('monthly_fee_paise'),
     supabase
@@ -161,6 +169,7 @@ export async function listStoreOptions(): Promise<StoreOptions> {
       id: plan.id,
       name: plan.name,
       monthlyFeePaise: plan.monthly_fee_paise,
+      templateKeys: plan.template_keys,
     })),
     // Only templates that also ship in this build.
     templates: check(templates, 'templates').filter(

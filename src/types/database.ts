@@ -151,14 +151,14 @@ isOneToOne: false
                   ]
                 },"plans": {
                   Row: {
-                    "created_at": string,"id": string,"is_active": boolean,"limits": NonNullable<Json>,"monthly_fee_paise": number,"name": string,"setup_fee_paise": number,"updated_at": string
+                    "created_at": string,"id": string,"is_active": boolean,"limits": NonNullable<Json>,"monthly_fee_paise": number,"name": string,"setup_fee_paise": number,"template_keys": (string)[] | null,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"id"?: string,"is_active"?: boolean,"limits"?: NonNullable<Json>,"monthly_fee_paise"?: number,"name": string,"setup_fee_paise"?: number,"updated_at"?: string
+                    "created_at"?: string,"id"?: string,"is_active"?: boolean,"limits"?: NonNullable<Json>,"monthly_fee_paise"?: number,"name": string,"setup_fee_paise"?: number,"template_keys"?: (string)[] | null,"updated_at"?: string
                   }
                   Update: {
-                    "created_at"?: string,"id"?: string,"is_active"?: boolean,"limits"?: NonNullable<Json>,"monthly_fee_paise"?: number,"name"?: string,"setup_fee_paise"?: number,"updated_at"?: string
+                    "created_at"?: string,"id"?: string,"is_active"?: boolean,"limits"?: NonNullable<Json>,"monthly_fee_paise"?: number,"name"?: string,"setup_fee_paise"?: number,"template_keys"?: (string)[] | null,"updated_at"?: string
                   }
                   Relationships: [
                     
@@ -349,23 +349,17 @@ isOneToOne: true
                   ]
                 },"templates": {
                   Row: {
-                    "created_at": string,"is_active": boolean,"key": string,"min_plan_id": string | null,"name": string
+                    "created_at": string,"is_active": boolean,"key": string,"name": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"is_active"?: boolean,"key": string,"min_plan_id"?: string | null,"name": string
+                    "created_at"?: string,"is_active"?: boolean,"key": string,"name": string
                   }
                   Update: {
-                    "created_at"?: string,"is_active"?: boolean,"key"?: string,"min_plan_id"?: string | null,"name"?: string
+                    "created_at"?: string,"is_active"?: boolean,"key"?: string,"name"?: string
                   }
                   Relationships: [
-                    {
-      foreignKeyName: "templates_min_plan_id_fkey"
-      columns: ["min_plan_id"]
-isOneToOne: false
-      referencedRelation: "plans"
-      referencedColumns: ["id"]
-    }
+                    
                   ]
                 },"tenant_domains": {
                   Row: {
@@ -459,14 +453,23 @@ isOneToOne: true
             [_ in never]: never
           }
           Functions: {
-            "allow_editing":
+            "add_member":
+{ Args: { "member_email": string,"member_role": Database["public"]['Enums']["member_role"],"tid": string }; Returns: boolean
+                           },
+"allow_editing":
 { Args: { "tid": string }; Returns: string
                            },
 "can_manage_tenant":
 { Args: { "tid": string }; Returns: boolean
                            },
+"can_own_tenant":
+{ Args: { "tid": string }; Returns: boolean
+                           },
 "can_view_tenant":
 { Args: { "tid": string }; Returns: boolean
+                           },
+"change_member":
+{ Args: { "new_role"?: Database["public"]['Enums']["member_role"],"tid": string,"uid": string }; Returns: boolean
                            },
 "create_store":
 { Args: { "actor": string,"root": string,"store": Json }; Returns: Json
@@ -489,6 +492,9 @@ isOneToOne: true
 "place_order":
 { Args: { "checkout": string,"client"?: string,"customer": Json,"items": Json,"tid": string }; Returns: Json
                            },
+"plan_has_template":
+{ Args: { "plan": string,"template": string }; Returns: boolean
+                           },
 "plan_limit":
 { Args: { "tid": string,"what": string }; Returns: number
                            },
@@ -508,7 +514,7 @@ isOneToOne: true
 { Args: Record<PropertyKey, never>; Returns: undefined
                            },
 "save_plan":
-{ Args: { "active": boolean,"max_products"?: number,"max_team"?: number,"monthly_fee": number,"pid"?: string,"plan_name": string,"setup_fee": number }; Returns: string
+{ Args: { "active": boolean,"max_products"?: number,"max_team"?: number,"monthly_fee": number,"only_templates"?: (string)[],"pid"?: string,"plan_name": string,"setup_fee": number }; Returns: string
                            },
 "save_product":
 { Args: { "pid"?: string,"product": Json,"tid": string }; Returns: string

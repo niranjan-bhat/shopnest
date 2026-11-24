@@ -195,7 +195,7 @@ Seventeen tables in Supabase Postgres cover the MVP; every tenant-owned table ca
 | `tenant_domains` | id, tenant\_id, hostname (unique), kind (`subdomain`/`custom`), is\_primary, verified\_at                                    | Hostname lookup for `proxy.ts`           |
 | `profiles`       | user\_id (PK → auth.users), full\_name, phone, is\_super\_admin                                                              | Created by trigger on sign-up            |
 | `tenant_members` | tenant\_id, user\_id (composite PK), role (`owner`/`staff`)                                                                  | Staff accounts are cheap to support now  |
-| `templates`      | key (PK), name, is\_active, min\_plan                                                                                        | Code holds the template; this enables it |
+| `templates`      | key (PK), name, is\_active                                                                                                  | Code holds the template; this enables it |
 | `tenant_themes`  | tenant\_id (PK), template\_key, draft jsonb, published jsonb, published\_at                                                  | Theme config from the section above      |
 
 **Catalog**
@@ -215,7 +215,7 @@ Seventeen tables in Supabase Postgres cover the MVP; every tenant-owned table ca
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
 | `orders`                  | id, tenant\_id, order\_number, customer\_name, customer\_phone, address jsonb, channel (`whatsapp`/`razorpay`), status, subtotal\_paise, total\_paise, notes, created\_at | unique (tenant\_id, order\_number); per-tenant counter |
 | `order_items`             | id, tenant\_id, order\_id, variant\_id, name\_snapshot, options\_snapshot, unit\_price\_paise, qty                                                                        | Snapshots survive product edits                        |
-| `plans` / `subscriptions` | plans: id, name, setup\_fee\_paise, monthly\_fee\_paise, limits jsonb · subscriptions: id, tenant\_id, plan\_id, status, current\_period\_end                             | Manual billing in MVP                                  |
+| `plans` / `subscriptions` | plans: id, name, setup\_fee\_paise, monthly\_fee\_paise, limits jsonb, template_keys · subscriptions: id, tenant\_id, plan\_id, status, current\_period\_end                             | Manual billing in MVP                                  |
 | `audit_log`               | id, tenant\_id, actor\_id, action, entity, entity\_id, diff jsonb, created\_at                                                                                            | Who changed what                                       |
 
 Order status flow: `pending` → `confirmed` → `packed` → `shipped` → `delivered`, plus `cancelled`. Razorpay later adds a `payments` table and a `payment_status` column; nothing above needs to change.
@@ -288,10 +288,10 @@ Eight phases, each ending in something demoable; MVP is Phases 0–5. I've reord
 
 ### Phase 5 — Super admin and subscriptions
 
-- [ ] Tenant onboarding wizard: create tenant, owner invite, template, subdomain, plan
-- [ ] Tenant list with status, suspend/reactivate, impersonate-read-only view
-- [ ] Plans and subscriptions with manual payment recording; plan limits (products, staff)
-- [ ] Template enable/disable per plan
+- [x] Tenant onboarding wizard: create tenant, owner invite, template, subdomain, plan
+- [x] Tenant list with status, suspend/reactivate, impersonate-read-only view
+- [x] Plans and subscriptions with manual payment recording; plan limits (products, staff)
+- [x] Template enable/disable per plan
 
 **Exit:** a new store goes from zero to live on a subdomain in under 30 minutes, without touching code. MVP done.
 

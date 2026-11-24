@@ -5,7 +5,7 @@ import { PageEditor } from '@/components/dashboard/settings/page-editor';
 import { Skeleton } from '@/components/ui/skeleton';
 import { isPageSlug } from '@/features/pages/content';
 import { listEditablePages } from '@/features/pages/dashboard';
-import { requireStore } from '@/features/tenants/access';
+import { requireOwner } from '@/features/tenants/access';
 
 export const metadata: Metadata = { title: 'Edit page' };
 
@@ -13,7 +13,7 @@ type Props = PageProps<'/dashboard/settings/pages/[slug]'>;
 
 async function EditPage({ params }: Pick<Props, 'params'>) {
   const { slug } = await params;
-  const { store } = await requireStore(`/dashboard/settings/pages/${slug}`);
+  const { store } = await requireOwner(`/dashboard/settings/pages/${slug}`);
   if (!isPageSlug(slug)) notFound();
   const page = (await listEditablePages(store.id)).find((p) => p.slug === slug);
   if (!page) notFound();

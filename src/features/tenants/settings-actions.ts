@@ -3,7 +3,7 @@
 import { refresh, updateTag } from 'next/cache';
 import type { ActionResult } from '@/lib/action-result';
 import { createServerSupabase } from '@/lib/supabase/server';
-import { requireStoreForAction } from './access';
+import { requireOwnerForAction } from './access';
 import { tenantTag } from './queries';
 import {
   settingsRow,
@@ -18,7 +18,7 @@ import {
 export async function saveStoreSettings(
   input: unknown,
 ): Promise<ActionResult<StoreSettingsField>> {
-  const { store } = await requireStoreForAction();
+  const { store } = await requireOwnerForAction();
   const parsed = storeSettingsSchema.safeParse(input);
   if (!parsed.success) {
     const fieldErrors: Partial<Record<StoreSettingsField, string>> = {};

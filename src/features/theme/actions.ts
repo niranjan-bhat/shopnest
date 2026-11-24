@@ -2,7 +2,7 @@
 
 import { refresh, updateTag } from 'next/cache';
 import { isBrandingKey } from '@/features/media/rules';
-import { requireStoreForAction } from '@/features/tenants/access';
+import { requireOwnerForAction } from '@/features/tenants/access';
 import { tenantTag } from '@/features/tenants/queries';
 import type { ActionResult } from '@/lib/action-result';
 import { isR2Configured, statObject } from '@/lib/r2';
@@ -38,7 +38,7 @@ async function imageKeyProblem(
 export async function saveThemeLook(
   input: unknown,
 ): Promise<ActionResult<LookField>> {
-  const { store } = await requireStoreForAction();
+  const { store } = await requireOwnerForAction();
   const parsed = themeLookSchema.safeParse(input);
   if (!parsed.success) {
     const fieldErrors: Partial<Record<LookField, string>> = {};
@@ -80,7 +80,7 @@ export async function saveThemeLook(
 
 /** Makes the draft live. */
 export async function publishTheme(): Promise<ActionResult> {
-  const { store } = await requireStoreForAction();
+  const { store } = await requireOwnerForAction();
   const editor = await getThemeEditor(store.id);
   if (!editor) return { ok: false, error: NO_THEME };
   const supabase = await createServerSupabase();
@@ -102,7 +102,7 @@ export async function publishTheme(): Promise<ActionResult> {
 
 /** Throws away unpublished changes: the draft becomes the live theme. */
 export async function discardThemeChanges(): Promise<ActionResult> {
-  const { store } = await requireStoreForAction();
+  const { store } = await requireOwnerForAction();
   const editor = await getThemeEditor(store.id);
   if (!editor) return { ok: false, error: NO_THEME };
   if (!editor.published) {

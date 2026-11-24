@@ -7,14 +7,14 @@ import { StoreSettingsForm } from '@/components/dashboard/settings/store-setting
 import { Skeleton } from '@/components/ui/skeleton';
 import { listEditablePages } from '@/features/pages/dashboard';
 import { getStorePlan, getUsage } from '@/features/billing/queries';
-import { requireStore } from '@/features/tenants/access';
+import { requireOwner } from '@/features/tenants/access';
 import { settingsFormValues } from '@/features/tenants/settings';
 import { getStoreSettings } from '@/features/tenants/settings-queries';
 
 export const metadata: Metadata = { title: 'Settings' };
 
 async function Settings() {
-  const { store } = await requireStore('/dashboard/settings');
+  const { store } = await requireOwner('/dashboard/settings');
   const [settings, pages, subscription, usage] = await Promise.all([
     getStoreSettings(store.id),
     listEditablePages(store.id),

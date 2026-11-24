@@ -9,6 +9,8 @@ const plan = {
   maxProducts: '100',
   maxTeam: '',
   isActive: true,
+  allTemplates: true,
+  templates: [],
 };
 const payment = {
   storeId: 'a0000000-0000-4000-8000-000000000000',
@@ -46,7 +48,17 @@ describe('planSchema', () => {
       maxProducts: 100,
       maxTeam: null,
       isActive: true,
+      allTemplates: true,
+      templates: [],
     });
+  });
+
+  it('needs a template unless it offers them all', () => {
+    const some = { ...plan, allTemplates: false };
+    expect(planSchema.safeParse(some).success).toBe(false);
+    expect(planSchema.safeParse({ ...some, templates: ['silk'] }).success).toBe(
+      true,
+    );
   });
 
   it.each(['0', '-1', '1.5', 'ten'])('refuses the limit %s', (maxTeam) => {

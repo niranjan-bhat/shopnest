@@ -7,7 +7,7 @@ import { PublishButton } from '@/components/dashboard/storefront/publish-button'
 import { StoreRoot } from '@/components/storefront/store-root';
 import { buttonVariants } from '@/components/ui/button';
 import { Toaster } from '@/components/ui/sonner';
-import { requireStore } from '@/features/tenants/access';
+import { requireOwner } from '@/features/tenants/access';
 import { loadThemePreview } from '@/features/theme/preview';
 
 export const metadata: Metadata = {
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
  * On the app host, so it sits behind sign-in like the dashboard.
  */
 async function Preview() {
-  const { store, editingUntil } = await requireStore('/preview');
+  const { store, editingUntil } = await requireOwner('/preview');
   const readOnly = store.role === 'admin' && editingUntil === null;
   const preview = await loadThemePreview(store);
   if (!preview) notFound();

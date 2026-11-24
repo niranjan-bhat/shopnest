@@ -2,7 +2,6 @@ import { ArrowLeft, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { PageHeader } from '@/components/dashboard/page-header';
-import { Badge } from '@/components/ui/badge';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { inviteMessage } from '@/features/admin/invite';
@@ -14,6 +13,7 @@ import { switchStore } from '@/features/tenants/actions';
 import { CopyButton } from './copy-button';
 import { StoreStatusBadge } from './store-status-badge';
 import { StoreStatusCard } from './store-status-card';
+import { TeamCard } from './team-card';
 
 const date = new Intl.DateTimeFormat('en-IN', {
   dateStyle: 'medium',
@@ -140,36 +140,13 @@ export function StoreDetail({
             </dl>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Team</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {store.team.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                Nobody has access to this store.
-              </p>
-            ) : (
-              <ul className="grid gap-3 text-sm" data-testid="store-team">
-                {store.team.map((member) => (
-                  <li key={member.userId} className="flex items-center gap-2">
-                    <span className="min-w-0 flex-1 truncate">
-                      {member.email}
-                      {!member.signedIn && (
-                        <span className="block text-muted-foreground">
-                          Has not signed in yet
-                        </span>
-                      )}
-                    </span>
-                    <Badge variant="outline" className="capitalize">
-                      {member.role}
-                    </Badge>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </CardContent>
-        </Card>
+        <TeamCard
+          key={`team:${store.id}`}
+          storeId={store.id}
+          storeName={store.name}
+          team={store.team}
+          loginUrl={loginUrl}
+        />
       </div>
     </div>
   );

@@ -3,15 +3,18 @@ import { Suspense } from 'react';
 import { PlanForm } from '@/components/admin/plan-form';
 import { PageHeader } from '@/components/dashboard/page-header';
 import { Skeleton } from '@/components/ui/skeleton';
+import { listStoreOptions } from '@/features/admin/queries';
 import { requireSuperAdmin } from '@/features/auth/session';
 
 export const metadata: Metadata = { title: 'New plan' };
 
 async function NewPlan() {
   await requireSuperAdmin('/admin/plans/new');
+  const { templates } = await listStoreOptions();
   return (
     <PlanForm
       planId={null}
+      templates={templates}
       initial={{
         name: '',
         monthlyFee: '',
@@ -19,6 +22,8 @@ async function NewPlan() {
         maxProducts: '',
         maxTeam: '',
         isActive: true,
+        allTemplates: true,
+        templates: [],
       }}
     />
   );

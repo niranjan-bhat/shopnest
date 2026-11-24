@@ -4,6 +4,7 @@ import { Suspense } from 'react';
 import { PlanForm } from '@/components/admin/plan-form';
 import { PageHeader } from '@/components/dashboard/page-header';
 import { Skeleton } from '@/components/ui/skeleton';
+import { listStoreOptions } from '@/features/admin/queries';
 import { requireSuperAdmin } from '@/features/auth/session';
 import { getPlan } from '@/features/billing/queries';
 import { toRupeesInput } from '@/lib/money';
@@ -15,7 +16,10 @@ type Props = PageProps<'/admin/plans/[id]'>;
 async function Plan({ params }: Pick<Props, 'params'>) {
   const { id } = await params;
   await requireSuperAdmin(`/admin/plans/${id}`);
-  const plan = await getPlan(id);
+  const [plan, { templates }] = await Promise.all([
+    getPlan(id),
+    listStoreOptions(),
+  ]);
   if (!plan) notFound();
   return (
     <div className="grid max-w-2xl gap-6">
@@ -23,6 +27,7 @@ async function Plan({ params }: Pick<Props, 'params'>) {
       <PlanForm
         key={plan.id}
         planId={plan.id}
+        templates={templates}
         initial={{
           name: plan.name,
           monthlyFee: toRupeesInput(plan.monthlyFeePaise),
@@ -30,6 +35,8 @@ async function Plan({ params }: Pick<Props, 'params'>) {
           maxProducts: plan.limits.products?.toString() ?? '',
           maxTeam: plan.limits.team?.toString() ?? '',
           isActive: plan.isActive,
+          allTemplates: plan.templateKeys === null,
+          templates: plan.templateKeys ?? [],
         }}
       />
     </div>

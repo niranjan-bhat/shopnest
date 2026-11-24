@@ -64,6 +64,7 @@ type Step = {
   title: string;
   description: string;
   done?: boolean;
+  ownerOnly?: boolean;
 };
 
 function NextSteps({ steps }: { steps: Step[] }) {
@@ -173,14 +174,16 @@ async function Overview() {
             icon: Palette,
             title: 'Brand your storefront',
             description: 'Logo, colours, fonts and home page sections.',
+            ownerOnly: true,
           },
           {
             href: '/dashboard/settings',
             icon: Settings,
             title: 'Check store details',
             description: 'Name, WhatsApp number and policies.',
+            ownerOnly: true,
           },
-        ]}
+        ].filter((step) => !(step.ownerOnly && store.role === 'staff'))}
       />
     </div>
   );

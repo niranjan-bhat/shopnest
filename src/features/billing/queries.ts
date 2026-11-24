@@ -17,10 +17,12 @@ export type Plan = {
   monthlyFeePaise: Paise;
   limits: PlanLimits;
   isActive: boolean;
+  /** Null: every template. */
+  templateKeys: string[] | null;
 };
 
 const PLAN_FIELDS =
-  'id, name, setup_fee_paise, monthly_fee_paise, limits, is_active' as const;
+  'id, name, setup_fee_paise, monthly_fee_paise, limits, is_active, template_keys' as const;
 
 function toPlan(row: {
   id: string;
@@ -29,6 +31,7 @@ function toPlan(row: {
   monthly_fee_paise: number;
   limits: Json;
   is_active: boolean;
+  template_keys: string[] | null;
 }): Plan {
   return {
     id: row.id,
@@ -37,6 +40,7 @@ function toPlan(row: {
     monthlyFeePaise: row.monthly_fee_paise,
     limits: parseLimits(row.limits),
     isActive: row.is_active,
+    templateKeys: row.template_keys,
   };
 }
 

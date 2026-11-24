@@ -7,6 +7,7 @@ import { DEFAULT_THEME } from '@/features/theme/defaults';
 import { getPublicEnv } from '@/lib/env.public';
 import { adminDb } from '@/lib/supabase/admin';
 import { normalizeHostname } from '@/lib/tenant';
+import { ensureAccount } from './accounts';
 import {
   createStoreResultSchema,
   newStoreSchema,
@@ -16,24 +17,6 @@ import {
 type CreateStoreResult =
   | { ok: true; storeId: string }
   | { ok: false; fieldErrors: Partial<Record<NewStoreField, string>> };
-
-/** Auth's answers to "this email already has an account". */
-const ACCOUNT_EXISTS = new Set(['email_exists', 'user_already_exists']);
-
-/**
- * Makes sure the owner has an account, so they can be added to the store
- * before they first sign in. They sign in with the usual emailed code; no
- * email is sent here.
- */
-async function ensureAccount(email: string): Promise<void> {
-  const { error } = await adminDb().auth.admin.createUser({
-    email,
-    email_confirm: true,
-  });
-  if (error && !ACCOUNT_EXISTS.has(error.code ?? '')) {
-    throw new Error(`Creating the owner's account failed: ${error.message}`);
-  }
-}
 
 /**
  * Creates a store that is not live yet: its subdomain, draft theme, owner

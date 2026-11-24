@@ -31,6 +31,7 @@ export async function StoreBanner() {
       )}
       {subscription?.overdue &&
         subscription.nextDue &&
+        store.role !== 'staff' &&
         store.status === 'active' && (
           <div
             role="status"

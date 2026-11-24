@@ -3,7 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -15,6 +15,7 @@ import {
   FieldLabel,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import type { TemplateOption } from '@/features/admin/queries';
 import { savePlan } from '@/features/billing/actions';
 import {
   planSchema,
@@ -25,7 +26,7 @@ import {
 import { useHydrated } from '@/lib/use-hydrated';
 
 const TEXT_FIELDS: {
-  name: Exclude<PlanField, 'isActive'>;
+  name: Exclude<PlanField, 'isActive' | 'allTemplates' | 'templates'>;
   label: string;
   hint?: string;
 }[] = [
@@ -51,15 +52,20 @@ const TEXT_FIELDS: {
 export function PlanForm({
   planId,
   initial,
+  templates,
 }: {
   planId: string | null;
   initial: PlanInput;
+  templates: TemplateOption[];
 }) {
   const router = useRouter();
   const hydrated = useHydrated();
   const [pending, startTransition] = useTransition();
   const {
     register,
+    control,
+    setValue,
+    clearErrors,
     handleSubmit,
     setError,
     getValues,
@@ -69,6 +75,9 @@ export function PlanForm({
     resolver: zodResolver(planSchema),
     defaultValues: initial,
   });
+
+  const allTemplates = useWatch({ control, name: 'allTemplates' });
+  const chosen = useWatch({ control, name: 'templates' });
 
   // The action parses what was typed, so send that, not the parsed values.
   const onSubmit = () => {
@@ -118,6 +127,49 @@ export function PlanForm({
                 <FieldError errors={[errors[name]]} />
               </Field>
             ))}
+            <fieldset className="grid gap-3 text-sm">
+              <legend className="mb-3 font-medium">Templates</legend>
+              <label className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  className="size-4"
+                  {...register('allTemplates', {
+                    onChange: () => clearErrors('templates'),
+                  })}
+                />
+                All templates, including new ones
+              </label>
+              {!allTemplates &&
+                templates.map((template) => (
+                  <label
+                    key={template.key}
+                    className="ml-7 flex items-center gap-3"
+                  >
+                    <input
+                      type="checkbox"
+                      className="size-4"
+                      checked={chosen.includes(template.key)}
+                      onChange={(event) => {
+                        clearErrors('templates');
+                        setValue(
+                          'templates',
+                          event.target.checked
+                            ? [...chosen, template.key]
+                            : chosen.filter((key) => key !== template.key),
+                          { shouldDirty: true },
+                        );
+                      }}
+                    />
+                    {template.name}
+                  </label>
+                ))}
+              <FieldDescription>
+                Stores keep the template they already use.
+              </FieldDescription>
+              <FieldError
+                errors={[errors.templates as { message?: string } | undefined]}
+              />
+            </fieldset>
             <label className="flex items-start gap-3 text-sm">
               <input
                 type="checkbox"

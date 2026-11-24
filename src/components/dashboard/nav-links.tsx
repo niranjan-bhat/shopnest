@@ -22,6 +22,8 @@ type NavItem = {
   exact?: boolean;
   /** Shown but not clickable until its phase ships. */
   soon?: boolean;
+  /** Hidden from staff; its page sends them away too. */
+  ownerOnly?: boolean;
 };
 
 const NAV: NavItem[] = [
@@ -29,8 +31,18 @@ const NAV: NavItem[] = [
   { href: '/dashboard/products', label: 'Products', icon: Package },
   { href: '/dashboard/categories', label: 'Categories', icon: FolderTree },
   { href: '/dashboard/orders', label: 'Orders', icon: ShoppingBag },
-  { href: '/dashboard/storefront', label: 'Storefront', icon: Palette },
-  { href: '/dashboard/settings', label: 'Settings', icon: Settings },
+  {
+    href: '/dashboard/storefront',
+    label: 'Storefront',
+    icon: Palette,
+    ownerOnly: true,
+  },
+  {
+    href: '/dashboard/settings',
+    label: 'Settings',
+    icon: Settings,
+    ownerOnly: true,
+  },
 ];
 
 function isActive(pathname: string | null, item: NavItem): boolean {
@@ -48,22 +60,32 @@ const itemClass =
  * layout, wrap it in <Suspense fallback={<NavList pathname={null} />}>
  * (Cache Components requires that on routes with params).
  */
-export function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
-  return <NavList pathname={usePathname()} onNavigate={onNavigate} />;
+export function NavLinks({
+  staff,
+  onNavigate,
+}: {
+  staff: boolean;
+  onNavigate?: () => void;
+}) {
+  return (
+    <NavList pathname={usePathname()} staff={staff} onNavigate={onNavigate} />
+  );
 }
 
 /** The links themselves; `pathname` null highlights nothing. */
 export function NavList({
   pathname,
+  staff = false,
   onNavigate,
 }: {
   pathname: string | null;
+  staff?: boolean;
   onNavigate?: () => void;
 }) {
   return (
     <nav aria-label="Dashboard">
       <ul className="grid gap-1">
-        {NAV.map((item) => {
+        {NAV.filter((item) => !(staff && item.ownerOnly)).map((item) => {
           const Icon = item.icon;
           if (item.soon) {
             return (

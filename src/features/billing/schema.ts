@@ -33,18 +33,26 @@ const limit = z
     return Number(value);
   });
 
-export const planSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(1, 'Enter a name')
-    .max(60, 'Keep it under 60 characters'),
-  setupFee: rupees('Enter an amount in rupees, or 0', 0),
-  monthlyFee: rupees('Enter an amount in rupees, or 0', 0),
-  maxProducts: limit,
-  maxTeam: limit,
-  isActive: z.boolean(),
-});
+export const planSchema = z
+  .object({
+    name: z
+      .string()
+      .trim()
+      .min(1, 'Enter a name')
+      .max(60, 'Keep it under 60 characters'),
+    setupFee: rupees('Enter an amount in rupees, or 0', 0),
+    monthlyFee: rupees('Enter an amount in rupees, or 0', 0),
+    maxProducts: limit,
+    maxTeam: limit,
+    isActive: z.boolean(),
+    /** Every template, including ones added later; else those ticked. */
+    allTemplates: z.boolean(),
+    templates: z.array(z.string().max(60)).max(50),
+  })
+  .refine((plan) => plan.allTemplates || plan.templates.length > 0, {
+    path: ['templates'],
+    message: 'Choose at least one template',
+  });
 export type PlanInput = z.input<typeof planSchema>;
 export type PlanValues = z.output<typeof planSchema>;
 export type PlanField = keyof PlanValues;

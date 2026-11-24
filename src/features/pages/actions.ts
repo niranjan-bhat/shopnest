@@ -1,7 +1,7 @@
 'use server';
 
 import { refresh, updateTag } from 'next/cache';
-import { requireStoreForAction } from '@/features/tenants/access';
+import { requireOwnerForAction } from '@/features/tenants/access';
 import { tenantTag } from '@/features/tenants/queries';
 import type { ActionResult } from '@/lib/action-result';
 import { createServerSupabase } from '@/lib/supabase/server';
@@ -15,7 +15,7 @@ export async function saveStorePage(
   slug: unknown,
   input: unknown,
 ): Promise<ActionResult<PageField>> {
-  const { store } = await requireStoreForAction();
+  const { store } = await requireOwnerForAction();
   if (typeof slug !== 'string' || !isPageSlug(slug)) {
     return { ok: false, error: 'That page does not exist.' };
   }

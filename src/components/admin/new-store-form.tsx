@@ -2,8 +2,8 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
-import { useTransition } from 'react';
-import { useForm } from 'react-hook-form';
+import { useTransition, type ChangeEvent } from 'react';
+import { useForm, useWatch } from 'react-hook-form';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -36,6 +36,13 @@ const selectClass =
 const suggestSlug = (name: string) =>
   slugify(name).slice(0, STORE_SLUG_MAX).replace(/-+$/, '');
 
+function templatesOf(options: StoreOptions, planId: string | undefined) {
+  const keys = options.plans.find((p) => p.id === planId)?.templateKeys;
+  return keys
+    ? options.templates.filter((t) => keys.includes(t.key))
+    : options.templates;
+}
+
 export function NewStoreForm({
   options,
   rootDomain,
@@ -52,6 +59,8 @@ export function NewStoreForm({
     setError,
     setValue,
     getFieldState,
+    getValues,
+    control,
     reset,
     formState: { errors, dirtyFields },
   } = useForm<NewStoreInput, unknown, NewStoreValues>({
@@ -62,7 +71,7 @@ export function NewStoreForm({
       businessType: 'saree',
       whatsappNumber: '',
       ownerEmail: '',
-      templateKey: options.templates[0]?.key ?? '',
+      templateKey: templatesOf(options, options.plans[0]?.id)[0]?.key ?? '',
       planId: options.plans[0]?.id ?? '',
     },
   });
@@ -87,11 +96,24 @@ export function NewStoreForm({
       }
     });
 
-  const field = (name: NewStoreField) => ({
+  const field = (
+    name: NewStoreField,
+    onChange?: (event: ChangeEvent<HTMLSelectElement>) => void,
+  ) => ({
     id: `store-${name}`,
     'aria-invalid': Boolean(errors[name]),
-    ...register(name),
+    ...register(name, { onChange }),
   });
+
+  // Only the plan's templates are offered.
+  const planId = useWatch({ control, name: 'planId' });
+  const templates = templatesOf(options, planId);
+  const pickTemplate = (event: ChangeEvent<HTMLSelectElement>) => {
+    const offered = templatesOf(options, event.target.value);
+    if (!offered.some((t) => t.key === getValues('templateKey'))) {
+      setValue('templateKey', offered[0]?.key ?? '');
+    }
+  };
 
   const nameField = field('name');
 
@@ -174,20 +196,12 @@ export function NewStoreForm({
               <FieldError errors={[errors.ownerEmail]} />
             </Field>
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field data-invalid={Boolean(errors.templateKey)}>
-                <FieldLabel htmlFor="store-templateKey">Template</FieldLabel>
-                <select className={selectClass} {...field('templateKey')}>
-                  {options.templates.map((template) => (
-                    <option key={template.key} value={template.key}>
-                      {template.name}
-                    </option>
-                  ))}
-                </select>
-                <FieldError errors={[errors.templateKey]} />
-              </Field>
               <Field data-invalid={Boolean(errors.planId)}>
                 <FieldLabel htmlFor="store-planId">Plan</FieldLabel>
-                <select className={selectClass} {...field('planId')}>
+                <select
+                  className={selectClass}
+                  {...field('planId', pickTemplate)}
+                >
                   {options.plans.map((plan) => (
                     <option key={plan.id} value={plan.id}>
                       {plan.name} ({formatINR(plan.monthlyFeePaise)}/month)
@@ -195,6 +209,17 @@ export function NewStoreForm({
                   ))}
                 </select>
                 <FieldError errors={[errors.planId]} />
+              </Field>
+              <Field data-invalid={Boolean(errors.templateKey)}>
+                <FieldLabel htmlFor="store-templateKey">Template</FieldLabel>
+                <select className={selectClass} {...field('templateKey')}>
+                  {templates.map((template) => (
+                    <option key={template.key} value={template.key}>
+                      {template.name}
+                    </option>
+                  ))}
+                </select>
+                <FieldError errors={[errors.templateKey]} />
               </Field>
             </div>
             <div>

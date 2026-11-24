@@ -48,11 +48,18 @@ export async function savePlan(
     pid: planId ?? undefined,
     max_products: plan.maxProducts ?? undefined,
     max_team: plan.maxTeam ?? undefined,
+    only_templates: plan.allTemplates ? undefined : plan.templates,
   });
   if (error?.code === '23505') {
     return {
       ok: false,
       fieldErrors: { name: 'Another plan has this name' },
+    };
+  }
+  if (error?.message === 'unknown template') {
+    return {
+      ok: false,
+      fieldErrors: { templates: 'A template is no longer available' },
     };
   }
   if (error) throw new Error(`Saving the plan failed: ${error.message}`);

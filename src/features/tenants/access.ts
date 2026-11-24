@@ -101,20 +101,44 @@ export async function requireStore(returnTo: string): Promise<StoreContext> {
 }
 
 /**
+ * For pages staff may not open (storefront, settings): they go to the
+ * overview. Super admins may look.
+ */
+export async function requireOwner(returnTo: string): Promise<StoreContext> {
+  const context = await requireStore(returnTo);
+  if (context.store.role === 'staff') redirect('/dashboard');
+  return context;
+}
+
+/**
  * For Server Actions that change a store's data: the user and the active
  * store, with access re-checked in the database right before the write (a
  * super admin who is not a member needs an edit session).
  * Throws instead of redirecting, because a failed action is an error, not a
  * navigation. Writes must still filter by `store.id` explicitly.
  */
-export async function requireStoreForAction(): Promise<StoreContext> {
+export function requireStoreForAction(): Promise<StoreContext> {
+  return requireForAction('can_manage_tenant');
+}
+
+/**
+ * The same for changes staff may not make: the storefront, pages and store
+ * settings. The database refuses staff there too.
+ */
+export function requireOwnerForAction(): Promise<StoreContext> {
+  return requireForAction('can_own_tenant');
+}
+
+async function requireForAction(
+  rule: 'can_manage_tenant' | 'can_own_tenant',
+): Promise<StoreContext> {
   const context = await loadDashboardContext();
   if (!context) throw new Error('Not signed in');
   if (!context.store) throw new Error('No store selected');
   const supabase = await createServerSupabase();
   const allowed = check(
-    await supabase.rpc('can_manage_tenant', { tid: context.store.id }),
-    'can_manage_tenant',
+    await supabase.rpc(rule, { tid: context.store.id }),
+    rule,
   );
   if (allowed !== true) throw new Error('No access to this store');
   return { ...context, store: context.store };
