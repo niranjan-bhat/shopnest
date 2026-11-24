@@ -295,6 +295,13 @@ Eight phases, each ending in something demoable; MVP is Phases 0–5. I've reord
 
 **Exit:** a new store goes from zero to live on a subdomain in under 30 minutes, without touching code. MVP done.
 
+### Phase 5.5 — Landing page
+
+- [x] zarify.in: what Zarify is, demo stores, how it works, WhatsApp contact, sign-in; merchants' stores are never listed
+- [x] Privacy and terms drafts, sitemap, share image
+
+**Exit:** a merchant can open zarify.in on a phone, understand it, view a demo and message on WhatsApp.
+
 ### Phase 6 — Templates 2–3, custom domains, hardening
 
 - [ ] Templates 2 and 3 on the same section contract: a second clothing style, then a jewellery template with its attribute preset and price-on-request display when that vertical opens

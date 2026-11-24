@@ -67,7 +67,7 @@ ignores the new database functions and keeps serving `/mock-media`.
 
 ## Deploy Phase 5 (super admin and subscriptions)
 
-1. [ ] **Database migrations** before merging `phase-5-admin`:
+1. [x] **Database migrations** before merging `phase-5-admin`:
        `npx supabase db push --remote --dry-run` should list `create_store`, `store_status`, `billing` and `team_and_templates`, then `npx supabase db push --remote`.
        It adds the Starter and Growth plans and puts every existing store on Growth.
 2. [ ] **Plan prices.** Starter (₹999) and Growth (₹2,499) are placeholders: set the real ones in Admin → Plans before billing anyone.
@@ -80,6 +80,18 @@ ignores the new database functions and keeps serving `/mock-media`.
 7. [ ] **Staff roles.** Anyone with the staff role loses the storefront and settings pages. Check each store's
        Team card on its admin page and make the right people owners.
 8. [ ] **Templates.** Every plan offers all templates until you narrow it in Admin → Plans.
+
+## Deploy Phase 5.5 (landing page)
+
+No migrations or environment variables.
+
+1. [ ] **Make `zarify.in` the main address.** Vercel → Domains: today it redirects to `www.zarify.in`. Reverse that, because
+       the page names `https://zarify.in` as its address to Google.
+2. [ ] **Check it on your phone**: "Chat on WhatsApp" reaches your sales number, both demos open, "Sign in" opens the app.
+       Send yourself the link on WhatsApp: the share image appears.
+3. [ ] **Review Privacy and Terms** (`/privacy`, `/terms`): they are drafts. Add the business name and city.
+4. [ ] **Contact email**: set up `hello@zarify.in` and add it to both pages and the footer.
+5. [ ] **Prices** are not shown. Add them to the page once they are final.
 
 ## Before the first real merchant
 

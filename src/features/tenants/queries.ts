@@ -107,19 +107,3 @@ export async function listStoreHosts(): Promise<string[]> {
   );
   return rows.map((row) => row.hostname);
 }
-
-/** Primary host name of every live store, for the platform's store list. */
-export async function listPrimaryStoreHosts(): Promise<string[]> {
-  'use cache';
-  cacheLife('hours');
-  cacheTag(STORES_TAG);
-  const rows = check(
-    await storefrontDb()
-      .from('tenant_domains')
-      .select('hostname')
-      .eq('is_primary', true)
-      .order('hostname'),
-    'tenant_domains',
-  );
-  return rows.map((row) => row.hostname);
-}
