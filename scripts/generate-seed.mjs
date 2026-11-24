@@ -14,10 +14,18 @@ const OUT = join(ROOT, 'supabase', 'seed.sql');
 /** Templates the demo stores use. The template itself lives in code. */
 const TEMPLATES = [{ key: 'silk', name: 'Silk' }];
 
+/** The demo stores' plan: Growth (20261123130000_create_store.sql). */
+const PLAN_ID = '00000000-0000-4000-8000-000000000002';
+const SUBSCRIPTIONS = mockDb.tenants.map((tenant) => ({
+  tenant_id: tenant.id,
+  plan_id: PLAN_ID,
+}));
+
 /** Insert order respects foreign keys. */
 const TABLES = [
   ['templates', TEMPLATES],
   ['tenants', mockDb.tenants],
+  ['subscriptions', SUBSCRIPTIONS],
   ['tenant_domains', mockDb.tenant_domains],
   ['tenant_themes', mockDb.tenant_themes],
   ['categories', mockDb.categories],

@@ -24,8 +24,8 @@ export async function switchStore(formData: FormData): Promise<void> {
 
   const supabase = await createServerSupabase();
   const allowed = check(
-    await supabase.rpc('can_manage_tenant', { tid: parsed.data.storeId }),
-    'can_manage_tenant',
+    await supabase.rpc('can_view_tenant', { tid: parsed.data.storeId }),
+    'can_view_tenant',
   );
   if (allowed !== true) return;
 

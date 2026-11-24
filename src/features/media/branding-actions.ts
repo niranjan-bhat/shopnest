@@ -1,7 +1,7 @@
 'use server';
 
 import { randomUUID } from 'node:crypto';
-import { requireStoreForAction } from '@/features/tenants/access';
+import { requireOwnerForAction } from '@/features/tenants/access';
 import { isR2Configured, signedUploadUrl } from '@/lib/r2';
 import { brandingKey, brandingUploadSchema, type UploadType } from './rules';
 
@@ -16,7 +16,7 @@ export async function prepareBrandingUpload(
   | { ok: true; key: string; uploadUrl: string; contentType: UploadType }
   | { ok: false; error: string }
 > {
-  const { store } = await requireStoreForAction();
+  const { store } = await requireOwnerForAction();
   if (!isR2Configured()) {
     return {
       ok: false,

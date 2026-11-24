@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import {
+  deleteUser,
   freshEmail,
   grantAccess,
   requestCode,
@@ -61,24 +62,29 @@ test.describe('sign-in', () => {
     await signIn(page, email);
     await expect(page.getByTestId('no-stores')).toBeVisible();
 
-    await grantAccess(email, { store: 'saree-demo' });
-    await page.reload();
-    await expect(
-      page.getByRole('heading', { level: 1, name: 'Tara Weaves' }),
-    ).toBeVisible();
-    await expect(page.getByText('Noor Atelier')).toHaveCount(0);
-    await expect(
-      page.getByRole('link', { name: 'View store' }),
-    ).toHaveAttribute('href', /^http:\/\/saree-demo\.localhost:\d+$/);
+    try {
+      await grantAccess(email, { store: 'saree-demo' });
+      await page.reload();
+      await expect(
+        page.getByRole('heading', { level: 1, name: 'Tara Weaves' }),
+      ).toBeVisible();
+      await expect(page.getByText('Noor Atelier')).toHaveCount(0);
+      await expect(
+        page.getByRole('link', { name: 'View store' }),
+      ).toHaveAttribute('href', /^http:\/\/saree-demo\.localhost:\d+$/);
 
-    await grantAccess(email, { superAdmin: true });
-    await page.reload();
-    await page.getByRole('button', { name: 'Account' }).click();
-    await page.getByRole('menuitem', { name: 'Super admin' }).click();
-    await expect(page).toHaveURL(app('/admin'));
-    const stores = page.getByTestId('all-stores');
-    await expect(stores).toContainText('Tara Weaves');
-    await expect(stores).toContainText('Noor Atelier');
+      await grantAccess(email, { superAdmin: true });
+      await page.reload();
+      await page.getByRole('button', { name: 'Account' }).click();
+      await page.getByRole('menuitem', { name: 'Super admin' }).click();
+      await expect(page).toHaveURL(app('/admin'));
+      const stores = page.getByTestId('all-stores');
+      await expect(stores).toContainText('Tara Weaves');
+      await expect(stores).toContainText('Noor Atelier');
+    } finally {
+      // The demo store's plan limits how many people it has.
+      await deleteUser(email);
+    }
   });
 
   test('a bad email is rejected before anything is sent', async ({ page }) => {

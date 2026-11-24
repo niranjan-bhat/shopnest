@@ -1,21 +1,25 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { PageHeader } from '@/components/dashboard/page-header';
+import { PlanCard } from '@/components/dashboard/settings/plan-card';
 import { StorePagesList } from '@/components/dashboard/settings/store-pages-list';
 import { StoreSettingsForm } from '@/components/dashboard/settings/store-settings-form';
 import { Skeleton } from '@/components/ui/skeleton';
 import { listEditablePages } from '@/features/pages/dashboard';
-import { requireStore } from '@/features/tenants/access';
+import { getStorePlan, getUsage } from '@/features/billing/queries';
+import { requireOwner } from '@/features/tenants/access';
 import { settingsFormValues } from '@/features/tenants/settings';
 import { getStoreSettings } from '@/features/tenants/settings-queries';
 
 export const metadata: Metadata = { title: 'Settings' };
 
 async function Settings() {
-  const { store } = await requireStore('/dashboard/settings');
-  const [settings, pages] = await Promise.all([
+  const { store } = await requireOwner('/dashboard/settings');
+  const [settings, pages, subscription, usage] = await Promise.all([
     getStoreSettings(store.id),
     listEditablePages(store.id),
+    getStorePlan(store.id),
+    getUsage(store.id),
   ]);
   const initial = settingsFormValues(settings);
   return (
@@ -32,6 +36,7 @@ async function Settings() {
         storeUrl={store.url}
       />
       <StorePagesList pages={pages} />
+      {subscription && <PlanCard subscription={subscription} usage={usage} />}
     </div>
   );
 }

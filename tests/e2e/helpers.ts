@@ -391,3 +391,22 @@ export async function signIn(page: Page, email: string) {
   await page.getByRole('button', { name: 'Sign in' }).click();
   await expect(page).toHaveURL(app('/dashboard'));
 }
+
+export async function deleteStoreBySlug(slug: string) {
+  const { error } = await adminDb().from('tenants').delete().eq('slug', slug);
+  if (error) throw error;
+}
+
+/** Changes a test store's own row, e.g. its status. */
+export async function setStoreRow(store: TestStore, row: object) {
+  const { error } = await adminDb()
+    .from('tenants')
+    .update(row)
+    .eq('id', store.id);
+  if (error) throw error;
+}
+
+export async function deletePlan(name: string) {
+  const { error } = await adminDb().from('plans').delete().eq('name', name);
+  if (error) throw error;
+}

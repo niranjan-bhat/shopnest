@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { freshEmail, grantAccess, signIn } from './helpers';
+import { deleteUser, freshEmail, grantAccess, signIn } from './helpers';
 import { app } from './urls';
 
 /** Opens a dashboard section from the sidebar, or the menu on phones. */
@@ -37,26 +37,31 @@ test.describe('dashboard shell', () => {
   }, testInfo) => {
     const email = freshEmail(testInfo);
     await signIn(page, email);
-    await grantAccess(email, { store: 'saree-demo' });
-    await page.reload();
+    try {
+      await grantAccess(email, { store: 'saree-demo' });
+      await page.reload();
 
-    await expect(heading(page, 'Tara Weaves')).toBeVisible();
-    // One store: its name, no switcher.
-    await expect(page.getByTestId('store-name')).toHaveText('Tara Weaves');
-    await expect(
-      page.getByRole('button', { name: /Switch store/ }),
-    ).toHaveCount(0);
+      await expect(heading(page, 'Tara Weaves')).toBeVisible();
+      // One store: its name, no switcher.
+      await expect(page.getByTestId('store-name')).toHaveText('Tara Weaves');
+      await expect(
+        page.getByRole('button', { name: /Switch store/ }),
+      ).toHaveCount(0);
 
-    await openSection(page, 'Products');
-    await expect(page).toHaveURL(app('/dashboard/products'));
-    await expect(heading(page, 'Products')).toBeVisible();
+      await openSection(page, 'Products');
+      await expect(page).toHaveURL(app('/dashboard/products'));
+      await expect(heading(page, 'Products')).toBeVisible();
 
-    await openSection(page, 'Settings');
-    await expect(page).toHaveURL(app('/dashboard/settings'));
-    await expect(heading(page, 'Settings')).toBeVisible();
+      await openSection(page, 'Settings');
+      await expect(page).toHaveURL(app('/dashboard/settings'));
+      await expect(heading(page, 'Settings')).toBeVisible();
 
-    await openSection(page, 'Overview');
-    await expect(heading(page, 'Tara Weaves')).toBeVisible();
+      await openSection(page, 'Overview');
+      await expect(heading(page, 'Tara Weaves')).toBeVisible();
+    } finally {
+      // The demo store's plan limits how many people it has.
+      await deleteUser(email);
+    }
   });
 
   test('super admins switch between every store', async ({

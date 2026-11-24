@@ -9,7 +9,7 @@ import { HomeSections } from '@/components/dashboard/storefront/home-sections';
 import { PublishBar } from '@/components/dashboard/storefront/publish-bar';
 import { ThemeLookForm } from '@/components/dashboard/storefront/theme-look-form';
 import { Skeleton } from '@/components/ui/skeleton';
-import { requireStore } from '@/features/tenants/access';
+import { requireOwner } from '@/features/tenants/access';
 import { listDashboardBanners } from '@/features/theme/banner-queries';
 import { getThemeEditor } from '@/features/theme/editor';
 import { lookOf } from '@/features/theme/look';
@@ -20,7 +20,7 @@ import { getTemplate } from '@/templates/registry';
 export const metadata: Metadata = { title: 'Storefront' };
 
 async function StorefrontEditor() {
-  const { store } = await requireStore('/dashboard/storefront');
+  const { store } = await requireOwner('/dashboard/storefront');
   const editor = await getThemeEditor(store.id);
   const banners = await listDashboardBanners(store.id, editor);
   const uploadsEnabled = isR2Configured();

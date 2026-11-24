@@ -1,5 +1,9 @@
 'use server';
 
+import {
+  PRODUCT_LIMIT_CODE,
+  PRODUCT_LIMIT_MESSAGE,
+} from '@/features/billing/schema';
 import { requireStoreForAction } from '@/features/tenants/access';
 import type { ActionResult } from '@/lib/action-result';
 import { deleteObjects, isR2Configured } from '@/lib/r2';
@@ -63,6 +67,9 @@ export async function saveProduct(
       };
     }
     if (error.code === 'P0002') return { ok: false, error: GONE };
+    if (error.code === PRODUCT_LIMIT_CODE) {
+      return { ok: false, error: PRODUCT_LIMIT_MESSAGE };
+    }
     if (error.code === '23503' || error.code === '22023') {
       return {
         ok: false,

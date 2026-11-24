@@ -56,14 +56,30 @@ ignores the new database functions and keeps serving `/mock-media`.
 
 ## Deploy Phase 4 (ordering)
 
-1. [ ] **Database migrations** before merging `phase-4-ordering`:
+1. [x] **Database migrations** before merging `phase-4-ordering`:
        `npx supabase db push --remote --dry-run` should list `place_order`, `order_status` and `order_limits`,
        then `npx supabase db push --remote`. The checkout breaks if the code ships without them.
-2. [ ] **Place a test order** on a live store from your phone: it reaches WhatsApp with an order number, shows
+2. [x] **Place a test order** on a live store from your phone: it reaches WhatsApp with an order number, shows
        up under Dashboard → Orders as New with the same total, and confirming then cancelling it moves the stock
        down and back. Cancel the test order afterwards.
-3. [ ] **Spam limits** need nothing set up: Vercel supplies the shopper's network address, and only a hash
+3. [x] **Spam limits** need nothing set up: Vercel supplies the shopper's network address, and only a hash
        of it, keyed with the Supabase service-role key, is stored. Rotating that key restarts the hourly counts.
+
+## Deploy Phase 5 (super admin and subscriptions)
+
+1. [ ] **Database migrations** before merging `phase-5-admin`:
+       `npx supabase db push --remote --dry-run` should list `create_store`, `store_status`, `billing` and `team_and_templates`, then `npx supabase db push --remote`.
+       It adds the Starter and Growth plans and puts every existing store on Growth.
+2. [ ] **Plan prices.** Starter (₹999) and Growth (₹2,499) are placeholders: set the real ones in Admin → Plans before billing anyone.
+3. [ ] **Create a test store** at `https://app.zarify.in/admin`, with an owner email you can read: the owner signs in
+       with a code and sees the store, and `https://<address>.zarify.in` says "Page not found" until it is live.
+4. [ ] **Go live, then suspend it** from its admin page: the address opens, then says "currently unavailable".
+5. [ ] **Super admins are read-only now** in stores they are not a member of: use "Allow editing" in the dashboard.
+6. [ ] **Billing dates.** Existing stores are not billed until you set "Billing starts" on their admin page; new stores
+       start the day they first go live. Plan limits apply to existing stores at once (Growth: 500 products, 6 people).
+7. [ ] **Staff roles.** Anyone with the staff role loses the storefront and settings pages. Check each store's
+       Team card on its admin page and make the right people owners.
+8. [ ] **Templates.** Every plan offers all templates until you narrow it in Admin → Plans.
 
 ## Before the first real merchant
 

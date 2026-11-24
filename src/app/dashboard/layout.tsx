@@ -4,13 +4,32 @@ import { Brand } from '@/components/dashboard/brand';
 import { DashboardHeader } from '@/components/dashboard/dashboard-header';
 import { MobileNav } from '@/components/dashboard/mobile-nav';
 import { NavLinks, NavList } from '@/components/dashboard/nav-links';
+import {
+  ReadOnlyGuard,
+  ReadOnlyProvider,
+} from '@/components/dashboard/read-only';
+import { StoreBanner } from '@/components/dashboard/store-banner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Toaster } from '@/components/ui/sonner';
+import { getDashboardContext } from '@/features/tenants/access';
 
 export const metadata: Metadata = {
   title: { default: 'Dashboard', template: '%s · Zarify' },
   robots: { index: false },
 };
+
+/** Staff see fewer sections. Pages check the role again. */
+async function isStaff(): Promise<boolean> {
+  return (await getDashboardContext())?.store?.role === 'staff';
+}
+
+async function SidebarNav() {
+  return <NavLinks staff={await isStaff()} />;
+}
+
+async function PhoneNav() {
+  return <MobileNav staff={await isStaff()} />;
+}
 
 /**
  * Dashboard shell: sidebar navigation (a slide-in menu on phones) and a
@@ -31,20 +50,27 @@ export default function DashboardLayout({
           {/* The highlight depends on the URL, which is only known per
               request on routes like /dashboard/products/[id]. */}
           <Suspense fallback={<NavList pathname={null} />}>
-            <NavLinks />
+            <SidebarNav />
           </Suspense>
         </div>
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-2 border-b bg-background px-3 md:px-6">
-          <MobileNav />
+          <Suspense fallback={<span className="size-8 md:hidden" />}>
+            <PhoneNav />
+          </Suspense>
           <Suspense fallback={<Skeleton className="h-6 w-40" />}>
             <DashboardHeader />
           </Suspense>
         </header>
-        <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 md:px-8">
-          {children}
-        </main>
+        <ReadOnlyProvider>
+          <Suspense fallback={null}>
+            <StoreBanner />
+          </Suspense>
+          <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 md:px-8">
+            <ReadOnlyGuard>{children}</ReadOnlyGuard>
+          </main>
+        </ReadOnlyProvider>
       </div>
       <Toaster position="top-center" />
     </div>

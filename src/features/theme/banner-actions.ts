@@ -7,7 +7,7 @@ import {
   MAX_IMAGE_BYTES,
   UPLOAD_TYPES,
 } from '@/features/media/rules';
-import { requireStoreForAction } from '@/features/tenants/access';
+import { requireOwnerForAction } from '@/features/tenants/access';
 import type { ActionResult } from '@/lib/action-result';
 import { deleteObjects, isR2Configured, statObject } from '@/lib/r2';
 import { createServerSupabase } from '@/lib/supabase/server';
@@ -49,7 +49,7 @@ async function discard(key: string) {
 export async function createBanner(
   input: unknown,
 ): Promise<ActionResult<BannerField>> {
-  const { store } = await requireStoreForAction();
+  const { store } = await requireOwnerForAction();
   if (!isR2Configured()) return { ok: false, error: NOT_SET_UP };
   const parsed = newBannerSchema.safeParse(input);
   if (!parsed.success) {
@@ -107,7 +107,7 @@ export async function updateBanner(
   id: unknown,
   input: unknown,
 ): Promise<ActionResult<BannerField>> {
-  const { store } = await requireStoreForAction();
+  const { store } = await requireOwnerForAction();
   const bannerId = bannerIdSchema.safeParse(id);
   if (!bannerId.success) return { ok: false, error: GONE };
   const parsed = bannerFormSchema.safeParse(input);
@@ -132,7 +132,7 @@ export async function updateBanner(
 
 /** Saves the order of all of the store's banners. */
 export async function reorderBanners(ids: unknown): Promise<ActionResult> {
-  const { store } = await requireStoreForAction();
+  const { store } = await requireOwnerForAction();
   const parsed = bannerOrderSchema.safeParse(ids);
   if (!parsed.success) {
     return { ok: false, error: 'Could not save the new order.' };
@@ -157,7 +157,7 @@ export async function reorderBanners(ids: unknown): Promise<ActionResult> {
 
 /** Deletes a banner, then its image file. */
 export async function deleteBanner(id: unknown): Promise<ActionResult> {
-  const { store } = await requireStoreForAction();
+  const { store } = await requireOwnerForAction();
   const bannerId = bannerIdSchema.safeParse(id);
   if (!bannerId.success) return { ok: false, error: GONE };
   const supabase = await createServerSupabase();

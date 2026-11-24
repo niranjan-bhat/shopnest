@@ -1,7 +1,7 @@
 'use server';
 
 import { refresh } from 'next/cache';
-import { requireStoreForAction } from '@/features/tenants/access';
+import { requireOwnerForAction } from '@/features/tenants/access';
 import type { ActionResult } from '@/lib/action-result';
 import { check } from '@/lib/supabase/result';
 import { createServerSupabase } from '@/lib/supabase/server';
@@ -20,7 +20,7 @@ import {
  * Shoppers see them after the next publish.
  */
 export async function saveHomeSections(input: unknown): Promise<ActionResult> {
-  const { store } = await requireStoreForAction();
+  const { store } = await requireOwnerForAction();
   const parsed = homeSectionsSchema.safeParse(input);
   if (!parsed.success) {
     const issue = parsed.error.issues[0];
