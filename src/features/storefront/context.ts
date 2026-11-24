@@ -1,13 +1,8 @@
 import { cacheLife } from 'next/cache';
 import { listCategories } from '@/features/catalog/queries';
 import { listPublishedPages } from '@/features/pages/queries';
-import {
-  getStoreByHost,
-  listPrimaryStoreHosts,
-} from '@/features/tenants/queries';
+import { getStoreByHost } from '@/features/tenants/queries';
 import type { ThemeConfig } from '@/features/theme/schema';
-import { getPublicEnv } from '@/lib/env.public';
-import { originFor } from '@/lib/tenant';
 import type { StoreContext } from '@/templates/contract';
 
 /**
@@ -45,33 +40,4 @@ export async function loadStorefront(host: string): Promise<Storefront | null> {
       categories,
     },
   };
-}
-
-export type StoreLink = {
-  slug: string;
-  name: string;
-  tagline: string | null;
-  url: string;
-};
-
-/** Live stores for the platform index page at "/". */
-export async function listStoreLinks(): Promise<StoreLink[]> {
-  'use cache';
-  cacheLife('hours');
-  const rootDomain = getPublicEnv().NEXT_PUBLIC_ROOT_DOMAIN;
-  const hosts = await listPrimaryStoreHosts();
-  const stores = await Promise.all(
-    hosts.map(async (hostname) => {
-      const store = await getStoreByHost(hostname);
-      return store
-        ? {
-            slug: store.slug,
-            name: store.name,
-            tagline: store.theme.branding.tagline ?? null,
-            url: originFor(hostname, rootDomain),
-          }
-        : null;
-    }),
-  );
-  return stores.filter((s) => s !== null);
 }

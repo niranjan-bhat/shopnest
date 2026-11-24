@@ -1,0 +1,241 @@
+/* The platform site only (zarify.in): maroon and blush, with a line of zari. */
+.marketing {
+  --maroon: #741733;
+  --maroon-deep: #4a0d20;
+  --blush: #f8e9e6;
+  --zari: #d9ad55;
+  --paper: #fffaf7;
+  --ink: #26141a;
+  --soft: #66525a;
+  --line: #ead7d4;
+  display: flex;
+  min-height: 100%;
+  flex: 1;
+  flex-direction: column;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-mukta), system-ui, sans-serif;
+  font-size: 1.0625rem;
+  line-height: 1.6;
+}
+.marketing :focus-visible {
+  outline: 3px solid var(--maroon);
+  outline-offset: 3px;
+}
+.marketing :is(.mk-close, .mk-footer) :focus-visible {
+  outline-color: var(--zari);
+}
+.mk-wrap {
+  width: 100%;
+  max-width: 78rem;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+}
+.mk-display {
+  font-family: var(--font-display), Georgia, serif;
+  line-height: 1.08;
+  text-wrap: balance;
+}
+.mk-h2 {
+  font-size: clamp(1.9rem, 5vw, 3rem);
+}
+.mk-header {
+  border-bottom: 1px solid var(--line);
+}
+.mk-logo {
+  color: var(--maroon);
+}
+.mk-signin {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  border: 1.5px solid var(--maroon);
+  border-radius: 0.6rem;
+  padding-inline: 1.25rem;
+  color: var(--maroon);
+  font-weight: 700;
+}
+.mk-signin:hover {
+  background: var(--blush);
+}
+.mk-hero {
+  overflow: hidden;
+  background: linear-gradient(105deg, #fff6f0, var(--blush) 55%, #efd0cd);
+}
+.mk-hero em {
+  color: var(--maroon);
+}
+.mk-for {
+  color: var(--maroon);
+  font-weight: 700;
+}
+/* Phones: just the phone, cut off by the gold line. Wide: laptop and phone. */
+.mk-devices {
+  position: relative;
+}
+.mk-laptop {
+  display: none;
+}
+.mk-devices .mk-phone {
+  width: 16rem;
+  margin: 0 auto -10rem;
+}
+.mk-screen {
+  overflow: hidden;
+  border: 10px solid #17100f;
+  border-radius: 1rem 1rem 0 0;
+}
+.mk-screen img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+@media (min-width: 64rem) {
+  .mk-devices {
+    padding-right: 3rem;
+  }
+  .mk-laptop {
+    display: block;
+  }
+  .mk-laptop::after {
+    display: block;
+    width: 110%;
+    height: 0.9rem;
+    margin-left: -5%;
+    border-radius: 0 0 1rem 1rem;
+    background: linear-gradient(#cbbfbe, #8f8281);
+    content: '';
+  }
+  .mk-devices .mk-phone {
+    position: absolute;
+    right: 0;
+    bottom: -3rem;
+    width: 30%;
+    margin: 0;
+    border-width: 6px;
+    border-radius: 1.6rem;
+  }
+  .mk-devices .mk-phone img {
+    aspect-ratio: 390 / 700;
+    border-radius: 1.2rem;
+    object-fit: cover;
+    object-position: top;
+  }
+}
+.mk-phone {
+  overflow: hidden;
+  border: 8px solid #0a1714;
+  border-radius: 2.25rem;
+  background: #0a1714;
+}
+.mk-phone img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 1.75rem;
+}
+/* A line of zari under the hero. */
+.mk-border {
+  position: relative;
+  height: 3px;
+  background: var(--zari);
+}
+.mk-btn {
+  display: inline-flex;
+  min-height: 3.25rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  border: 1.5px solid var(--maroon);
+  border-radius: 0.6rem;
+  padding: 0.5rem 1.5rem;
+  background: var(--maroon);
+  color: #fff;
+  font-weight: 700;
+  transition: background-color 150ms;
+}
+.mk-btn:hover {
+  background: var(--maroon-deep);
+}
+.mk-btn-quiet {
+  background: transparent;
+  color: var(--maroon);
+}
+.mk-btn-quiet:hover {
+  background: #fff;
+}
+.mk-card {
+  display: flex;
+  gap: 1rem;
+  border-radius: 1rem;
+  padding: 1.25rem;
+  background: var(--blush);
+}
+.mk-card h3 {
+  color: var(--maroon);
+}
+.mk-icon {
+  display: grid;
+  flex: none;
+  width: 3rem;
+  height: 3rem;
+  place-items: center;
+  border-radius: 0.75rem;
+  background: #f1cfca;
+  color: var(--maroon);
+}
+.mk-close {
+  background: var(--maroon-deep);
+  color: #fff;
+}
+.mk-close .mk-btn {
+  border-color: var(--zari);
+  background: var(--zari);
+  color: var(--ink);
+}
+.mk-close .mk-btn:hover {
+  background: #edc97e;
+}
+.mk-footer {
+  border-top: 1px solid rgb(255 255 255 / 18%);
+  background: var(--maroon-deep);
+  color: #f6e3e0;
+}
+.mk-footer a {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+}
+.mk-faq summary {
+  cursor: pointer;
+  padding: 1rem 0;
+  font-weight: 700;
+}
+.mk-faq details {
+  border-bottom: 1px solid var(--line);
+}
+.mk-text {
+  max-width: 46rem;
+  padding-block: 3.5rem;
+}
+.mk-text h2 {
+  margin-top: 2.25rem;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+.mk-text :is(p, ul) {
+  margin-top: 0.75rem;
+}
+.mk-text ul {
+  padding-left: 1.25rem;
+  list-style: disc;
+}
+.mk-text a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:has(.marketing) {
+    scroll-behavior: smooth;
+  }
+}

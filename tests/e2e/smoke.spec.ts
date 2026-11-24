@@ -1,18 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { app, platform, store } from './urls';
 
-test('platform index links to both demo stores on their own hosts', async ({
-  page,
-}) => {
-  const response = await page.goto(platform());
-  expect(response?.ok()).toBe(true);
-  await expect(page.getByRole('link', { name: /Tara Weaves/ })).toHaveAttribute(
-    'href',
-    store('saree-demo').replace(/\/$/, ''),
-  );
-  await expect(page.getByRole('link', { name: /Noor Atelier/ })).toBeVisible();
-});
-
 test('each store host serves its own store from the database', async ({
   page,
 }) => {
