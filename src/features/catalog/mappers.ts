@@ -5,12 +5,14 @@ import {
   CLOTHING_ATTRIBUTES,
   SIZE_ORDER,
 } from './attributes';
+import { imagesForColour, matchColour, uniqueColours } from './colours';
 import type {
   Banner,
   CatalogItem,
   CategorySummary,
   MediaImage,
   ProductDetail,
+  ProductImage,
   ProductVariant,
 } from './types';
 
@@ -87,6 +89,22 @@ export function toImage(row: Tables<'product_images'>): MediaImage {
   };
 }
 
+/**
+ * A product's photos in display order. A tag for a colour the product does
+ * not have (any more) counts as none.
+ */
+function toProductImages(
+  rows: Tables<'product_images'>[],
+  colours: string[],
+): ProductImage[] {
+  return [...rows]
+    .sort((a, b) => a.position - b.position)
+    .map((row) => ({
+      ...toImage(row),
+      colour: matchColour(colours, row.colour),
+    }));
+}
+
 export function toCategory(row: Tables<'categories'>): CategorySummary {
   return {
     id: row.id,
@@ -150,6 +168,14 @@ export type ProductRows = {
   categories: Tables<'categories'>[];
 };
 
+function cardImage(
+  image: MediaImage | ProductImage | undefined,
+): MediaImage | null {
+  if (!image) return null;
+  const { key, alt, width, height } = image;
+  return { key, alt, width, height };
+}
+
 /** Builds the card + filter fields for one active product. */
 export function toCatalogItem({
   product,
@@ -161,7 +187,8 @@ export function toCatalogItem({
   const prices = variantViews
     .map((v) => v.pricePaise)
     .filter((p): p is number => p !== null);
-  const sortedImages = [...images].sort((a, b) => a.position - b.position);
+  const colours = uniqueColours(variantViews.map((v) => v.options.colour));
+  const productImages = toProductImages(images, colours);
   const attributes = toStringRecord(product.attributes);
   const available = variantViews.filter((v) => v.available);
   const trackedStock = available
@@ -177,8 +204,8 @@ export function toCatalogItem({
         ? null
         : Math.min(...prices),
     compareAtPaise: product.compare_at_paise,
-    image: sortedImages[0] ? toImage(sortedImages[0]) : null,
-    hoverImage: sortedImages[1] ? toImage(sortedImages[1]) : null,
+    image: cardImage(productImages[0]),
+    hoverImage: cardImage(productImages[1]),
     inStock: available.length > 0,
     lowStock:
       available.length > 0 &&
@@ -187,7 +214,17 @@ export function toCatalogItem({
     categorySlugs: categories.map((c) => c.slug),
     isFeatured: product.is_featured,
     createdAt: product.created_at,
-    colour: attributes.colour ?? null,
+    colours: colours.map((name) => {
+      const [image, hoverImage] = imagesForColour(productImages, name);
+      return {
+        name,
+        inStock: available.some(
+          (v) => matchColour([name], v.options.colour) !== null,
+        ),
+        image: cardImage(image),
+        hoverImage: cardImage(hoverImage),
+      };
+    }),
     fabric: attributes.fabric ?? null,
     sizes: sortSizes(
       variantViews.map((v) => v.options.size).filter((s): s is string => !!s),
@@ -220,9 +257,10 @@ export function toProductDetail(rows: ProductRows): ProductDetail {
     lowStock: item.lowStock,
     description: rows.product.description,
     attributes,
-    images: [...rows.images]
-      .sort((a, b) => a.position - b.position)
-      .map(toImage),
+    images: toProductImages(
+      rows.images,
+      uniqueColours(variants.map((v) => v.options.colour)),
+    ),
     variants,
     optionNames,
     categories: rows.categories.map((c) => ({ slug: c.slug, name: c.name })),

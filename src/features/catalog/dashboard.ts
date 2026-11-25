@@ -6,6 +6,7 @@ import {
   CLOTHING_ATTRIBUTE_KEYS,
   type ClothingAttributeKey,
 } from './attributes';
+import { matchColour } from './colours';
 import { toStringRecord } from './mappers';
 import {
   emptyProductForm,
@@ -237,6 +238,8 @@ export type DashboardImage = {
   alt: string;
   width: number;
   height: number;
+  /** The colour it shows; null for every colour. */
+  colour: string | null;
 };
 
 export type ProductForEdit = {
@@ -261,11 +264,13 @@ export async function getProductForEdit(
       .from('products')
       .select(
         `*, product_variants(*), product_categories(category_id),
-         product_images(id, r2_key, alt, width, height, position)`,
+         product_images(id, r2_key, alt, width, height, position, colour)`,
       )
       .eq('tenant_id', tenantId)
       .eq('id', productId)
+      .order('position', { referencedTable: 'product_variants' })
       .order('created_at', { referencedTable: 'product_variants' })
+      .order('id', { referencedTable: 'product_variants' })
       .order('position', { referencedTable: 'product_images' })
       .maybeSingle(),
     'product',
@@ -315,6 +320,7 @@ export async function getProductForEdit(
       alt: image.alt ?? '',
       width: image.width ?? 900,
       height: image.height ?? 1200,
+      colour: matchColour(lists.colours, image.colour),
     })),
     values: {
       name: row.name,

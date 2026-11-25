@@ -46,6 +46,7 @@ async function EditProduct({ params }: Pick<Props, 'params'>) {
           productId={product.id}
           productName={product.values.name}
           images={product.images}
+          colours={product.values.colours}
           uploadsEnabled={isR2Configured()}
         />
       }

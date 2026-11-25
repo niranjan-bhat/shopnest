@@ -58,6 +58,7 @@ import {
   prepareProductImageUploads,
   reorderProductImages,
   setProductImageAlt,
+  setProductImageColour,
 } from '@/features/media/product-image-actions';
 import { MAX_IMAGES_PER_PRODUCT } from '@/features/media/rules';
 
@@ -74,11 +75,14 @@ export function ProductPhotos({
   productId,
   productName,
   images,
+  colours,
   uploadsEnabled,
 }: {
   productId: string;
   productName: string;
   images: DashboardImage[];
+  /** The product's saved colours. */
+  colours: string[];
   uploadsEnabled: boolean;
 }) {
   // A local copy so reordering shows at once; replaced by every fresh list.
@@ -246,8 +250,33 @@ export function ProductPhotos({
     });
   };
 
+  const setColour = (image: DashboardImage, colour: string | null) => {
+    const before = items;
+    setItems(items.map((i) => (i.id === image.id ? { ...i, colour } : i)));
+    startTransition(async () => {
+      try {
+        const result = await setProductImageColour({ id: image.id, colour });
+        if (result.ok) {
+          toast.success('Photo colour saved');
+          return;
+        }
+        setItems(before);
+        toast.error(result.error ?? FAILED);
+      } catch {
+        setItems(before);
+        toast.error(FAILED);
+      }
+    });
+  };
+
   return (
     <div className="grid gap-4">
+      {colours.length > 1 && items.length > 0 && (
+        <p className="text-sm text-muted-foreground">
+          Choose the colour each photo shows. Shoppers who pick a colour see its
+          photos first.
+        </p>
+      )}
       {items.length > 0 && (
         <DndContext
           id={dndId}
@@ -276,6 +305,8 @@ export function ProductPhotos({
                   image={image}
                   index={i}
                   productName={productName}
+                  colours={colours}
+                  onColour={(colour) => setColour(image, colour)}
                   onEdit={() => setEditing({ open: true, image })}
                   onDelete={() => setRemoving({ open: true, image })}
                 />
@@ -365,12 +396,16 @@ function PhotoTile({
   image,
   index,
   productName,
+  colours,
+  onColour,
   onEdit,
   onDelete,
 }: {
   image: DashboardImage;
   index: number;
   productName: string;
+  colours: string[];
+  onColour: (colour: string | null) => void;
   onEdit: () => void;
   onDelete: () => void;
 }) {
@@ -388,49 +423,68 @@ function PhotoTile({
     <li
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
-      className={cn(
-        'group relative aspect-[3/4] overflow-hidden rounded-lg border bg-muted',
-        isDragging && 'z-10 shadow-lg',
-      )}
+      className={cn('grid content-start gap-1.5', isDragging && 'z-10')}
       data-testid="photo-tile"
     >
-      <StoreImage
-        image={image}
-        sizes="(min-width: 640px) 180px, 30vw"
-        fill
-        alt={image.alt || `${productName}, ${label}`}
-      />
-      {index === 0 && <Badge className="absolute top-2 left-2">Cover</Badge>}
-      <div className="absolute inset-x-0 bottom-0 flex justify-between bg-gradient-to-t from-black/60 to-transparent p-1.5">
-        <button
-          ref={setActivatorNodeRef}
-          type="button"
-          className="cursor-grab touch-none rounded-md bg-background/90 p-1.5 outline-none focus-visible:ring-3 focus-visible:ring-ring/50 active:cursor-grabbing"
-          aria-label={`Move ${label}`}
-          {...attributes}
-          {...listeners}
-        >
-          <GripVertical aria-hidden className="size-4" />
-        </button>
-        <span className="flex gap-1">
+      <div
+        className={cn(
+          'group relative aspect-[3/4] overflow-hidden rounded-lg border bg-muted',
+          isDragging && 'shadow-lg',
+        )}
+      >
+        <StoreImage
+          image={image}
+          sizes="(min-width: 640px) 180px, 30vw"
+          fill
+          alt={image.alt || `${productName}, ${label}`}
+        />
+        {index === 0 && <Badge className="absolute top-2 left-2">Cover</Badge>}
+        <div className="absolute inset-x-0 bottom-0 flex justify-between bg-gradient-to-t from-black/60 to-transparent p-1.5">
           <button
+            ref={setActivatorNodeRef}
             type="button"
-            className="rounded-md bg-background/90 p-1.5 outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-            aria-label={`Describe ${label}`}
-            onClick={onEdit}
+            className="cursor-grab touch-none rounded-md bg-background/90 p-1.5 outline-none focus-visible:ring-3 focus-visible:ring-ring/50 active:cursor-grabbing"
+            aria-label={`Move ${label}`}
+            {...attributes}
+            {...listeners}
           >
-            <Pencil aria-hidden className="size-4" />
+            <GripVertical aria-hidden className="size-4" />
           </button>
-          <button
-            type="button"
-            className="rounded-md bg-background/90 p-1.5 text-destructive outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-            aria-label={`Delete ${label}`}
-            onClick={onDelete}
-          >
-            <Trash2 aria-hidden className="size-4" />
-          </button>
-        </span>
+          <span className="flex gap-1">
+            <button
+              type="button"
+              className="rounded-md bg-background/90 p-1.5 outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+              aria-label={`Describe ${label}`}
+              onClick={onEdit}
+            >
+              <Pencil aria-hidden className="size-4" />
+            </button>
+            <button
+              type="button"
+              className="rounded-md bg-background/90 p-1.5 text-destructive outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+              aria-label={`Delete ${label}`}
+              onClick={onDelete}
+            >
+              <Trash2 aria-hidden className="size-4" />
+            </button>
+          </span>
+        </div>
       </div>
+      {colours.length > 1 && (
+        <select
+          value={image.colour ?? ''}
+          onChange={(e) => onColour(e.target.value || null)}
+          aria-label={`Colour of ${label}`}
+          className="h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+        >
+          <option value="">All colours</option>
+          {colours.map((colour) => (
+            <option key={colour} value={colour}>
+              {colour}
+            </option>
+          ))}
+        </select>
+      )}
     </li>
   );
 }

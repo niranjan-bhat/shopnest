@@ -10,6 +10,9 @@ export type MediaImage = {
   height: number;
 };
 
+/** A product photo; `colour` is the colour it shows, null for every colour. */
+export type ProductImage = MediaImage & { colour: string | null };
+
 export type CategorySummary = {
   id: string;
   slug: string;
@@ -36,9 +39,19 @@ export type ProductCardData = {
   compareAtPaise: number | null;
   image: MediaImage | null;
   hoverImage: MediaImage | null;
+  /** The colour the card shows and links to, when filtered by colour. */
+  colour?: string;
   inStock: boolean;
   /** Fewer than this many in stock shows "only a few left". */
   lowStock: boolean;
+};
+
+/** One of a product's colours, for filtering and its card. */
+export type CatalogColour = {
+  name: string;
+  inStock: boolean;
+  image: MediaImage | null;
+  hoverImage: MediaImage | null;
 };
 
 /** A product card plus the fields category filters and sorting need. */
@@ -46,7 +59,7 @@ export type CatalogItem = ProductCardData & {
   categorySlugs: string[];
   isFeatured: boolean;
   createdAt: string;
-  colour: string | null;
+  colours: CatalogColour[];
   fabric: string | null;
   sizes: string[];
 };
@@ -64,7 +77,7 @@ export type ProductVariant = {
 export type ProductDetail = ProductCardData & {
   description: string | null;
   attributes: { label: string; value: string }[];
-  images: MediaImage[];
+  images: ProductImage[];
   variants: ProductVariant[];
   /** Option names in display order, e.g. ["colour", "size"]. */
   optionNames: string[];

@@ -126,8 +126,8 @@ export function ProductOptions({ saved }: { saved: VariantDraft[] }) {
           />
         </div>
         <p className="text-sm text-muted-foreground">
-          Only if shoppers pick a colour on this product. Otherwise use the
-          Colour detail above.
+          One for a single-colour product, or several for shoppers to choose
+          from. Once saved, photos can be matched to each colour.
         </p>
       </div>
 

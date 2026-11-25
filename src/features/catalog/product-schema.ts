@@ -159,6 +159,10 @@ export const productFormSchema = z
     const taken = new Set<string>(
       CLOTHING_ATTRIBUTES.flatMap((a) => [a.key, a.label.toLowerCase()]),
     );
+    // Colour has its own place, next to sizes.
+    for (const label of ['colour', 'colours', 'color', 'colors']) {
+      taken.add(label);
+    }
     form.extraDetails.forEach((detail, i) => {
       const label = detail.label.toLowerCase();
       if (taken.has(label)) {

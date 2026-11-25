@@ -85,9 +85,9 @@ async function productRows(
 
   const [variantResult, imageResult, linkResult, categories] =
     await Promise.all([
-      // Variants keep the order they were created in (sizes are re-sorted
-      // for display anyway).
-      variantQuery.order('created_at').order('id'),
+      // Variants keep the merchant's order (sizes are re-sorted for display
+      // anyway).
+      variantQuery.order('position').order('created_at').order('id'),
       imageQuery.order('position'),
       linkQuery,
       activeCategoryRows(tenantId),

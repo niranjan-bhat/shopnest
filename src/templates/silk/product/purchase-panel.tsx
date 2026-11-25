@@ -10,14 +10,14 @@ import { useCartDrawer, useCartStore } from '@/features/cart/store';
 import { LOW_STOCK_THRESHOLD } from '@/features/catalog/mappers';
 import type { ProductDetail } from '@/features/catalog/types';
 import {
+  canBuy,
   findVariant,
-  initialSelection,
   isValueAvailable,
   optionValues,
-  type OptionSelection,
 } from '@/features/catalog/variants';
 import { waLink } from '@/lib/whatsapp';
 import { cn } from '@/lib/utils';
+import { useProductSelection } from './selection';
 
 const OPTION_LABELS: Record<string, string> = {
   size: 'Size',
@@ -30,9 +30,7 @@ export function PurchasePanel({ product }: { product: ProductDetail }) {
   const store = useStore();
   const add = useCartStore((s) => s.add);
   const openCart = useCartDrawer((s) => s.setOpen);
-  const [selection, setSelection] = useState<OptionSelection>(() =>
-    initialSelection(product.variants, product.optionNames),
-  );
+  const { selection, select: choose, images } = useProductSelection();
   const [qty, setQty] = useState(1);
   const [showMissing, setShowMissing] = useState(false);
   const [added, setAdded] = useState(false);
@@ -44,11 +42,10 @@ export function PurchasePanel({ product }: { product: ProductDetail }) {
     MAX_QTY_PER_LINE,
     variant?.trackInventory ? variant.stock : MAX_QTY_PER_LINE,
   );
-  const soldOut =
-    !product.inStock || (variant !== undefined && !variant.available);
+  const soldOut = !product.inStock || !canBuy(product.variants, selection);
 
   const select = (name: string, value: string) => {
-    setSelection((current) => ({ ...current, [name]: value }));
+    choose(name, value);
     setQty(1);
     setAdded(false);
   };
@@ -67,7 +64,7 @@ export function PurchasePanel({ product }: { product: ProductDetail }) {
         name: product.name,
         optionsLabel: formatOptions(variant.options),
         unitPricePaise: variant.pricePaise,
-        imageKey: product.image?.key ?? null,
+        imageKey: images[0]?.key ?? null,
         maxQty: variant.trackInventory ? variant.stock : null,
       },
       qty,
@@ -99,7 +96,7 @@ export function PurchasePanel({ product }: { product: ProductDetail }) {
         <div aria-live="polite" className="mt-2 text-sm empty:hidden">
           {soldOut ? (
             <p className="text-store-muted">
-              Sold out{variant ? ' in this option' : ''}.
+              Sold out{product.inStock ? ' in this option' : ''}.
             </p>
           ) : variant?.trackInventory &&
             variant.stock <= LOW_STOCK_THRESHOLD ? (
@@ -110,6 +107,8 @@ export function PurchasePanel({ product }: { product: ProductDetail }) {
 
       {product.optionNames.map((name) => {
         const values = optionValues(product.variants, name);
+        // Nothing to choose: a single colour is only named.
+        const onlyNamed = name === 'colour' && values.length === 1;
         const isMissing = showMissing && missing.includes(name);
         return (
           <fieldset key={name}>
@@ -119,37 +118,45 @@ export function PurchasePanel({ product }: { product: ProductDetail }) {
                 <span className="text-store-muted">: {selection[name]}</span>
               )}
             </legend>
-            <div className="flex flex-wrap gap-2">
-              {values.map((value) => {
-                const available = isValueAvailable(
-                  product.variants,
-                  selection,
-                  name,
-                  value,
-                );
-                const selected = selection[name] === value;
-                return (
-                  <button
-                    key={value}
-                    type="button"
-                    onClick={() => select(name, value)}
-                    disabled={!available}
-                    aria-pressed={selected}
-                    className={cn(
-                      'min-w-12 rounded-store border px-4 py-2.5 text-sm transition-colors',
-                      selected
-                        ? 'border-store-text bg-store-text text-store-bg'
-                        : 'border-store-border hover:border-store-text',
-                      !available &&
-                        'cursor-not-allowed text-store-muted line-through opacity-60 hover:border-store-border',
-                    )}
-                  >
-                    {value}
-                    {!available && <span className="sr-only"> (sold out)</span>}
-                  </button>
-                );
-              })}
-            </div>
+            {!onlyNamed && (
+              <div className="flex flex-wrap gap-2">
+                {values.map((value) => {
+                  const available = isValueAvailable(
+                    product.variants,
+                    selection,
+                    name,
+                    value,
+                  );
+                  const selected = selection[name] === value;
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => select(name, value)}
+                      // A sold-out colour can still be looked at.
+                      disabled={!available && name !== 'colour'}
+                      aria-pressed={selected}
+                      className={cn(
+                        'min-w-12 rounded-store border px-4 py-2.5 text-sm transition-colors',
+                        selected
+                          ? 'border-store-text bg-store-text text-store-bg'
+                          : 'border-store-border hover:border-store-text',
+                        !available && 'line-through opacity-60',
+                        !available &&
+                          !selected &&
+                          'text-store-muted hover:border-store-border',
+                        !available && name !== 'colour' && 'cursor-not-allowed',
+                      )}
+                    >
+                      {value}
+                      {!available && (
+                        <span className="sr-only"> (sold out)</span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
             {isMissing && (
               <p className="mt-2 text-sm text-red-700" role="alert">
                 Please choose a {optionLabel(name).toLowerCase()}.

@@ -5,15 +5,28 @@ import { X, ZoomIn } from 'lucide-react';
 import { StoreImage } from '@/components/storefront/store-image';
 import type { MediaImage } from '@/features/catalog/types';
 import { cn } from '@/lib/utils';
+import { useProductSelection } from './selection';
 
 const MAIN_SIZES = '(min-width: 1024px) 50vw, 100vw';
+
+/** The photos of the chosen colour, starting over when they change. */
+export function ProductGallery({ productName }: { productName: string }) {
+  const { images } = useProductSelection();
+  return (
+    <Gallery
+      key={images.map((image) => image.key).join(' ')}
+      images={images}
+      productName={productName}
+    />
+  );
+}
 
 /**
  * Product images: swipeable on mobile, thumbnails on desktop. Selecting an
  * image opens a full-screen viewer; tapping there toggles 2× zoom and the
  * zoomed image pans by scrolling (or pinch on touch screens).
  */
-export function ProductGallery({
+function Gallery({
   images,
   productName,
 }: {

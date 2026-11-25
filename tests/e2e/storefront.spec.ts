@@ -71,7 +71,7 @@ test.describe('storefront', () => {
     // The order is saved first, so the message carries its number.
     expect(text).toMatch(/I'd like to place an order \(#\d+\):/);
     expect(text).toContain(
-      '1. Ruby Temple-Border Kanjivaram × 2, ₹24,500 each',
+      '1. Ruby Temple-Border Kanjivaram (Red) × 2, ₹24,500 each',
     );
     expect(text).toContain('Total: ₹49,000');
     expect(text).toContain(`Phone: +91 ${phone}`);

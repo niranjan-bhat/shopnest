@@ -2,6 +2,8 @@
 
 import { randomUUID } from 'node:crypto';
 import { catalogChanged } from '@/features/catalog/cache';
+import { matchColour } from '@/features/catalog/colours';
+import { toStringRecord } from '@/features/catalog/mappers';
 import { requireStoreForAction } from '@/features/tenants/access';
 import type { ActionResult } from '@/lib/action-result';
 import {
@@ -15,6 +17,7 @@ import {
   addImagesSchema,
   IMAGE_TYPES,
   imageAltSchema,
+  imageColourSchema,
   imageOrderSchema,
   isProductImageKey,
   MAX_IMAGE_BYTES,
@@ -199,6 +202,49 @@ export async function setProductImageAlt(
     .eq('id', parsed.data.id)
     .select('id');
   if (error) throw new Error(`Saving description failed: ${error.message}`);
+  if ((data ?? []).length === 0) {
+    return { ok: false, error: 'That photo no longer exists.' };
+  }
+  catalogChanged(store.id);
+  return { ok: true };
+}
+
+/** Tags a photo with one of its product's colours, or with none. */
+export async function setProductImageColour(
+  input: unknown,
+): Promise<ActionResult> {
+  const { store } = await requireStoreForAction();
+  const parsed = imageColourSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: 'Choose a colour.' };
+  const { id, colour } = parsed.data;
+
+  const supabase = await createServerSupabase();
+  const image = await supabase
+    .from('product_images')
+    .select('products(product_variants(options))')
+    .eq('tenant_id', store.id)
+    .eq('id', id)
+    .maybeSingle();
+  if (image.error) throw new Error(image.error.message);
+  if (!image.data) return { ok: false, error: 'That photo no longer exists.' };
+  const colours = (image.data.products?.product_variants ?? []).map(
+    (variant) => toStringRecord(variant.options).colour ?? '',
+  );
+  const known = matchColour(colours, colour);
+  if (colour !== null && known === null) {
+    return {
+      ok: false,
+      error: 'The product no longer has that colour. Reload the page.',
+    };
+  }
+
+  const { data, error } = await supabase
+    .from('product_images')
+    .update({ colour: known })
+    .eq('tenant_id', store.id)
+    .eq('id', id)
+    .select('id');
+  if (error) throw new Error(`Saving photo colour failed: ${error.message}`);
   if ((data ?? []).length === 0) {
     return { ok: false, error: 'That photo no longer exists.' };
   }

@@ -3,7 +3,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 
-select plan(12);
+select plan(13);
 
 delete from public.tenants;
 insert into public.tenants (id, slug, name, status, whatsapp_number) values
@@ -69,6 +69,18 @@ select lives_ok($$ select pg_temp.save(10, 10, jsonb_build_object('seen_updated_
 
 do $$ begin perform pg_temp.save(7, null); end $$;
 select is(pg_temp.stock(), 7, 'without stock_was it works as before');
+
+-- Listed order is kept, whatever order rows were created in.
+do $$ begin perform pg_temp.save(0, null, '{"variants":[
+  {"id":null,"options":{"colour":"Zari"},"stock_qty":1,"track_inventory":true},
+  {"id":"a4000000-0000-4000-8000-000000000001","options":{"colour":"Moss"},"stock_qty":1,"track_inventory":true},
+  {"id":null,"options":{"colour":"Amber"},"stock_qty":1,"track_inventory":true}
+]}'); end $$;
+select results_eq(
+  $$ select options ->> 'colour' from public.product_variants order by position $$,
+  $$ values ('Zari'), ('Moss'), ('Amber') $$,
+  'variants keep the order they are listed in'
+);
 
 select * from finish();
 rollback;

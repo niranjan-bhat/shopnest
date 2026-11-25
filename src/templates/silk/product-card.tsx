@@ -78,7 +78,12 @@ export function ProductCard({
       <div className="mt-3.5 space-y-1">
         <h3 className="font-store-heading text-lg leading-snug md:text-xl">
           <Link
-            href={storeHref(basePath, storePaths.product(product.slug))}
+            href={
+              storeHref(basePath, storePaths.product(product.slug)) +
+              (product.colour
+                ? `?colour=${encodeURIComponent(product.colour)}`
+                : '')
+            }
             className="after:absolute after:inset-0"
           >
             {product.name}

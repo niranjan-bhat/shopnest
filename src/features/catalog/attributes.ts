@@ -7,7 +7,6 @@
 export const CLOTHING_ATTRIBUTES = [
   { key: 'fabric', label: 'Fabric', example: 'Pure mulberry silk' },
   { key: 'zari', label: 'Zari', example: 'Gold zari' },
-  { key: 'colour', label: 'Colour', example: 'Ruby red' },
   { key: 'fit', label: 'Fit', example: 'Relaxed' },
   { key: 'length', label: 'Length', example: '5.5 m saree + 0.8 m blouse' },
   { key: 'blouse', label: 'Blouse piece', example: 'Included, unstitched' },
