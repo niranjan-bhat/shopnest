@@ -127,6 +127,13 @@ Rotating the service-role key restarts the hourly counts. The limits are in the 
        options, so the live colour filter stays empty until the new code is deployed: merge right after.
 2. [ ] **Redeploy without the build cache** after merging, so stores drop their cached products.
 
+## Deploy store visitors
+
+1. [ ] **Database migration** before merging `store-visitors`: `npx supabase db push --remote --dry-run` should list only
+       `store_visitors`, then `npx supabase db push --remote`. The dashboard's Overview page breaks if the code ships without it.
+2. [ ] **Check it live**: open a store on your phone, look at a product, then see Dashboard → Overview → Visitors → Today.
+3. [ ] **Stores' own privacy pages** written before this: add the sample's line about counting visits.
+
 ## Before the first real merchant
 
 - [ ] **Image domain.** `r2.dev` addresses are rate-limited and uncached (Cloudflare: development only).

@@ -1,14 +1,17 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Suspense, type ReactNode } from 'react';
+import { CountVisits } from '@/components/storefront/count-visits';
 import { StoreShellFallback } from '@/components/storefront/fallbacks';
 import { StoreUnavailable } from '@/components/storefront/store-unavailable';
 import { StoreRoot } from '@/components/storefront/store-root';
 import { loadStorefront } from '@/features/storefront/context';
 import { isSuspendedHost, listStoreHosts } from '@/features/tenants/queries';
+import { getPublicEnv } from '@/lib/env.public';
 import { mediaUrl } from '@/lib/media';
 import { storeIcon } from '@/lib/store-icon';
 import { atLeastOne } from '@/lib/static-params';
+import { appOrigin } from '@/lib/tenant';
 import { getTemplate } from '@/templates/registry';
 
 export async function generateStaticParams() {
@@ -58,6 +61,9 @@ async function Storefront({
       template={getTemplate(storefront.theme.templateKey)}
     >
       {children}
+      <CountVisits
+        appOrigin={appOrigin(getPublicEnv().NEXT_PUBLIC_ROOT_DOMAIN)}
+      />
     </StoreRoot>
   );
 }

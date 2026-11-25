@@ -157,6 +157,7 @@ When you order, we collect your name, phone number and delivery address. We use 
 
 - We do not sell or rent your details to anyone.
 - We share your address and phone only with our courier, to deliver your order.
+- We count visits to our store without cookies. The counts are daily totals and do not identify you.
 - Payments are handled by your bank or payment app; we never see your card or UPI PIN.
 - We keep order records for [as long as the law requires] and then delete them.
 

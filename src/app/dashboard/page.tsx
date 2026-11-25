@@ -14,11 +14,14 @@ import Link from 'next/link';
 import { Suspense } from 'react';
 import { EmptyState } from '@/components/dashboard/empty-state';
 import { PageHeader } from '@/components/dashboard/page-header';
+import { VisitorsCard } from '@/components/dashboard/visitors/visitors-card';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { requireDashboard } from '@/features/tenants/access';
 import type { StoreRole } from '@/features/tenants/active-store';
 import { getStoreStats } from '@/features/tenants/dashboard';
+import { getVisitorStats } from '@/features/visitors/queries';
+import { parseVisitorDays } from '@/features/visitors/schema';
 
 export const metadata: Metadata = { title: 'Overview' };
 
@@ -116,7 +119,9 @@ function NextSteps({ steps }: { steps: Step[] }) {
   );
 }
 
-async function Overview() {
+type Props = PageProps<'/dashboard'>;
+
+async function Overview({ searchParams }: Props) {
   const { user, store } = await requireDashboard('/dashboard');
 
   if (!store) {
@@ -140,7 +145,11 @@ async function Overview() {
     );
   }
 
-  const stats = await getStoreStats(store.id);
+  const days = parseVisitorDays((await searchParams).days);
+  const [stats, visitors] = await Promise.all([
+    getStoreStats(store.id),
+    getVisitorStats(store.id, days),
+  ]);
   return (
     <div className="grid gap-8">
       <PageHeader title={store.name} description={ROLE_TEXT[store.role]} />
@@ -153,6 +162,9 @@ async function Overview() {
         <Stat label="Categories" value={String(stats.categories)} />
         <Stat label="Store" value={STATUS_TEXT[store.status]} />
       </div>
+      {store.status !== 'onboarding' && (
+        <VisitorsCard stats={visitors} days={days} />
+      )}
       <NextSteps
         steps={[
           {
@@ -203,10 +215,10 @@ function OverviewSkeleton() {
   );
 }
 
-export default function DashboardPage() {
+export default function DashboardPage(props: Props) {
   return (
     <Suspense fallback={<OverviewSkeleton />}>
-      <Overview />
+      <Overview {...props} />
     </Suspense>
   );
 }

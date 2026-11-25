@@ -49,7 +49,7 @@ async function Preview() {
           <a
             href={store.url}
             target="_blank"
-            rel="noreferrer"
+            rel="noopener"
             className={buttonVariants({ variant: 'outline', size: 'sm' })}
           >
             <ExternalLink aria-hidden />

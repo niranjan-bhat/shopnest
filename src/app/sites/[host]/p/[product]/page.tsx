@@ -6,6 +6,7 @@ import { StorePageFallback } from '@/components/storefront/fallbacks';
 import { getProductBySlug } from '@/features/catalog/queries';
 import { loadStorefront } from '@/features/storefront/context';
 import { listStorePaths, loadProductPage } from '@/features/storefront/pages';
+import { CountProductVisit } from '@/components/storefront/count-visits';
 import { getStoreByHost } from '@/features/tenants/queries';
 import { getTemplate } from '@/templates/registry';
 
@@ -42,7 +43,12 @@ async function Product({ params }: Pick<Props, 'params'>) {
   const data = await loadProductPage(storefront.store.id, product);
   if (!data) notFound();
   const { ProductPage } = getTemplate(storefront.theme.templateKey);
-  return <ProductPage store={storefront.store} {...data} />;
+  return (
+    <>
+      <ProductPage store={storefront.store} {...data} />
+      <CountProductVisit productId={data.product.id} />
+    </>
+  );
 }
 
 export default function ProductRoute(props: Props) {
