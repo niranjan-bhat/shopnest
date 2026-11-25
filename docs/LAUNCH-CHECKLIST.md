@@ -120,6 +120,13 @@ Rotating the service-role key restarts the hourly counts. The limits are in the 
 1. [ ] **Database migration** before merging `fix-stale-stock`: `npx supabase db push --remote --dry-run` should list only
        `save_product_conflicts`, then `npx supabase db push --remote`. The code live before it keeps working with it.
 
+## Deploy product colours
+
+1. [ ] **Database migration** before merging `product-colours`: `npx supabase db push --remote --dry-run` should list only
+       `product_colours` and `variant_order`, then `npx supabase db push --remote`. It moves each product's Colour detail into its colour
+       options, so the live colour filter stays empty until the new code is deployed: merge right after.
+2. [ ] **Redeploy without the build cache** after merging, so stores drop their cached products.
+
 ## Before the first real merchant
 
 - [ ] **Image domain.** `r2.dev` addresses are rate-limited and uncached (Cloudflare: development only).

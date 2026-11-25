@@ -20,6 +20,8 @@ export type FixtureProduct = {
   price: number | null;
   compareAt?: number;
   description: string;
+  /** Its one colour; products with several list them in `variants`. */
+  colour?: string;
   attributes: Record<string, string>;
   featured?: boolean;
   status?: 'draft' | 'active' | 'archived';
@@ -289,10 +291,10 @@ Refunds reach your original payment method within 7 working days of us receiving
       price: rs(24500),
       description:
         'A classic ruby Kanjivaram with a contrast temple border and a rich pallu of peacocks and mango motifs, woven in pure mulberry silk.',
+      colour: 'Red',
       attributes: {
         fabric: 'Pure mulberry silk',
         zari: 'Silver zari, gold polished',
-        colour: 'Red',
         length: SAREE_LENGTH,
         blouse: 'Included, unstitched',
         occasion: 'Wedding',
@@ -310,10 +312,10 @@ Refunds reach your original payment method within 7 working days of us receiving
       price: null,
       description:
         'Our heaviest bridal weave: an emerald body with an all-over peacock jaal and a 9-inch korvai border. Made to order; price confirmed on WhatsApp.',
+      colour: 'Green',
       attributes: {
         fabric: 'Pure mulberry silk',
         zari: 'Pure gold zari',
-        colour: 'Green',
         length: SAREE_LENGTH,
         blouse: 'Included, unstitched',
         occasion: 'Bridal',
@@ -332,10 +334,10 @@ Refunds reach your original payment method within 7 working days of us receiving
       compareAt: rs(21000),
       description:
         'Turmeric-gold body with an interlocked korvai border in deep maroon. Light enough to wear all day.',
+      colour: 'Yellow',
       attributes: {
         fabric: 'Pure mulberry silk',
         zari: 'Silver zari, gold polished',
-        colour: 'Yellow',
         length: SAREE_LENGTH,
         blouse: 'Included, unstitched',
         occasion: 'Festive',
@@ -351,10 +353,10 @@ Refunds reach your original payment method within 7 working days of us receiving
       price: rs(15400),
       description:
         'Midnight-blue katan silk with a dense floral brocade and a shimmering kadhwa pallu.',
+      colour: 'Blue',
       attributes: {
         fabric: 'Katan silk',
         zari: 'Antique gold zari',
-        colour: 'Blue',
         length: SAREE_LENGTH,
         blouse: 'Included, unstitched',
         occasion: 'Festive',
@@ -371,10 +373,10 @@ Refunds reach your original payment method within 7 working days of us receiving
       price: rs(12800),
       description:
         'Soft rose georgette woven with kadhwa buttis, finished with a scalloped zari border.',
+      colour: 'Pink',
       attributes: {
         fabric: 'Georgette',
         zari: 'Silver zari',
-        colour: 'Pink',
         length: SAREE_LENGTH,
         blouse: 'Included, unstitched',
         occasion: 'Party',
@@ -390,10 +392,10 @@ Refunds reach your original payment method within 7 working days of us receiving
       price: null,
       description:
         'An heirloom ivory tissue saree with real gold zari. Woven to order in about six weeks; price confirmed on WhatsApp.',
+      colour: 'Ivory',
       attributes: {
         fabric: 'Tissue silk',
         zari: 'Pure gold zari',
-        colour: 'Ivory',
         length: SAREE_LENGTH,
         blouse: 'Included, unstitched',
         occasion: 'Bridal',
@@ -411,10 +413,10 @@ Refunds reach your original payment method within 7 working days of us receiving
       price: rs(7450),
       description:
         'A featherlight soft silk in lavender with a slim gold border, easy to drape and easy to carry.',
+      colour: 'Purple',
       attributes: {
         fabric: 'Soft silk',
         zari: 'Copper zari',
-        colour: 'Purple',
         length: SAREE_LENGTH,
         blouse: 'Included, unstitched',
         occasion: 'Festive',
@@ -432,10 +434,10 @@ Refunds reach your original payment method within 7 working days of us receiving
       compareAt: rs(7900),
       description:
         'Deep teal soft silk scattered with tiny zari buttas and a contrast magenta border.',
+      colour: 'Teal',
       attributes: {
         fabric: 'Soft silk',
         zari: 'Copper zari',
-        colour: 'Teal',
         length: SAREE_LENGTH,
         blouse: 'Included, unstitched',
         occasion: 'Festive',
@@ -451,10 +453,10 @@ Refunds reach your original payment method within 7 working days of us receiving
       price: rs(6200),
       description:
         'A bright coral soft silk with a plain body and a woven pallu. Restocking soon.',
+      colour: 'Orange',
       attributes: {
         fabric: 'Soft silk',
         zari: 'Copper zari',
-        colour: 'Orange',
         length: SAREE_LENGTH,
         blouse: 'Included, unstitched',
         occasion: 'Party',
@@ -471,9 +473,9 @@ Refunds reach your original payment method within 7 working days of us receiving
       price: rs(2450),
       description:
         'Hand-painted kalamkari on soft mul cotton, dyed in natural indigo.',
+      colour: 'Blue',
       attributes: {
         fabric: 'Mul cotton',
-        colour: 'Blue',
         length: SAREE_LENGTH,
         blouse: 'Not included',
         occasion: 'Everyday',
@@ -491,9 +493,9 @@ Refunds reach your original payment method within 7 working days of us receiving
       price: rs(1890),
       description:
         'Bold Chettinad checks in rust and mustard, with a crisp hand that softens with every wash.',
+      colour: 'Orange',
       attributes: {
         fabric: 'Chettinad cotton',
-        colour: 'Orange',
         length: SAREE_LENGTH,
         blouse: 'Included, unstitched',
         occasion: 'Everyday',
@@ -510,9 +512,9 @@ Refunds reach your original payment method within 7 working days of us receiving
       price: rs(2150),
       description:
         'Sage-green Mangalagiri cotton with a nizam zari border; a workday favourite.',
+      colour: 'Green',
       attributes: {
         fabric: 'Mangalagiri cotton',
-        colour: 'Green',
         length: SAREE_LENGTH,
         blouse: 'Included, unstitched',
         occasion: 'Everyday',
@@ -528,9 +530,9 @@ Refunds reach your original payment method within 7 working days of us receiving
       price: rs(3650),
       description:
         'Undyed handloom linen with a fine silver zari border. Cool, crisp and quietly elegant.',
+      colour: 'Natural',
       attributes: {
         fabric: 'Linen',
-        colour: 'Natural',
         length: SAREE_LENGTH,
         blouse: 'Included, unstitched',
         occasion: 'Office',
@@ -546,9 +548,9 @@ Refunds reach your original payment method within 7 working days of us receiving
       price: rs(3990),
       description:
         'Charcoal linen with a broad silver border. Only a few left from this weave.',
+      colour: 'Grey',
       attributes: {
         fabric: 'Linen',
-        colour: 'Grey',
         length: SAREE_LENGTH,
         blouse: 'Included, unstitched',
         occasion: 'Office',
@@ -565,9 +567,9 @@ Refunds reach your original payment method within 7 working days of us receiving
       price: rs(4850),
       description:
         'Sheer blush organza with hand-embroidered florals and a delicate scalloped edge.',
+      colour: 'Pink',
       attributes: {
         fabric: 'Silk organza',
-        colour: 'Pink',
         length: SAREE_LENGTH,
         blouse: 'Included, unstitched',
         occasion: 'Party',
@@ -585,9 +587,9 @@ Refunds reach your original payment method within 7 working days of us receiving
       compareAt: rs(6200),
       description:
         'Powder-blue organza with tonal thread embroidery and a satin-finished border.',
+      colour: 'Blue',
       attributes: {
         fabric: 'Silk organza',
-        colour: 'Blue',
         length: SAREE_LENGTH,
         blouse: 'Included, unstitched',
         occasion: 'Party',
@@ -602,7 +604,8 @@ Refunds reach your original payment method within 7 working days of us receiving
       categories: ['kanjivaram'],
       price: rs(32000),
       description: 'Draft product: must never appear on the storefront.',
-      attributes: { fabric: 'Silk', colour: 'Green' },
+      colour: 'Green',
+      attributes: { fabric: 'Silk' },
       status: 'draft',
       ageDays: 0,
       images: 4,
@@ -760,9 +763,9 @@ We do not ship outside India yet.`,
       price: rs(4290),
       description:
         'A straight Chanderi kurta in sage with delicate gota detailing, paired with cotton pants and a sheer dupatta.',
+      colour: 'Green',
       attributes: {
         fabric: 'Chanderi silk-cotton',
-        colour: 'Green',
         fit: 'Straight, relaxed',
         length: 'Calf length',
         includes: 'Kurta, pants, dupatta',
@@ -781,9 +784,9 @@ We do not ship outside India yet.`,
       compareAt: rs(6990),
       description:
         'Hand-embroidered Lucknowi chikankari on soft mul, with a scalloped hem and matching palazzos.',
+      colour: 'Ivory',
       attributes: {
         fabric: 'Mul cotton',
-        colour: 'Ivory',
         fit: 'A-line',
         length: 'Knee length',
         includes: 'Kurta, palazzo',
@@ -801,9 +804,9 @@ We do not ship outside India yet.`,
       price: rs(3450),
       description:
         'Hand block-printed in Sanganer with natural dyes, finished with wooden buttons.',
+      colour: 'Orange',
       attributes: {
         fabric: 'Cotton cambric',
-        colour: 'Orange',
         fit: 'Straight',
         length: 'Calf length',
         includes: 'Kurta, pants',
@@ -820,9 +823,9 @@ We do not ship outside India yet.`,
       price: rs(8900),
       description:
         'A floor-length micro-velvet anarkali with zardozi at the yoke. Made for winter weddings.',
+      colour: 'Blue',
       attributes: {
         fabric: 'Micro velvet',
-        colour: 'Blue',
         fit: 'Flared',
         length: 'Floor length',
         includes: 'Anarkali, churidar, dupatta',
@@ -840,9 +843,9 @@ We do not ship outside India yet.`,
       price: rs(7250),
       description:
         'Three soft tiers of georgette in blush pink, with a hand-embroidered neckline.',
+      colour: 'Pink',
       attributes: {
         fabric: 'Georgette',
-        colour: 'Pink',
         fit: 'Flared',
         length: 'Ankle length',
         includes: 'Anarkali, pants, dupatta',
@@ -860,9 +863,9 @@ We do not ship outside India yet.`,
       compareAt: rs(7900),
       description:
         'Emerald georgette with a sequinned yoke and a sweeping 4-metre flare.',
+      colour: 'Green',
       attributes: {
         fabric: 'Georgette',
-        colour: 'Green',
         fit: 'Flared',
         length: 'Floor length',
         includes: 'Anarkali, dupatta',
@@ -879,9 +882,9 @@ We do not ship outside India yet.`,
       price: null,
       description:
         'Our signature bridal lehenga, covered in hand-placed sequins. Made to measure; price confirmed on WhatsApp.',
+      colour: 'Gold',
       attributes: {
         fabric: 'Net with silk lining',
-        colour: 'Gold',
         fit: 'Made to measure',
         includes: 'Lehenga, blouse, dupatta',
         care: 'Dry clean only',
@@ -898,9 +901,9 @@ We do not ship outside India yet.`,
       price: rs(24900),
       description:
         'Rani pink raw silk with gota patti borders and a mirror-work blouse.',
+      colour: 'Pink',
       attributes: {
         fabric: 'Raw silk',
-        colour: 'Pink',
         fit: 'Flared',
         includes: 'Lehenga, blouse, dupatta',
         care: 'Dry clean only',
@@ -916,9 +919,9 @@ We do not ship outside India yet.`,
       price: rs(18500),
       description:
         'A light organza lehenga in mint with tonal thread work, made for day functions.',
+      colour: 'Green',
       attributes: {
         fabric: 'Organza',
-        colour: 'Green',
         fit: 'Flared',
         includes: 'Lehenga, blouse, dupatta',
         care: 'Dry clean only',
@@ -936,7 +939,6 @@ We do not ship outside India yet.`,
         'A boxy shirt and wide-leg pants in handwoven Pochampally ikat. Choose indigo or rust.',
       attributes: {
         fabric: 'Handwoven cotton ikat',
-        colour: 'Blue',
         fit: 'Relaxed',
         includes: 'Shirt, pants',
         care: KURTA_CARE,
@@ -956,9 +958,9 @@ We do not ship outside India yet.`,
       price: rs(3290),
       description:
         'Washed linen in oat, with a relaxed kurta-shirt and drawstring pants.',
+      colour: 'Natural',
       attributes: {
         fabric: 'Washed linen',
-        colour: 'Natural',
         fit: 'Relaxed',
         includes: 'Top, pants',
         care: 'Machine wash gentle',
@@ -974,9 +976,9 @@ We do not ship outside India yet.`,
       price: rs(3650),
       description:
         'Cotton twill in olive, with patch pockets and a tie belt. Made for travel.',
+      colour: 'Green',
       attributes: {
         fabric: 'Cotton twill',
-        colour: 'Green',
         fit: 'Relaxed',
         includes: 'Shirt, pants',
         care: 'Machine wash gentle',
@@ -992,9 +994,9 @@ We do not ship outside India yet.`,
       price: rs(2890),
       description:
         'Featherlight mulmul with a peach floral print. Our coolest set for summer.',
+      colour: 'Orange',
       attributes: {
         fabric: 'Mulmul cotton',
-        colour: 'Orange',
         fit: 'Relaxed',
         includes: 'Top, pants',
         care: KURTA_CARE,
@@ -1010,9 +1012,9 @@ We do not ship outside India yet.`,
       price: rs(2150),
       description:
         'Marigold chiffon dupatta with gota patti borders and tassels.',
+      colour: 'Yellow',
       attributes: {
         fabric: 'Chiffon',
-        colour: 'Yellow',
         length: '2.5 m',
         care: 'Dry clean only',
       },
@@ -1027,9 +1029,9 @@ We do not ship outside India yet.`,
       price: rs(2890),
       description:
         'Hand-tied bandhani on gaji silk from Kutch, in a deep festive red.',
+      colour: 'Red',
       attributes: {
         fabric: 'Gaji silk',
-        colour: 'Red',
         length: '2.4 m',
         care: 'Dry clean only',
       },
@@ -1045,9 +1047,9 @@ We do not ship outside India yet.`,
       price: rs(1950),
       compareAt: rs(2400),
       description: 'Sheer pink organza with printed florals and a lace edge.',
+      colour: 'Pink',
       attributes: {
         fabric: 'Organza',
-        colour: 'Pink',
         length: '2.4 m',
         care: 'Dry clean only',
       },

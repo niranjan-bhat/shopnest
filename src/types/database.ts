@@ -197,14 +197,14 @@ isOneToOne: false
                   ]
                 },"product_images": {
                   Row: {
-                    "alt": string | null,"created_at": string,"height": number | null,"id": string,"position": number,"product_id": string,"r2_key": string,"tenant_id": string,"width": number | null
+                    "alt": string | null,"colour": string | null,"created_at": string,"height": number | null,"id": string,"position": number,"product_id": string,"r2_key": string,"tenant_id": string,"width": number | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "alt"?: string | null,"created_at"?: string,"height"?: number | null,"id"?: string,"position"?: number,"product_id": string,"r2_key": string,"tenant_id": string,"width"?: number | null
+                    "alt"?: string | null,"colour"?: string | null,"created_at"?: string,"height"?: number | null,"id"?: string,"position"?: number,"product_id": string,"r2_key": string,"tenant_id": string,"width"?: number | null
                   }
                   Update: {
-                    "alt"?: string | null,"created_at"?: string,"height"?: number | null,"id"?: string,"position"?: number,"product_id"?: string,"r2_key"?: string,"tenant_id"?: string,"width"?: number | null
+                    "alt"?: string | null,"colour"?: string | null,"created_at"?: string,"height"?: number | null,"id"?: string,"position"?: number,"product_id"?: string,"r2_key"?: string,"tenant_id"?: string,"width"?: number | null
                   }
                   Relationships: [
                     {
@@ -223,14 +223,14 @@ isOneToOne: false
                   ]
                 },"product_variants": {
                   Row: {
-                    "created_at": string,"id": string,"options": NonNullable<Json>,"price_paise": number | null,"product_id": string,"sku": string | null,"stock_qty": number,"tenant_id": string,"track_inventory": boolean,"updated_at": string
+                    "created_at": string,"id": string,"options": NonNullable<Json>,"position": number,"price_paise": number | null,"product_id": string,"sku": string | null,"stock_qty": number,"tenant_id": string,"track_inventory": boolean,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"id"?: string,"options"?: NonNullable<Json>,"price_paise"?: number | null,"product_id": string,"sku"?: string | null,"stock_qty"?: number,"tenant_id": string,"track_inventory"?: boolean,"updated_at"?: string
+                    "created_at"?: string,"id"?: string,"options"?: NonNullable<Json>,"position"?: number,"price_paise"?: number | null,"product_id": string,"sku"?: string | null,"stock_qty"?: number,"tenant_id": string,"track_inventory"?: boolean,"updated_at"?: string
                   }
                   Update: {
-                    "created_at"?: string,"id"?: string,"options"?: NonNullable<Json>,"price_paise"?: number | null,"product_id"?: string,"sku"?: string | null,"stock_qty"?: number,"tenant_id"?: string,"track_inventory"?: boolean,"updated_at"?: string
+                    "created_at"?: string,"id"?: string,"options"?: NonNullable<Json>,"position"?: number,"price_paise"?: number | null,"product_id"?: string,"sku"?: string | null,"stock_qty"?: number,"tenant_id"?: string,"track_inventory"?: boolean,"updated_at"?: string
                   }
                   Relationships: [
                     {

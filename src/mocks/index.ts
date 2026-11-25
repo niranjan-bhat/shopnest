@@ -173,10 +173,13 @@ function addStore(db: MockDb, store: FixtureStore): void {
         tenant_id: tenantId,
         product_id: productId,
         sku: `${store.slug.slice(0, 2).toUpperCase()}-${i + 1}-${v + 1}`,
-        options: variant.options,
+        options: product.colour
+          ? { ...variant.options, colour: product.colour }
+          : variant.options,
         price_paise: variant.price ?? null,
         stock_qty: variant.stock,
         track_inventory: true,
+        position: v,
         created_at: createdAt,
         updated_at: createdAt,
       });
@@ -193,6 +196,7 @@ function addStore(db: MockDb, store: FixtureStore): void {
         position: n - 1,
         width: MEDIA_SIZE.product.width,
         height: MEDIA_SIZE.product.height,
+        colour: null,
         created_at: createdAt,
       });
     }

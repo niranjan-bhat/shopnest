@@ -8,9 +8,11 @@ import {
   parseCatalogFilters,
   sortCatalog,
 } from './filter';
+import { imagesForColour } from './colours';
 import { toCatalogItem, toProductDetail, type ProductRows } from './mappers';
 import type { CatalogItem } from './types';
 import {
+  canBuy,
   findVariant,
   initialSelection,
   isValueAvailable,
@@ -52,7 +54,7 @@ describe('mappers', () => {
     );
     expect(item.pricePaise).toBe(2_450_000);
     expect(item.inStock).toBe(true);
-    expect(item.colour).toBe('Red');
+    expect(item.colours.map((c) => c.name)).toEqual(['Red']);
     expect(item.categorySlugs).toEqual(['kanjivaram']);
     expect(item.image?.key).toMatch(/\/1\.webp$/);
     expect(item.hoverImage?.key).toMatch(/\/2\.webp$/);
@@ -138,7 +140,7 @@ describe('parseCatalogFilters', () => {
     ).toEqual({
       sort: 'price-desc',
       price: [],
-      colour: ['Red'],
+      colour: ['red'],
       fabric: [],
       size: [],
       inStock: true,
@@ -180,6 +182,7 @@ describe('filterCatalog and sortCatalog', () => {
 
   it('filters by colour, fabric and stock', () => {
     const blue = filterCatalog(items, parseCatalogFilters({ colour: 'Blue' }));
+    expect(blue.length).toBeGreaterThan(0);
     expect(blue.every((i) => i.colour === 'Blue')).toBe(true);
     const inStock = filterCatalog(items, parseCatalogFilters({ inStock: '1' }));
     expect(inStock.some((i) => i.slug === 'coral-soft-silk')).toBe(false);
@@ -217,7 +220,8 @@ describe('filterCatalog and sortCatalog', () => {
     const facets = catalogFacets(
       items.filter((i) => i.categorySlugs.includes('linen')),
     );
-    expect(facets.colour.map((f) => f.value)).toEqual(['Grey', 'Natural']);
+    expect(facets.colour.map((f) => f.value)).toEqual(['grey', 'natural']);
+    expect(facets.colour.map((f) => f.label)).toEqual(['Grey', 'Natural']);
     expect(facets.size).toEqual([]);
   });
 });
@@ -271,5 +275,76 @@ describe('variants', () => {
     expect(
       findVariant(saree1.variants, saree1.optionNames, selection)?.id,
     ).toBe(saree1.variants[0]?.id);
+  });
+});
+
+describe('colours', () => {
+  const rows = rowsFor(boutique.id, 'ikat-co-ord');
+  // Photo 1 for every colour, photo 2 rust, photo 3 a colour it lost.
+  const tagged: ProductRows = {
+    ...rows,
+    images: rows.images.map((image, i) => ({
+      ...image,
+      colour: [null, 'rust ', 'Teal'][i] ?? null,
+    })),
+    variants: rows.variants.map((v) =>
+      (v.options as { colour: string }).colour === 'Indigo'
+        ? { ...v, stock_qty: 0 }
+        : v,
+    ),
+  };
+  const item = toCatalogItem(tagged);
+  const filter = (params: Record<string, string>) =>
+    filterCatalog([item], parseCatalogFilters(params));
+
+  it('shows a colour its own photos, then those for every colour', () => {
+    const { images } = toProductDetail(tagged);
+    expect(images.map((i) => i.colour)).toEqual([null, 'Rust', null]);
+    const keys = images.map((i) => i.key);
+    expect(imagesForColour(images, 'Rust').map((i) => i.key)).toEqual([
+      keys[1],
+      keys[0],
+      keys[2],
+    ]);
+    expect(imagesForColour(images, 'Indigo')).toEqual(images);
+    expect(imagesForColour(images, undefined)).toEqual(images);
+  });
+
+  it('finds a product under each colour, however it is spelled', () => {
+    const [rust] = filter({ colour: ' RUST ' });
+    expect(rust?.colour).toBe('Rust');
+    expect(rust?.image?.key).toBe(rows.images[1].r2_key);
+    expect(filter({ colour: 'indigo' })).toHaveLength(1);
+    expect(filter({ colour: 'Blue' })).toEqual([]);
+    expect(filter({})[0].colour).toBeUndefined();
+  });
+
+  it('with "in stock", needs stock in that colour', () => {
+    expect(filter({ colour: 'Rust', inStock: '1' })).toHaveLength(1);
+    expect(filter({ colour: 'Indigo', inStock: '1' })).toEqual([]);
+  });
+
+  it('offers one choice per colour across spellings', () => {
+    const other = {
+      ...item,
+      colours: [{ ...item.colours[0], name: 'indigo' }],
+    };
+    expect(catalogFacets([item, other]).colour).toEqual([
+      { value: 'indigo', label: 'Indigo', count: 2 },
+      { value: 'rust', label: 'Rust', count: 1 },
+    ]);
+  });
+
+  it('opens on the cover photo colour if it can be bought', () => {
+    const { variants, optionNames } = toProductDetail(rows);
+    expect(initialSelection(variants, optionNames, 'Rust')).toEqual({
+      colour: 'Rust',
+    });
+    const sold = toProductDetail(tagged);
+    expect(initialSelection(sold.variants, sold.optionNames, 'Indigo')).toEqual(
+      { colour: 'Rust' },
+    );
+    expect(canBuy(sold.variants, { colour: 'Indigo' })).toBe(false);
+    expect(canBuy(sold.variants, { colour: 'Rust' })).toBe(true);
   });
 });

@@ -156,6 +156,12 @@ export const imageAltSchema = z.object({
   alt: z.string().trim().max(200, 'Keep it under 200 characters'),
 });
 
+/** null: the photo is for every colour. */
+export const imageColourSchema = z.object({
+  id: z.uuid(),
+  colour: z.string().trim().min(1).max(40).nullable(),
+});
+
 export const imageOrderSchema = z.object({
   productId: z.uuid(),
   ids: z

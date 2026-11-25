@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { CLOTHING_ATTRIBUTES } from '@/features/catalog/attributes';
 import type { ProductFormValues } from '@/features/catalog/product-schema';
 
-/** The clothing preset (fabric, zari, colour…) plus the merchant's own. */
+/** The clothing preset (fabric, zari, fit…) plus the merchant's own. */
 export function ProductDetailsFields() {
   const {
     register,

@@ -1,3 +1,4 @@
+import { colourKey, uniqueColours } from './colours';
 import { sortSizes } from './mappers';
 import type { ProductVariant } from './types';
 
@@ -11,7 +12,8 @@ export function optionValues(
   const values = variants
     .map((v) => v.options[name])
     .filter((v): v is string => v !== undefined);
-  return name === 'size' ? sortSizes(values) : [...new Set(values)];
+  if (name === 'size') return sortSizes(values);
+  return name === 'colour' ? uniqueColours(values) : [...new Set(values)];
 }
 
 const matches = (
@@ -54,17 +56,36 @@ export function isValueAvailable(
 /**
  * Starting selection: products without options select their only variant;
  * otherwise only non-size options are preselected, from the first variant in
- * stock, so shoppers always choose their size themselves.
+ * stock, so shoppers always choose their size themselves. The cover photo's
+ * colour comes first, if it can be bought.
  */
 export function initialSelection(
   variants: ProductVariant[],
   optionNames: string[],
+  coverColour?: string | null,
 ): OptionSelection {
-  const first = variants.find((v) => v.available) ?? variants[0];
+  const available = variants.filter((v) => v.available);
+  const first =
+    available.find(
+      (v) =>
+        coverColour &&
+        v.options.colour &&
+        colourKey(v.options.colour) === colourKey(coverColour),
+    ) ??
+    available[0] ??
+    variants[0];
   if (!first) return {};
   return Object.fromEntries(
     optionNames
       .filter((name) => name !== 'size' && first.options[name] !== undefined)
       .map((name) => [name, first.options[name] as string]),
   );
+}
+
+/** Whether any variant that fits the choices so far can be bought. */
+export function canBuy(
+  variants: ProductVariant[],
+  selection: OptionSelection,
+): boolean {
+  return variants.some((v) => v.available && matches(v, selection));
 }

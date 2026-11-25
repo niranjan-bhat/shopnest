@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { colourKey } from './colours';
 import { sortSizes } from './mappers';
 import type { CatalogItem } from './types';
 
@@ -54,7 +55,10 @@ const filtersSchema = z.object({
   price: list(
     z.enum(PRICE_BANDS.map((b) => b.value) as [PriceBand, ...PriceBand[]]),
   ),
-  colour: list(freeText),
+  // As keys, so any spelling in the link matches.
+  colour: list(freeText).transform((values) => [
+    ...new Set(values.map(colourKey)),
+  ]),
   fabric: list(freeText),
   size: list(freeText),
   inStock: z
@@ -127,6 +131,28 @@ export function sortCatalog(
   }
 }
 
+/** The item's colours that were asked for (and can be bought, if asked). */
+function matchingColours(item: CatalogItem, filters: CatalogFilters) {
+  return item.colours.filter(
+    (colour) =>
+      filters.colour.includes(colourKey(colour.name)) &&
+      (!filters.inStock || colour.inStock),
+  );
+}
+
+/** An item found by colour shows that colour on its card. */
+function inColour(item: CatalogItem, filters: CatalogFilters): CatalogItem {
+  const matching = matchingColours(item, filters);
+  const colour = matching.find((c) => c.inStock) ?? matching[0];
+  if (!colour) return item;
+  return {
+    ...item,
+    colour: colour.name,
+    image: colour.image,
+    hoverImage: colour.hoverImage,
+  };
+}
+
 export function filterCatalog(
   items: CatalogItem[],
   filters: CatalogFilters,
@@ -134,13 +160,16 @@ export function filterCatalog(
   const filtered = items.filter(
     (item) =>
       inPriceBands(item, filters.price) &&
-      matchesAny(item.colour, filters.colour) &&
+      (filters.colour.length === 0 ||
+        matchingColours(item, filters).length > 0) &&
       matchesAny(item.fabric, filters.fabric) &&
       (filters.size.length === 0 ||
         item.sizes.some((s) => filters.size.includes(s))) &&
       (!filters.inStock || item.inStock),
   );
-  return sortCatalog(filtered, filters.sort);
+  return sortCatalog(filtered, filters.sort).map((item) =>
+    inColour(item, filters),
+  );
 }
 
 export type FacetValue = { value: string; label: string; count: number };
@@ -161,6 +190,22 @@ function countValues(values: (string | null)[]): FacetValue[] {
     .sort((a, b) => a.label.localeCompare(b.label));
 }
 
+/** One choice per colour, whatever the spelling; its value is the key. */
+function colourFacet(items: CatalogItem[]): FacetValue[] {
+  const labels = new Map<string, string>();
+  const keys = items.flatMap((item) =>
+    item.colours.map(({ name }) => {
+      const key = colourKey(name);
+      if (!labels.has(key)) labels.set(key, name);
+      return key;
+    }),
+  );
+  return countValues(keys).map((facet) => ({
+    ...facet,
+    label: labels.get(facet.value) ?? facet.value,
+  }));
+}
+
 /** Filter options for a set of items; options with no items are left out. */
 export function catalogFacets(items: CatalogItem[]): CatalogFacets {
   const sizeOrder = new Map(
@@ -172,7 +217,7 @@ export function catalogFacets(items: CatalogItem[]): CatalogFacets {
       label: band.label,
       count: items.filter((item) => inPriceBands(item, [band.value])).length,
     })).filter((facet) => facet.count > 0),
-    colour: countValues(items.map((i) => i.colour)),
+    colour: colourFacet(items),
     fabric: countValues(items.map((i) => i.fabric)),
     size: countValues(items.flatMap((i) => i.sizes)).sort(
       (a, b) => (sizeOrder.get(a.value) ?? 0) - (sizeOrder.get(b.value) ?? 0),

@@ -482,3 +482,75 @@ export async function deletePlan(name: string) {
   const { error } = await adminDb().from('plans').delete().eq('name', name);
   if (error) throw error;
 }
+
+/** Gives a store's product colours (10 of each) and photos tagged with them. */
+export async function addColours(
+  store: TestStore,
+  productSlug: string,
+  colours: string[],
+  photos: (string | null)[],
+): Promise<string[]> {
+  const db = adminDb();
+  const { data: product, error } = await db
+    .from('products')
+    .select('id')
+    .eq('tenant_id', store.id)
+    .eq('slug', productSlug)
+    .single();
+  if (error) throw error;
+  const owner = { tenant_id: store.id, product_id: product.id };
+  const { error: e1 } = await db.from('product_variants').delete().match(owner);
+  if (e1) throw e1;
+  const { error: e2 } = await db.from('product_variants').insert(
+    colours.map((colour, position) => ({
+      ...owner,
+      options: { colour },
+      stock_qty: 10,
+      position,
+    })),
+  );
+  if (e2) throw e2;
+  // The files need not exist: tests look at which photos are shown.
+  const keys = photos.map(
+    (_, i) => `tenants/${store.id}/products/${product.id}/photo-${i + 1}.webp`,
+  );
+  const { error: e3 } = await db.from('product_images').insert(
+    photos.map((colour, i) => ({
+      ...owner,
+      r2_key: keys[i],
+      position: i,
+      colour,
+    })),
+  );
+  if (e3) throw e3;
+  return keys;
+}
+
+/** Links a store's product to a new category. */
+export async function linkCategory(
+  store: TestStore,
+  productSlug: string,
+  categorySlug: string,
+) {
+  const db = adminDb();
+  const product = await db
+    .from('products')
+    .select('id')
+    .eq('tenant_id', store.id)
+    .eq('slug', productSlug)
+    .single();
+  if (product.error) throw product.error;
+  const category = await db
+    .from('categories')
+    .select('id')
+    .eq('tenant_id', store.id)
+    .eq('slug', categorySlug)
+    .single();
+  if (category.error) throw category.error;
+  const { error } = await db.from('product_categories').insert({
+    tenant_id: store.id,
+    product_id: product.data.id,
+    category_id: category.data.id,
+  });
+  if (error) throw error;
+}

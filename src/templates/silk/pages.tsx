@@ -10,6 +10,7 @@ import type {
 } from '../contract';
 import { CatalogBrowser } from './category/catalog-browser';
 import { ProductGallery } from './product/gallery';
+import { ProductSelectionProvider } from './product/selection';
 import { PurchasePanel } from './product/purchase-panel';
 import { ProductGrid } from './product-card';
 import { SectionHeading } from './section-heading';
@@ -150,40 +151,42 @@ export function SilkProductPage({ store, product, related }: ProductPageProps) {
           { label: product.name },
         ]}
       />
-      <div className="mt-6 grid gap-10 lg:grid-cols-[1.15fr_1fr] lg:gap-16">
-        <ProductGallery images={product.images} productName={product.name} />
-        <div className="lg:sticky lg:top-36 lg:h-fit">
-          <h1 className="font-store-heading text-4xl leading-tight md:text-5xl">
-            {product.name}
-          </h1>
-          <div className="mt-5">
-            <PurchasePanel product={product} />
+      <ProductSelectionProvider product={product}>
+        <div className="mt-6 grid gap-10 lg:grid-cols-[1.15fr_1fr] lg:gap-16">
+          <ProductGallery productName={product.name} />
+          <div className="lg:sticky lg:top-36 lg:h-fit">
+            <h1 className="font-store-heading text-4xl leading-tight md:text-5xl">
+              {product.name}
+            </h1>
+            <div className="mt-5">
+              <PurchasePanel product={product} />
+            </div>
+            {product.description && (
+              <div className="mt-10 border-t border-store-border pt-8">
+                <h2 className="text-xs tracking-[0.18em] uppercase">
+                  Description
+                </h2>
+                <p className="mt-3 leading-relaxed text-store-muted">
+                  {product.description}
+                </p>
+              </div>
+            )}
+            {product.attributes.length > 0 && (
+              <div className="mt-8 border-t border-store-border pt-8">
+                <h2 className="text-xs tracking-[0.18em] uppercase">Details</h2>
+                <dl className="mt-4 grid grid-cols-[auto_1fr] gap-x-8 gap-y-3 text-sm">
+                  {product.attributes.map((attribute) => (
+                    <div key={attribute.label} className="contents">
+                      <dt className="text-store-muted">{attribute.label}</dt>
+                      <dd>{attribute.value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            )}
           </div>
-          {product.description && (
-            <div className="mt-10 border-t border-store-border pt-8">
-              <h2 className="text-xs tracking-[0.18em] uppercase">
-                Description
-              </h2>
-              <p className="mt-3 leading-relaxed text-store-muted">
-                {product.description}
-              </p>
-            </div>
-          )}
-          {product.attributes.length > 0 && (
-            <div className="mt-8 border-t border-store-border pt-8">
-              <h2 className="text-xs tracking-[0.18em] uppercase">Details</h2>
-              <dl className="mt-4 grid grid-cols-[auto_1fr] gap-x-8 gap-y-3 text-sm">
-                {product.attributes.map((attribute) => (
-                  <div key={attribute.label} className="contents">
-                    <dt className="text-store-muted">{attribute.label}</dt>
-                    <dd>{attribute.value}</dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
-          )}
         </div>
-      </div>
+      </ProductSelectionProvider>
       {related.length > 0 && (
         <section className="mt-24 md:mt-32">
           <SectionHeading title="You may also like" />
