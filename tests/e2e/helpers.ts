@@ -225,6 +225,28 @@ export async function placeOrder(
   return result.order_number!;
 }
 
+/** Changes a (single-variant) product's stock behind the app's back. */
+export async function setStock(
+  store: TestStore,
+  productSlug: string,
+  stock: number,
+) {
+  const db = adminDb();
+  const { data, error } = await db
+    .from('products')
+    .select('id')
+    .eq('tenant_id', store.id)
+    .eq('slug', productSlug)
+    .single();
+  if (error) throw error;
+  const { error: e } = await db
+    .from('product_variants')
+    .update({ stock_qty: stock })
+    .eq('tenant_id', store.id)
+    .eq('product_id', data.id);
+  if (e) throw e;
+}
+
 /** Units in stock of a store's (single-variant) product. */
 export async function stockOf(
   store: TestStore,

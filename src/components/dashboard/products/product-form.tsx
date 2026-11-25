@@ -4,7 +4,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, ExternalLink, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, useTransition, type ReactNode } from 'react';
+import {
+  useEffect,
+  useRef,
+  useState,
+  useTransition,
+  type ReactNode,
+} from 'react';
 import {
   Controller,
   FormProvider,
@@ -82,12 +88,15 @@ function Section({
 /** Add a product (no `productId`) or edit one. */
 export function ProductForm({
   productId,
+  updatedAt = null,
   initial,
   categories,
   liveUrl,
   photos,
 }: {
   productId: string | null;
+  /** When the product in `initial` was last saved. */
+  updatedAt?: string | null;
   initial: ProductFormValues;
   categories: CategoryChoice[];
   /** The product's storefront page, when it is live. */
@@ -107,6 +116,8 @@ export function ProductForm({
     control,
     handleSubmit,
     setError,
+    getValues,
+    resetField,
     formState: { errors, isDirty },
   } = form;
   const name = useWatch({ control, name: 'name' });
@@ -114,6 +125,24 @@ export function ProductForm({
   const priceMode = useWatch({ control, name: 'priceMode' });
   const status = useWatch({ control, name: 'status' });
   const shownSlug = slug?.trim().toLowerCase() || slugify(name ?? '');
+
+  // Orders change stock without changing the product, and Next.js keeps this
+  // form mounted between visits: take fresh stock numbers in as they arrive.
+  // A stock number the merchant has typed over stays as typed.
+  const shownVariants = useRef(initial.variants);
+  useEffect(() => {
+    if (shownVariants.current === initial.variants) return;
+    shownVariants.current = initial.variants;
+    const fresh = new Map(
+      initial.variants.map((variant) => [variant.id, variant.stock]),
+    );
+    getValues('variants').forEach(({ id, stock, stockWas }, i) => {
+      const now = id === null ? undefined : fresh.get(id);
+      if (now === undefined || now === stock || stock !== stockWas) return;
+      resetField(`variants.${i}.stock`, { defaultValue: now });
+      resetField(`variants.${i}.stockWas`, { defaultValue: now });
+    });
+  }, [initial.variants, getValues, resetField]);
 
   // Warn before leaving with unsaved changes (closing the tab, reloading).
   useEffect(() => {
@@ -126,13 +155,19 @@ export function ProductForm({
   const onSubmit = (values: ProductFormValues) =>
     startTransition(async () => {
       try {
-        const result = await saveProduct(productId, values);
+        const result = await saveProduct(productId, values, updatedAt);
         if (result.ok) {
           toast.success(productId ? 'Product saved' : 'Product added');
           if (productId) {
             // Not dirty any more; the page then reloads with the saved
             // product (new variant ids) and the form restarts from it.
-            form.reset(values);
+            form.reset({
+              ...values,
+              variants: values.variants.map((variant) => ({
+                ...variant,
+                stockWas: variant.id === null ? '' : variant.stock,
+              })),
+            });
           } else {
             // Next.js keeps visited pages mounted (hidden) for instant back
             // navigation, so empty this form before leaving it: the next
@@ -149,6 +184,16 @@ export function ProductForm({
             path === 'variants' ? 'variants.root' : path
           ) as FieldPath<ProductFormValues>;
           setError(field, { message });
+        }
+        // The number is theirs to decide: show what it is now, and let the
+        // next save through unless it moves again.
+        for (const { id, stock } of result.stockNow ?? []) {
+          const i = values.variants.findIndex((v) => v.id === id);
+          if (i < 0) continue;
+          resetField(`variants.${i}.stockWas`, { defaultValue: String(stock) });
+          setError(`variants.${i}.stock`, {
+            message: `Stock changed to ${stock} while you were editing. Check your number and save again.`,
+          });
         }
         if (result.error) toast.error(result.error);
         else toast.error('Check the highlighted fields.');

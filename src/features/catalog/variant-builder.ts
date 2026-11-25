@@ -15,6 +15,8 @@ export type VariantDraft = {
   /** Rupees; empty means "use the product price". */
   price: string;
   stock: string;
+  /** The saved stock this row was shown with; empty for a new row. */
+  stockWas: string;
   trackInventory: boolean;
 };
 
@@ -32,6 +34,7 @@ export function emptyVariant(options: VariantOptions = {}): VariantDraft {
     sku: '',
     price: '',
     stock: '0',
+    stockWas: '',
     trackInventory: true,
   };
 }

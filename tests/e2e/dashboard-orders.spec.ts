@@ -7,6 +7,7 @@ import {
   grantAccess,
   listOrders,
   placeOrder,
+  setStock,
   signIn,
   stockOf,
   updateProduct,
@@ -48,6 +49,19 @@ test('the order list fits the screen', async ({ page }) => {
   );
   expect(overflow).toBeLessThanOrEqual(0);
 });
+
+/** Opens a dashboard section from the sidebar, or the menu on phones. */
+async function openSection(page: Page, name: string) {
+  const menu = page.getByRole('button', { name: 'Open menu' });
+  const nav = page.getByRole('navigation', { name: 'Dashboard' });
+  // The menu may not be interactive yet, or still be closing: try again.
+  await expect(async () => {
+    if (!(await nav.isVisible()) && (await menu.isVisible())) {
+      await menu.click({ timeout: 1000 });
+    }
+    await nav.getByRole('link', { name }).click({ timeout: 2000 });
+  }).toPass();
+}
 
 const rows = (page: Page) => page.getByTestId('order-row');
 const badge = (page: Page) => page.getByTestId('order-status-badge');
@@ -174,4 +188,116 @@ test('a merchant prices, confirms and delivers an order; stock follows', async (
     (o) => o.order_number === 1001,
   );
   expect(order?.total_paise).toBe(350000);
+});
+
+test('the product form shows the stock an order left, keeping unsaved edits', async ({
+  page,
+}) => {
+  const stock = page
+    .getByRole('textbox', { name: 'Stock for Default' })
+    .filter({ visible: true });
+  const name = page.getByLabel('Name', { exact: true }).filter({
+    visible: true,
+  });
+  // Moves through links only: a reload would hide a form left over from the
+  // first visit.
+  const openProduct = async () => {
+    await openSection(page, 'Products');
+    await page
+      .getByRole('link', { name: 'Product 01' })
+      .filter({ visible: true })
+      .first()
+      .click();
+    await expect(name).toBeVisible();
+  };
+
+  test.slow(); // Many moves through the phone menu.
+  await expect(rows(page)).toHaveCount(2);
+  await openProduct();
+  await expect(stock).toHaveValue('1');
+  await name.fill('Product 01 renamed');
+
+  await openSection(page, 'Orders');
+  await rows(page)
+    .filter({ hasText: '#1002' })
+    .filter({ visible: true })
+    .click();
+  await page.locator('[data-testid="order-actions"][data-hydrated]').waitFor();
+  await move(page, 'Confirm order', 'Order marked as confirmed');
+  expect(await stockOf(shop, 'product-01')).toBe(0);
+
+  await openProduct();
+  await expect(stock).toHaveValue('0');
+  await expect(name).toHaveValue('Product 01 renamed');
+
+  // Restocking saves the new number.
+  await stock.fill('5');
+  await page
+    .getByRole('button', { name: 'Save', exact: true })
+    .filter({ visible: true })
+    .click();
+  await expect(page.getByText('Product saved')).toBeVisible();
+  expect(await stockOf(shop, 'product-01')).toBe(5);
+
+  // A change made elsewhere (another device) shows on the next visit.
+  await openSection(page, 'Orders');
+  await setStock(shop, 'product-01', 3);
+  await openSection(page, 'Products');
+  await page
+    .getByRole('link', { name: 'Product 01 renamed' })
+    .filter({ visible: true })
+    .first()
+    .click();
+  await expect(stock).toHaveValue('3');
+});
+
+test('saving a product never overwrites what changed meanwhile', async ({
+  page,
+}) => {
+  const productForm = async (tab: Page) => {
+    await tab.goto(app('/dashboard/products'));
+    await tab.getByRole('link', { name: 'Product 01' }).first().click();
+    await expect(tab.getByLabel('Name', { exact: true })).toBeVisible();
+  };
+  const save = (tab: Page) =>
+    tab.getByRole('button', { name: 'Save', exact: true }).click();
+  const details = (tab: Page) => tab.locator('#product-description');
+  const stock = page.getByRole('textbox', { name: 'Stock for Default' });
+
+  // An order takes the last one while the form is open: editing the
+  // description leaves the stock alone.
+  await productForm(page);
+  await expect(stock).toHaveValue('1');
+  await setStock(shop, 'product-01', 0);
+  await details(page).fill('Silk');
+  await save(page);
+  await expect(page.getByText('Product saved')).toBeVisible();
+  expect(await stockOf(shop, 'product-01')).toBe(0);
+  await expect(stock).toHaveValue('0');
+
+  // Changing a number that moved is asked about first, then saved.
+  await stock.fill('10');
+  await setStock(shop, 'product-01', 3);
+  await save(page);
+  await expect(
+    page.getByText('Stock changed to 3 while you were editing.'),
+  ).toBeVisible();
+  expect(await stockOf(shop, 'product-01')).toBe(3);
+  await expect(stock).toHaveValue('10');
+  await save(page);
+  await expect.poll(() => stockOf(shop, 'product-01')).toBe(10);
+
+  // Two windows: the second save is refused, not silently last.
+  const other = await page.context().newPage();
+  await productForm(other);
+  await page.reload();
+  await expect(stock).toHaveValue('10');
+  await details(other).fill('Cotton');
+  await save(other);
+  await expect(other.getByText('Product saved')).toBeVisible();
+  await details(page).fill('Linen');
+  await save(page);
+  await expect(
+    page.getByText('This product was changed in another window.'),
+  ).toBeVisible();
 });

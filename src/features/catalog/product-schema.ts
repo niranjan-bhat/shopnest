@@ -17,6 +17,11 @@ import { optionKey, type VariantDraft } from './variant-builder';
 export const PRODUCT_STATUSES = ['draft', 'active', 'archived'] as const;
 export type ProductStatus = (typeof PRODUCT_STATUSES)[number];
 
+/** save_product: someone else saved the product meanwhile. */
+export const PRODUCT_CHANGED_CODE = 'ZL004';
+/** save_product: a stock number being changed moved meanwhile. */
+export const STOCK_CHANGED_CODE = 'ZL005';
+
 /** Products per page in the dashboard list. */
 export const PRODUCT_PAGE_SIZE = 25;
 
@@ -65,6 +70,7 @@ const variantSchema = z.object({
   sku: z.string().trim().max(64, 'Keep the SKU under 64 characters'),
   price: z.string().trim(),
   stock: z.string().trim(),
+  stockWas: z.string().regex(/^\d{0,9}$/),
   trackInventory: z.boolean(),
 });
 
@@ -226,6 +232,7 @@ export function emptyProductForm(): ProductFormValues {
         sku: '',
         price: '',
         stock: '0',
+        stockWas: '',
         trackInventory: true,
       } satisfies VariantDraft,
     ],
@@ -247,12 +254,16 @@ export type ProductPayload = {
   attributes: Record<string, string>;
   seo: { title?: string; description?: string };
   category_ids: string[];
+  /** When the form's data was last saved; null for a new product. */
+  seen_updated_at: string | null;
   variants: {
     id: string | null;
     sku: string | null;
     options: Record<string, string>;
     price_paise: Paise | null;
     stock_qty: number;
+    /** The stock the form showed, so a stale one is never written back. */
+    stock_was: number | null;
     track_inventory: boolean;
   }[];
 };
@@ -260,6 +271,7 @@ export type ProductPayload = {
 /** Converts validated form values (schema output) into the save payload. */
 export function toProductPayload(
   form: z.output<typeof productFormSchema>,
+  seenUpdatedAt: string | null = null,
 ): ProductPayload {
   const fixed = form.priceMode === 'fixed';
   const attributes: Record<string, string> = {};
@@ -286,6 +298,7 @@ export function toProductPayload(
     attributes,
     seo,
     category_ids: [...new Set(form.categoryIds)],
+    seen_updated_at: seenUpdatedAt,
     variants: form.variants.map((variant) => {
       const options: Record<string, string> = {};
       if (variant.options.colour) options.colour = variant.options.colour;
@@ -296,6 +309,7 @@ export function toProductPayload(
         options,
         price_paise: fixed && variant.price ? parseRupees(variant.price) : null,
         stock_qty: Number(variant.stock),
+        stock_was: variant.stockWas === '' ? null : Number(variant.stockWas),
         track_inventory: variant.trackInventory,
       };
     }),

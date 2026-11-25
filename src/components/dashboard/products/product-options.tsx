@@ -279,6 +279,10 @@ function VariantTable({
                     aria-invalid={Boolean(rowErrors?.stock)}
                     {...register(`variants.${i}.stock`)}
                   />
+                  <input
+                    type="hidden"
+                    {...register(`variants.${i}.stockWas`)}
+                  />
                   <FieldError errors={[rowErrors?.stock]} className="mt-1" />
                 </div>
                 <div>

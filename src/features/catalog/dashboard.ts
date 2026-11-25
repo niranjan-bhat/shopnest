@@ -297,6 +297,7 @@ export async function getProductForEdit(
       price:
         variant.price_paise === null ? '' : toRupeesInput(variant.price_paise),
       stock: String(variant.stock_qty),
+      stockWas: String(variant.stock_qty),
       trackInventory: variant.track_inventory,
     };
   });

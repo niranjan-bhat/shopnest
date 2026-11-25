@@ -1,5 +1,6 @@
 'use server';
 
+import { z } from 'zod';
 import {
   PRODUCT_LIMIT_CODE,
   PRODUCT_LIMIT_MESSAGE,
@@ -11,7 +12,9 @@ import { createServerSupabase } from '@/lib/supabase/server';
 import { catalogChanged } from './cache';
 import {
   payloadJson,
+  PRODUCT_CHANGED_CODE,
   productFormSchema,
+  STOCK_CHANGED_CODE,
   toProductPayload,
 } from './product-schema';
 import { idSchema } from './schemas';
@@ -22,18 +25,40 @@ import { idSchema } from './schemas';
 
 export type SaveProductResult =
   | { ok: true; id: string }
-  | { ok: false; error?: string; fieldErrors?: Record<string, string> };
+  | {
+      ok: false;
+      error?: string;
+      fieldErrors?: Record<string, string>;
+      /** Variants whose stock moved while being edited, and what it is now. */
+      stockNow?: { id: string; stock: number }[];
+    };
 
 const GONE = 'That product no longer exists.';
+const CHANGED =
+  'This product was changed in another window. Reload the page to see the latest, then make your changes again.';
 
-/** Creates a product (id null) or updates one. */
+const stockNowSchema = z.array(
+  z.object({ id: z.uuid(), stock: z.number().int() }),
+);
+
+/**
+ * Creates a product (id null) or updates one. `seenUpdatedAt` is the product's
+ * updatedAt when the form loaded: a save over someone else's is refused.
+ */
 export async function saveProduct(
   id: string | null,
   input: unknown,
+  seenUpdatedAt: string | null,
 ): Promise<SaveProductResult> {
   const { store } = await requireStoreForAction();
   const productId = id === null ? null : idSchema.safeParse(id);
   if (productId && !productId.success) return { ok: false, error: GONE };
+
+  const seen = z.iso
+    .datetime({ offset: true })
+    .nullable()
+    .safeParse(seenUpdatedAt);
+  if (!seen.success) return { ok: false, error: CHANGED };
 
   const parsed = productFormSchema.safeParse(input);
   if (!parsed.success) {
@@ -47,7 +72,7 @@ export async function saveProduct(
   const supabase = await createServerSupabase();
   const { data, error } = await supabase.rpc('save_product', {
     tid: store.id,
-    product: payloadJson(toProductPayload(parsed.data)),
+    product: payloadJson(toProductPayload(parsed.data, seen.data)),
     ...(productId ? { pid: productId.data } : {}),
   });
 
@@ -64,6 +89,16 @@ export async function saveProduct(
         fieldErrors: {
           variants: 'A SKU here is already used by another product.',
         },
+      };
+    }
+    if (error.code === PRODUCT_CHANGED_CODE) {
+      return { ok: false, error: CHANGED };
+    }
+    if (error.code === STOCK_CHANGED_CODE) {
+      return {
+        ok: false,
+        error: 'Stock changed while you were editing. Check the numbers.',
+        stockNow: stockNowSchema.parse(JSON.parse(error.details)),
       };
     }
     if (error.code === 'P0002') return { ok: false, error: GONE };

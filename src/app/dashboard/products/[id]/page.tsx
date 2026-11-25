@@ -33,6 +33,7 @@ async function EditProduct({ params }: Pick<Props, 'params'>) {
       // A save changes updatedAt, so the form restarts from the saved data.
       key={product.updatedAt}
       productId={product.id}
+      updatedAt={product.updatedAt}
       initial={product.values}
       categories={categories}
       liveUrl={
