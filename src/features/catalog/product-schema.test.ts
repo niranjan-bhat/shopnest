@@ -101,12 +101,15 @@ describe('toProductPayload', () => {
           sku: '',
           price: '2599',
           stock: '3',
+          stockWas: '5',
           trackInventory: true,
         },
       ],
     });
-    const payload = toProductPayload(productFormSchema.parse(values));
+    const seen = '2026-11-25T10:00:00.123456+00:00';
+    const payload = toProductPayload(productFormSchema.parse(values), seen);
     expect(payload).toMatchObject({
+      seen_updated_at: seen,
       slug: 'rust-kurta-set',
       description: null,
       price_paise: 249900,
@@ -120,6 +123,7 @@ describe('toProductPayload', () => {
           options: { size: 'M' },
           price_paise: 259900,
           stock_qty: 3,
+          stock_was: 5,
         },
       ],
     });
@@ -132,6 +136,8 @@ describe('toProductPayload', () => {
     expect(payload.price_paise).toBeNull();
     expect(payload.compare_at_paise).toBeNull();
     expect(payload.variants[0].price_paise).toBeNull();
+    // A new row has no earlier stock to compare.
+    expect(payload.variants[0].stock_was).toBeNull();
   });
 });
 

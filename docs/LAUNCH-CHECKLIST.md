@@ -97,23 +97,28 @@ No migrations or environment variables.
 
 The order matters: a wrong one can lock everyone out of `app.zarify.in`.
 
-1. [ ] **Database migration** before merging `login-hardening`: `npx supabase db push --remote --dry-run` should list
+1. [x] **Database migration** before merging `login-hardening`: `npx supabase db push --remote --dry-run` should list
        `sign_in_limits`, then `npx supabase db push --remote`. Sign-in breaks if the code ships without it.
-2. [ ] **Turnstile widget.** Cloudflare dashboard → Turnstile → Add widget: name "Zarify login", hostname
+2. [x] **Turnstile widget.** Cloudflare dashboard → Turnstile → Add widget: name "Zarify login", hostname
        `app.zarify.in`, mode Managed. No DNS change is needed. Copy the site key and the secret key.
-3. [ ] **Vercel → Environment Variables (Production only):** `NEXT_PUBLIC_TURNSTILE_SITE_KEY` and
+3. [x] **Vercel → Environment Variables (Production only):** `NEXT_PUBLIC_TURNSTILE_SITE_KEY` and
        `TURNSTILE_SECRET_KEY` (as Secret). Not Preview: the widget only works on `app.zarify.in`.
-4. [ ] **Merge and deploy** (the site key is built in, so redeploy if you add it later). Sign out, then sign in
+4. [x] **Merge and deploy** (the site key is built in, so redeploy if you add it later). Sign out, then sign in
        at `https://app.zarify.in/login`, including a resend. Try an email with no access: same message, no email.
-5. [ ] **Then Supabase → Authentication → Attack Protection:** enable CAPTCHA, provider Turnstile, with the same
+5. [x] **Then Supabase → Authentication → Attack Protection:** enable CAPTCHA, provider Turnstile, with the same
        secret key. Sign in again straight away; if no code arrives, turn it off and check the Vercel logs for
        "Sending a sign-in code failed".
-6. [ ] **Supabase → Authentication → Sign In / Providers:** turn off "Allow new users to sign up". Keep the Email
+6. [x] **Supabase → Authentication → Sign In / Providers:** turn off "Allow new users to sign up". Keep the Email
        provider on. Add a person from a store's Team card to confirm accounts can still be made.
 7. [ ] **Clean up (optional).** Authentication → Users may hold strangers who signed in before. They are sent no
        more codes; delete the ones you don't know.
 
 Rotating the service-role key restarts the hourly counts. The limits are in the migration's header comment.
+
+## Deploy the product save checks
+
+1. [ ] **Database migration** before merging `fix-stale-stock`: `npx supabase db push --remote --dry-run` should list only
+       `save_product_conflicts`, then `npx supabase db push --remote`. The code live before it keeps working with it.
 
 ## Before the first real merchant
 
