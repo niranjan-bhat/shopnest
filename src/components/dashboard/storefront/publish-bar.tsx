@@ -194,7 +194,7 @@ export function PublishBar({
           <a
             href="/preview"
             target="_blank"
-            rel="noreferrer"
+            rel="noopener"
             className={buttonVariants({ variant: 'outline' })}
           >
             <Eye aria-hidden />

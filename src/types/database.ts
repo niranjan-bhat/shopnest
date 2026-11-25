@@ -315,6 +315,72 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"store_product_visits": {
+                  Row: {
+                    "day": string,"product_id": string,"tenant_id": string,"visitors": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "day": string,"product_id": string,"tenant_id": string,"visitors"?: number
+                  }
+                  Update: {
+                    "day"?: string,"product_id"?: string,"tenant_id"?: string,"visitors"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "store_product_visits_tenant_id_fkey"
+      columns: ["tenant_id"]
+isOneToOne: false
+      referencedRelation: "tenants"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "store_product_visits_tenant_id_product_id_fkey"
+      columns: ["tenant_id","product_id"]
+isOneToOne: false
+      referencedRelation: "products"
+      referencedColumns: ["tenant_id","id"]
+    }
+                  ]
+                },"store_visit_keys": {
+                  Row: {
+                    "day": string,"network": string | null,"tenant_id": string,"visitor": string,"what": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "day": string,"network"?: string | null,"tenant_id": string,"visitor": string,"what": string
+                  }
+                  Update: {
+                    "day"?: string,"network"?: string | null,"tenant_id"?: string,"visitor"?: string,"what"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "store_visit_keys_tenant_id_fkey"
+      columns: ["tenant_id"]
+isOneToOne: false
+      referencedRelation: "tenants"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"store_visits": {
+                  Row: {
+                    "bag": number,"chats": number,"day": string,"tenant_id": string,"visitors": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "bag"?: number,"chats"?: number,"day": string,"tenant_id": string,"visitors"?: number
+                  }
+                  Update: {
+                    "bag"?: number,"chats"?: number,"day"?: string,"tenant_id"?: string,"visitors"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "store_visits_tenant_id_fkey"
+      columns: ["tenant_id"]
+isOneToOne: false
+      referencedRelation: "tenants"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"subscription_payments": {
                   Row: {
                     "amount_paise": number,"created_at": string,"id": string,"method": Database["public"]['Enums']["payment_method"],"months": number,"paid_on": string,"recorded_by": string | null,"reference": string | null,"tenant_id": string,"void_reason": string | null,"voided_at": string | null,"voided_by": string | null
@@ -521,6 +587,9 @@ isOneToOne: true
 "record_sign_in_attempt":
 { Args: { "attempt": string,"client"?: string,"email_key": string }; Returns: string
                            },
+"record_store_visit":
+{ Args: { "event": string,"net": string,"person": string,"product"?: string,"tid": string }; Returns: undefined
+                           },
 "reorder_banners":
 { Args: { "ordered_ids": (string)[],"tid": string }; Returns: undefined
                            },
@@ -561,6 +630,9 @@ isOneToOne: true
 { Args: { "tid": string }; Returns: {
               "email": string,"role": Database["public"]['Enums']["member_role"],"signed_in": boolean,"user_id": string
             }[]
+                           },
+"store_visitor_stats":
+{ Args: { "days": number,"tid": string }; Returns: Json
                            },
 "sync_next_due":
 { Args: { "tid": string }; Returns: undefined

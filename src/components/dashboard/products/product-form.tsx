@@ -249,7 +249,7 @@ export function ProductForm({
             <a
               href={liveUrl}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener"
               className={buttonVariants({ variant: 'outline', size: 'sm' })}
             >
               <ExternalLink aria-hidden />

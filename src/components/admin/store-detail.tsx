@@ -62,7 +62,7 @@ export function StoreDetail({
             <a
               href={store.url}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener"
               className="underline underline-offset-4"
             >
               {address}

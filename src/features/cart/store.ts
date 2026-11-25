@@ -3,6 +3,7 @@
 import { useSyncExternalStore } from 'react';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
+import { countVisit } from '@/features/visitors/client';
 import {
   addLine,
   removeLine,
@@ -37,8 +38,10 @@ export const useCartStore = create<CartState>()(
         }));
       return {
         carts: {},
-        add: (tenantId, item, qty = 1) =>
-          update(tenantId, (lines) => addLine(lines, item, qty)),
+        add: (tenantId, item, qty = 1) => {
+          update(tenantId, (lines) => addLine(lines, item, qty));
+          countVisit({ event: 'bag' });
+        },
         setQty: (tenantId, variantId, qty) =>
           update(tenantId, (lines) => setLineQty(lines, variantId, qty)),
         remove: (tenantId, variantId) =>

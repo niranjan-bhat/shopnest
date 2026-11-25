@@ -39,7 +39,12 @@ export default function PrivacyPage() {
         in Mumbai. We do not sell personal information.
       </p>
       <h2>Cookies</h2>
-      <p>We use cookies to keep store owners signed in.</p>
+      <p>
+        We use cookies to keep store owners signed in. We count visits to stores
+        without cookies: a visitor’s network address and browser are turned into
+        a code that changes every day and is deleted within a few days. Stores
+        see daily totals only.
+      </p>
       <h2>Your choices</h2>
       <p>
         You can ask to see, correct or delete your information. Ask the store
