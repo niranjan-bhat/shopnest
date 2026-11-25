@@ -1,18 +1,28 @@
 'use client';
 
-import { useActionState, type ReactNode } from 'react';
+import { useActionState, useState, type ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { signIn, type SignInState } from '@/features/auth/actions';
+import { Turnstile } from './turnstile';
 
 const inputClass =
   'mt-1.5 block w-full rounded-md border bg-background px-3 py-2.5 text-base outline-none focus-visible:ring-2 focus-visible:ring-ring';
 
 /** Email → 6-digit code → signed in. */
-export function LoginForm({ next }: { next: string }) {
+export function LoginForm({
+  next,
+  siteKey,
+}: {
+  next: string;
+  /** Turnstile's site key; without one there is no bot check. */
+  siteKey?: string;
+}) {
   const [state, action, pending] = useActionState<SignInState, FormData>(
     signIn,
     { step: 'email' },
   );
+  const [answeredFor, setAnsweredFor] = useState<SignInState | null>(null);
+  const blocked = pending || (siteKey !== undefined && answeredFor !== state);
 
   return (
     <form action={action} className="mt-8 space-y-5" noValidate>
@@ -38,7 +48,7 @@ export function LoginForm({ next }: { next: string }) {
             type="submit"
             name="intent"
             value="send"
-            disabled={pending}
+            disabled={blocked}
             className="w-full"
           >
             {pending ? 'Sending…' : 'Email me a code'}
@@ -48,8 +58,9 @@ export function LoginForm({ next }: { next: string }) {
         <>
           <input type="hidden" name="email" value={state.email} />
           <p className="text-sm text-muted-foreground">
-            We sent a 6-digit code to{' '}
-            <span className="font-medium text-foreground">{state.email}</span>.
+            If{' '}
+            <span className="font-medium text-foreground">{state.email}</span>{' '}
+            has access to Zarify, we&apos;ve sent it a 6-digit code.
           </p>
           <label className="block text-sm font-medium">
             Code
@@ -70,7 +81,7 @@ export function LoginForm({ next }: { next: string }) {
             type="submit"
             name="intent"
             value="verify"
-            disabled={pending}
+            disabled={blocked}
             className="w-full"
           >
             {pending ? 'Checking…' : 'Sign in'}
@@ -80,7 +91,7 @@ export function LoginForm({ next }: { next: string }) {
               type="submit"
               name="intent"
               value="send"
-              disabled={pending}
+              disabled={blocked}
               className="underline underline-offset-4"
             >
               Send a new code
@@ -96,6 +107,14 @@ export function LoginForm({ next }: { next: string }) {
             </button>
           </div>
         </>
+      )}
+      {siteKey && (
+        // Each answer works once: every reply from the server needs a new one.
+        <Turnstile
+          siteKey={siteKey}
+          resetOn={state}
+          onChange={setAnsweredFor}
+        />
       )}
     </form>
   );

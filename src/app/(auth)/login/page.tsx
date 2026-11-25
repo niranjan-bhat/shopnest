@@ -5,6 +5,8 @@ import { LoginForm } from '@/components/auth/login-form';
 import { ZarifyLogo } from '@/components/zarify-logo';
 import { safeNextPath } from '@/features/auth/schemas';
 import { getSessionUser } from '@/features/auth/session';
+import { salesLink } from '@/features/marketing/site';
+import { getPublicEnv } from '@/lib/env.public';
 
 export const metadata: Metadata = {
   title: 'Sign in · Zarify',
@@ -30,7 +32,10 @@ async function Login({
           {linkError}
         </p>
       )}
-      <LoginForm next={next} />
+      <LoginForm
+        next={next}
+        siteKey={getPublicEnv().NEXT_PUBLIC_TURNSTILE_SITE_KEY || undefined}
+      />
     </>
   );
 }
@@ -46,6 +51,14 @@ export default function LoginPage(props: PageProps<'/login'>) {
       <Suspense>
         <Login searchParams={props.searchParams} />
       </Suspense>
+      <p className="mt-8 text-sm text-muted-foreground">
+        No code after a few minutes? Check your spam folder and the spelling of
+        your email, or{' '}
+        <a href={salesLink} className="underline underline-offset-4">
+          ask us on WhatsApp
+        </a>
+        .
+      </p>
     </main>
   );
 }

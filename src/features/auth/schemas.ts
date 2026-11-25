@@ -1,5 +1,8 @@
 import { z } from 'zod';
 
+/** The form field Turnstile's answer arrives in. */
+export const BOT_TOKEN_FIELD = 'cf-turnstile-response';
+
 const email = z
   .string()
   .trim()

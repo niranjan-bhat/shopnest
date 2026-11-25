@@ -1,8 +1,11 @@
 import { expect, test } from '@playwright/test';
 import {
+  createAccount,
   deleteUser,
+  emailCount,
   freshEmail,
   grantAccess,
+  hasAccount,
   requestCode,
   signIn,
   signInCode,
@@ -17,6 +20,7 @@ test.describe('sign-in', () => {
     await expect(page).toHaveURL(app('/login?next=%2Fdashboard'));
 
     const email = freshEmail(testInfo);
+    const dropAccess = await createAccount(email);
     await requestCode(page, email);
 
     await page.getByLabel('Code').fill('000000');
@@ -25,7 +29,9 @@ test.describe('sign-in', () => {
       'wrong or has expired',
     );
 
-    await page.getByLabel('Code').fill(await signInCode(page, email));
+    const code = await signInCode(page, email);
+    await dropAccess();
+    await page.getByLabel('Code').fill(code);
     await page.getByRole('button', { name: 'Sign in' }).click();
 
     await expect(page).toHaveURL(app('/dashboard'));
@@ -83,6 +89,52 @@ test.describe('sign-in', () => {
       await expect(stores).toContainText('Noor Atelier');
     } finally {
       // The demo store's plan limits how many people it has.
+      await deleteUser(email);
+    }
+  });
+
+  test('people without access get the same answer and no email', async ({
+    page,
+  }, testInfo) => {
+    const stranger = freshEmail(testInfo);
+    const removed = freshEmail(testInfo);
+    await (
+      await createAccount(removed)
+    )();
+    try {
+      for (const email of [stranger, removed]) {
+        await page.goto(app('/login'));
+        await requestCode(page, email);
+        await expect(page.locator('main').getByRole('alert')).toHaveCount(0);
+      }
+      // Give an email time to arrive before saying none did.
+      await page.waitForTimeout(3000);
+      for (const email of [stranger, removed]) {
+        expect(await emailCount(page, email)).toBe(0);
+      }
+      // No account was made for the stranger either.
+      expect(await hasAccount(stranger)).toBe(false);
+    } finally {
+      await deleteUser(removed);
+    }
+  });
+
+  test('asking again straight away sends no second code', async ({
+    page,
+  }, testInfo) => {
+    const email = freshEmail(testInfo);
+    await createAccount(email);
+    try {
+      await page.goto(app('/login'));
+      await requestCode(page, email);
+      await signInCode(page, email);
+      await page.getByRole('button', { name: 'Send a new code' }).click();
+      await expect(page.locator('main').getByRole('alert')).toContainText(
+        'a moment ago',
+      );
+      await page.waitForTimeout(2000);
+      expect(await emailCount(page, email)).toBe(1);
+    } finally {
       await deleteUser(email);
     }
   });

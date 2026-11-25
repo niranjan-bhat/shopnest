@@ -351,6 +351,15 @@ export function freshEmail(testInfo: TestInfo): string {
   return `e2e-${id}@example.com`;
 }
 
+/** How many emails Mailpit holds for an address. */
+export async function emailCount(page: Page, email: string): Promise<number> {
+  const search = await page.request.get(
+    `${MAILPIT_URL}/api/v1/search?query=${encodeURIComponent(`to:"${email}"`)}`,
+  );
+  const { messages } = (await search.json()) as { messages: unknown[] };
+  return messages?.length ?? 0;
+}
+
 /** Waits for the sign-in email in Mailpit and returns its 6-digit code. */
 export async function signInCode(page: Page, email: string): Promise<string> {
   let code = '';
@@ -380,14 +389,55 @@ export async function signInCode(page: Page, email: string): Promise<string> {
 export async function requestCode(page: Page, email: string) {
   await page.getByLabel('Email').fill(email);
   await page.getByRole('button', { name: 'Email me a code' }).click();
-  await expect(page.getByText(`We sent a 6-digit code to`)).toBeVisible();
+  await expect(page.getByText("we've sent it a 6-digit code")).toBeVisible();
 }
 
-/** Signs in through the UI and lands on the dashboard. */
+/**
+ * Makes an account with no store. It is a super admin until the returned
+ * function runs: only people with access are sent a code.
+ */
+export async function createAccount(
+  email: string,
+): Promise<() => Promise<void>> {
+  const db = adminDb();
+  const { data, error } = await db.auth.admin.createUser({
+    email,
+    email_confirm: true,
+  });
+  if (error) throw error;
+  const userId = data.user.id;
+  const setAdmin = async (is_super_admin: boolean) => {
+    const { error: e } = await db
+      .from('profiles')
+      .update({ is_super_admin })
+      .eq('user_id', userId);
+    if (e) throw e;
+  };
+  await setAdmin(true);
+  return () => setAdmin(false);
+}
+
+export async function hasAccount(email: string): Promise<boolean> {
+  const { data, error } = await adminDb().auth.admin.listUsers({
+    perPage: 1000,
+  });
+  if (error) throw error;
+  return data.users.some((u) => u.email === email);
+}
+
+/**
+ * Signs in through the UI and lands on the dashboard. An email without an
+ * account gets one, with no store.
+ */
 export async function signIn(page: Page, email: string) {
+  const dropAccess = (await hasAccount(email))
+    ? undefined
+    : await createAccount(email);
   await page.goto(app('/login'));
   await requestCode(page, email);
-  await page.getByLabel('Code').fill(await signInCode(page, email));
+  const code = await signInCode(page, email);
+  await dropAccess?.();
+  await page.getByLabel('Code').fill(code);
   await page.getByRole('button', { name: 'Sign in' }).click();
   await expect(page).toHaveURL(app('/dashboard'));
 }

@@ -281,6 +281,20 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"sign_in_attempts": {
+                  Row: {
+                    "client_hash": string | null,"created_at": string,"email_hash": string,"id": number,"kind": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "client_hash"?: string | null,"created_at"?: string,"email_hash": string,"id"?: never,"kind": string
+                  }
+                  Update: {
+                    "client_hash"?: string | null,"created_at"?: string,"email_hash"?: string,"id"?: never,"kind"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"store_pages": {
                   Row: {
                     "body": string,"created_at": string,"id": string,"is_published": boolean,"slug": string,"tenant_id": string,"title": string,"updated_at": string
@@ -465,6 +479,9 @@ isOneToOne: true
 "can_own_tenant":
 { Args: { "tid": string }; Returns: boolean
                            },
+"can_sign_in":
+{ Args: { "member_email": string }; Returns: boolean
+                           },
 "can_view_tenant":
 { Args: { "tid": string }; Returns: boolean
                            },
@@ -500,6 +517,9 @@ isOneToOne: true
                            },
 "record_payment":
 { Args: { "amount": number,"how": Database["public"]['Enums']["payment_method"],"months": number,"paid": string,"pid": string,"ref"?: string,"tid": string }; Returns: undefined
+                           },
+"record_sign_in_attempt":
+{ Args: { "attempt": string,"client"?: string,"email_key": string }; Returns: string
                            },
 "reorder_banners":
 { Args: { "ordered_ids": (string)[],"tid": string }; Returns: undefined
