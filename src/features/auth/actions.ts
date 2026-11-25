@@ -1,10 +1,24 @@
 'use server';
 
+import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { getPublicEnv } from '@/lib/env.public';
+import { after } from 'next/server';
+import { clientAddress } from '@/features/orders/client';
 import { createServerSupabase } from '@/lib/supabase/server';
-import { appOrigin } from '@/lib/tenant';
-import { safeNextPath, sendCodeSchema, verifyCodeSchema } from './schemas';
+import { clearCodeChecks, recordAttempt } from './limits';
+import {
+  BOT_TOKEN_FIELD,
+  safeNextPath,
+  sendCodeSchema,
+  verifyCodeSchema,
+} from './schemas';
+import { sendCodeIfAllowed } from './send-code';
+import { passedBotCheck } from './turnstile';
+
+const BOT_ERROR =
+  'We could not check that you are not a bot. Please try again.';
+const NETWORK_ERROR =
+  'Too many attempts from your network. Try again in an hour.';
 
 export type SignInState =
   | { step: 'email'; email?: string; error?: string }
@@ -28,9 +42,9 @@ export async function signIn(
   }
 }
 
-/** Step 1: email a 6-digit sign-in code. */
+/** Step 1: email a 6-digit sign-in code, if this person has access. */
 async function sendSignInCode(
-  _previous: SignInState,
+  previous: SignInState,
   formData: FormData,
 ): Promise<SignInState> {
   const parsed = sendCodeSchema.safeParse({ email: formData.get('email') });
@@ -42,27 +56,37 @@ async function sendSignInCode(
     };
   }
   const { email } = parsed.data;
-
-  const supabase = await createServerSupabase();
-  const { error } = await supabase.auth.signInWithOtp({
+  const stay = (error: string): SignInState => ({
+    step: previous.step === 'code' ? 'code' : 'email',
     email,
-    options: {
-      // Anyone may create an account; it sees nothing until a super admin
-      // adds it to a store.
-      shouldCreateUser: true,
-      emailRedirectTo: `${appOrigin(getPublicEnv().NEXT_PUBLIC_ROOT_DOMAIN)}/auth/callback`,
-    },
+    error,
   });
-  if (error) {
-    return {
-      step: 'email',
-      email,
-      error:
-        error.status === 429
-          ? 'Too many attempts. Wait a minute and try again.'
-          : 'We could not send a code right now. Please try again.',
-    };
+
+  const ip = clientAddress(await headers());
+  if (!(await passedBotCheck(formData.get(BOT_TOKEN_FIELD), ip))) {
+    return stay(BOT_ERROR);
   }
+
+  switch (await recordAttempt('send', email, ip)) {
+    case 'network':
+      return stay(NETWORK_ERROR);
+    // The last code may still be good, so leave them room to enter it.
+    case 'wait':
+      return {
+        step: 'code',
+        email,
+        error:
+          'You asked for a code a moment ago. Check your email, or wait a minute and ask again.',
+      };
+    case 'email':
+      return {
+        step: 'code',
+        email,
+        error:
+          'Too many codes asked for. Use the last one, or try again in an hour.',
+      };
+  }
+  after(() => sendCodeIfAllowed(email));
   return { step: 'code', email };
 }
 
@@ -80,6 +104,22 @@ async function verifySignInCode(
     return { step: 'code', email, error: parsed.error.issues[0]?.message };
   }
 
+  const ip = clientAddress(await headers());
+  if (!(await passedBotCheck(formData.get(BOT_TOKEN_FIELD), ip))) {
+    return { step: 'code', email, error: BOT_ERROR };
+  }
+  const attempt = await recordAttempt('verify', parsed.data.email, ip);
+  if (attempt !== 'ok') {
+    return {
+      step: 'code',
+      email,
+      error:
+        attempt === 'network'
+          ? NETWORK_ERROR
+          : 'Too many wrong codes. Try again in an hour.',
+    };
+  }
+
   const supabase = await createServerSupabase();
   const { error } = await supabase.auth.verifyOtp({
     email: parsed.data.email,
@@ -94,6 +134,7 @@ async function verifySignInCode(
         'That code is wrong or has expired. Check the email or send a new code.',
     };
   }
+  await clearCodeChecks(parsed.data.email);
   redirect(safeNextPath(formData.get('next')));
 }
 

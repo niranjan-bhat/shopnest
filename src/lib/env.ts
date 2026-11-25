@@ -9,6 +9,8 @@ import { parseEnv } from './env.public';
  */
 export const serverEnvSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
+  /** Cloudflare Turnstile on the login page; off when unset or empty. */
+  TURNSTILE_SECRET_KEY: z.string().optional(),
 });
 
 /** R2 credentials; only the upload code (Phase 3) needs them. */

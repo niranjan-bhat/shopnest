@@ -29,8 +29,8 @@ Every store has its own host name, and the dashboard has its own (any
 
 ### Signing in and access
 
-Anyone can sign in at `/login`, but a new account sees no stores. Give access
-from the command line (until the super-admin screens arrive):
+Only store members and super admins are sent a sign-in code. Add people in
+the super-admin screens or from the command line (it makes the account):
 
 ```bash
 npm run grant -- --email you@example.com --store saree-demo   # owner of a store

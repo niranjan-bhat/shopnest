@@ -29,6 +29,8 @@ export const publicEnvSchema = z.object({
       /^[a-z0-9.-]+(:\d+)?$/i,
       'must be a host name, optionally with a port',
     ),
+  /** Cloudflare Turnstile on the login page; off when unset or empty. */
+  NEXT_PUBLIC_TURNSTILE_SITE_KEY: z.string().optional(),
 });
 
 export type PublicEnv = z.infer<typeof publicEnvSchema>;
@@ -67,6 +69,8 @@ export function getPublicEnv(): PublicEnv {
       NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
       NEXT_PUBLIC_MEDIA_BASE_URL: process.env.NEXT_PUBLIC_MEDIA_BASE_URL,
       NEXT_PUBLIC_ROOT_DOMAIN: process.env.NEXT_PUBLIC_ROOT_DOMAIN,
+      NEXT_PUBLIC_TURNSTILE_SITE_KEY:
+        process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
     },
     'public',
   );

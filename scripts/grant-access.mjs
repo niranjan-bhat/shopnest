@@ -1,5 +1,5 @@
-// Gives an existing account access, until the super-admin UI exists
-// (Phase 5). The person must have signed in once at /login first.
+// Gives someone access, until the super-admin UI exists
+// (Phase 5). Makes the account if there is none (sign-ups are off).
 //
 //   npm run grant -- --email you@example.com --super-admin
 //   npm run grant -- --email owner@example.com --store saree-demo [--role staff]
@@ -61,9 +61,17 @@ async function findUserId(address) {
 }
 
 console.log(`Project: ${url}`);
-const userId = await findUserId(email);
-if (!userId)
-  fail(`No account for ${email}. Sign in once at /login, then run this again.`);
+let userId = await findUserId(email);
+if (!userId && values.revoke) fail(`No account for ${email}.`);
+if (!userId) {
+  const { data, error } = await db.auth.admin.createUser({
+    email,
+    email_confirm: true,
+  });
+  if (error) fail(`Could not create the account: ${error.message}`);
+  userId = data.user.id;
+  console.log(`Created an account for ${email}.`);
+}
 
 if (values['super-admin']) {
   const { error } = await db
